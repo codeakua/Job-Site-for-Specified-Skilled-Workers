@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="red" data-lang="ja">
+<html lang="ja" data-theme="blue" data-lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -13,7 +13,7 @@
 (function () {
   try {
     var d = document.documentElement;
-    d.dataset.theme = localStorage.getItem('yp_theme') === 'blue' ? 'blue' : 'red';
+    d.dataset.theme = localStorage.getItem('yp_theme') === 'red' ? 'red' : 'blue';
     var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
     d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
   } catch (e) {}

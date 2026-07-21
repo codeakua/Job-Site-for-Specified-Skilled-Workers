@@ -16,7 +16,7 @@ const LS = {
 };
 
 /* ---------- 基本状態 ---------- */
-function getTheme() { return localStorage.getItem(LS.theme) === 'blue' ? 'blue' : 'red'; }
+function getTheme() { return localStorage.getItem(LS.theme) === 'red' ? 'red' : 'blue'; }
 function getLang() { return localStorage.getItem(LS.lang) === 'zh' ? 'zh' : 'ja'; }
 function isRegistered() { return localStorage.getItem(LS.registered) === '1'; }
 
@@ -235,8 +235,8 @@ function openDemoSheet() {
     <div class="demo-group">
       <div class="demo-label">${t('demo.theme')}</div>
       <div class="seg" id="demo-theme">
-        <button type="button" data-v="red" class="${theme === 'red' ? 'on' : ''}">🌸 ${t('demo.theme.red')}</button>
         <button type="button" data-v="blue" class="${theme === 'blue' ? 'on' : ''}">🌊 ${t('demo.theme.blue')}</button>
+        <button type="button" data-v="red" class="${theme === 'red' ? 'on' : ''}">🌸 ${t('demo.theme.red')}</button>
       </div>
     </div>
     <div class="demo-group">
