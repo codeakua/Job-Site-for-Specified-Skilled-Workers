@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="red" data-lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ログイン｜樱聘 YingPin</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>
+(function () {
+  try {
+    var d = document.documentElement;
+    d.dataset.theme = localStorage.getItem('yp_theme') === 'blue' ? 'blue' : 'red';
+    var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
+    d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <button type="button" class="icon-btn" onclick="history.length > 1 ? history.back() : location.href='index.html'">
+      <span class="icon" id="back-icon"></span>
+    </button>
+    <div class="spacer"></div>
+    <button type="button" class="lang-pill" id="lang-toggle"></button>
+  </header>
+
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <span class="brand-mark">🌸</span>
+      <div>
+        <h1 data-i18n="login.title"></h1>
+        <p data-i18n="login.sub"></p>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label" for="l-phone"><span data-i18n="login.phone"></span></label>
+      <div class="input-row">
+        <select class="input code" id="l-code">
+          <option value="+81">🇯🇵 +81</option>
+          <option value="+86">🇨🇳 +86</option>
+        </select>
+        <input class="input" id="l-phone" type="tel" data-i18n-ph="reg.phone.ph">
+      </div>
+    </div>
+    <div class="field">
+      <label class="label" for="l-pass"><span data-i18n="login.password"></span></label>
+      <input class="input" id="l-pass" type="password" data-i18n-ph="login.password.ph">
+    </div>
+
+    <button type="button" class="btn btn-primary btn-block" id="login-btn" data-i18n="login.btn"></button>
+
+    <div class="auth-links">
+      <a href="#" id="forgot" class="sub" data-i18n="login.forgot"></a>
+      <a href="register.html" data-i18n="login.toRegister"></a>
+    </div>
+
+    <p class="demo-hint" data-i18n="login.demoNote"></p>
+  </div>
+</div>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+initPage({});
+qs('#back-icon').innerHTML = ICONS.back;
+
+function renderLangPill() {
+  qs('#lang-toggle').innerHTML = `${icon('globe')}<span>${getLang() === 'ja' ? '中文' : '日本語'}</span>`;
+}
+qs('#lang-toggle').addEventListener('click', () => setLang(getLang() === 'ja' ? 'zh' : 'ja'));
+window.onLangChange = renderLangPill;
+renderLangPill();
+
+qs('#login-btn').addEventListener('click', () => {
+  /* モック: 入力内容に関わらずログイン成功として扱う */
+  setRegistered(true);
+  if (!getProfile()) setProfile(demoProfile());
+  showToast(t('login.success'), 'check');
+  setTimeout(() => location.href = 'jobs.html', 650);
+});
+
+qs('#forgot').addEventListener('click', e => {
+  e.preventDefault();
+  showToast(t('login.demoNote'));
+});
+</script>
+</body>
+</html>

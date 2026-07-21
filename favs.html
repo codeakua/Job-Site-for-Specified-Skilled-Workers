@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="red" data-lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>お気に入り｜樱聘 YingPin</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>
+(function () {
+  try {
+    var d = document.documentElement;
+    d.dataset.theme = localStorage.getItem('yp_theme') === 'blue' ? 'blue' : 'red';
+    var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
+    d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div class="shell has-tabbar">
+  <div class="page-head jobs-title-row" style="display:flex; align-items:center; gap:10px">
+    <h1 data-i18n="favs.title" style="flex:1"></h1>
+    <button type="button" class="lang-pill" id="lang-toggle"></button>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+initPage({ tab: 'favs' });
+
+function renderLangPill() {
+  qs('#lang-toggle').innerHTML = `${icon('globe')}<span>${getLang() === 'ja' ? '中文' : '日本語'}</span>`;
+}
+qs('#lang-toggle').addEventListener('click', () => setLang(getLang() === 'ja' ? 'zh' : 'ja'));
+
+function render() {
+  applyI18n();
+  renderLangPill();
+  const box = qs('#content');
+
+  /* 未登録 */
+  if (!isRegistered()) {
+    box.innerHTML = `
+      <div class="empty">
+        <div class="e-emoji">🔒</div>
+        <h3>${t('lock.title')}</h3>
+        <p>${t('lock.desc')}</p>
+        <a class="btn btn-primary" href="register.html">${t('lock.register')}</a>
+      </div>`;
+    return;
+  }
+
+  const favJobs = getFavs().map(jobOf).filter(Boolean);
+  if (!favJobs.length) {
+    box.innerHTML = `
+      <div class="empty">
+        <div class="e-emoji">🤍</div>
+        <h3>${t('favs.empty.title')}</h3>
+        <p>${t('favs.empty.sub')}</p>
+        <a class="btn btn-primary" href="jobs.html">${t('favs.browse')}</a>
+      </div>`;
+    return;
+  }
+
+  box.innerHTML = `<div class="job-list">${favJobs.map(j => jobCardHTML(j)).join('')}</div>`;
+  bindJobCards(box, { onFavChange: render });
+  initReveal();
+}
+
+window.onLangChange = render;
+render();
+</script>
+</body>
+</html>

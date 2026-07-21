@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="red" data-lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>マイページ｜樱聘 YingPin</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>
+(function () {
+  try {
+    var d = document.documentElement;
+    d.dataset.theme = localStorage.getItem('yp_theme') === 'blue' ? 'blue' : 'red';
+    var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
+    d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div class="shell has-tabbar">
+  <div class="page-head jobs-title-row" style="display:flex; align-items:center; gap:10px">
+    <h1 data-i18n="my.title" style="flex:1"></h1>
+    <button type="button" class="lang-pill" id="lang-toggle"></button>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+initPage({ tab: 'mypage' });
+
+function renderLangPill() {
+  qs('#lang-toggle').innerHTML = `${icon('globe')}<span>${getLang() === 'ja' ? '中文' : '日本語'}</span>`;
+}
+qs('#lang-toggle').addEventListener('click', () => setLang(getLang() === 'ja' ? 'zh' : 'ja'));
+
+/* 設定メニュー（言語・テーマ）— 登録状態に関わらず表示 */
+function settingsHTML() {
+  const langName = getLang() === 'ja' ? '日本語' : '简体中文';
+  const themeName = t(getTheme() === 'red' ? 'demo.theme.red' : 'demo.theme.blue');
+  return `
+    <h2 class="sec-h">${t('my.settings')}</h2>
+    <div class="menu-card reveal">
+      <button type="button" class="menu-item" id="set-lang">
+        <span class="m-icon">${icon('globe')}</span>${t('my.lang')}
+        <span class="m-value">${langName}</span><span class="icon chev">${ICONS.chevron}</span>
+      </button>
+      <button type="button" class="menu-item" id="set-theme">
+        <span class="m-icon">${icon('sparkle')}</span>${t('my.theme')}
+        <span class="m-value">${themeName}</span><span class="icon chev">${ICONS.chevron}</span>
+      </button>
+      ${isRegistered() ? `
+      <button type="button" class="menu-item danger" id="set-logout">
+        <span class="m-icon">${icon('close')}</span>${t('my.logout')}
+        <span class="icon chev">${ICONS.chevron}</span>
+      </button>` : ''}
+    </div>`;
+}
+
+function bindSettings() {
+  qs('#set-lang')?.addEventListener('click', () => {
+    const { el, close } = openSheet(
+      [['ja', '日本語'], ['zh', '简体中文']].map(([v, label]) => `
+        <button type="button" class="list-opt ${getLang() === v ? 'on' : ''}" data-v="${v}">
+          🌐 ${label}<span class="icon">${ICONS.check}</span>
+        </button>`).join(''),
+      'my.lang');
+    qsa('[data-v]', el).forEach(b => b.addEventListener('click', () => { close(); setLang(b.dataset.v); }));
+  });
+
+  qs('#set-theme')?.addEventListener('click', () => {
+    const { el, close } = openSheet(
+      [['red', '🌸 ' + t('demo.theme.red')], ['blue', '🌊 ' + t('demo.theme.blue')]].map(([v, label]) => `
+        <button type="button" class="list-opt ${getTheme() === v ? 'on' : ''}" data-v="${v}">
+          ${label}<span class="icon">${ICONS.check}</span>
+        </button>`).join(''),
+      'my.theme');
+    qsa('[data-v]', el).forEach(b => b.addEventListener('click', () => { close(); setTheme(b.dataset.v); render(); }));
+  });
+
+  qs('#set-logout')?.addEventListener('click', () => {
+    const { el, close } = openDialog(`
+      <div class="gate">
+        <div class="gate-icon">${icon('user')}</div>
+        <p style="margin-top:4px">${t('my.logoutConfirm')}</p>
+        <button type="button" class="btn btn-primary btn-block" id="logout-yes">${t('my.logout')}</button>
+        <button type="button" class="btn btn-ghost btn-block" data-close>${t('common.cancel')}</button>
+      </div>`);
+    qs('#logout-yes', el).addEventListener('click', () => {
+      setRegistered(false);
+      close();
+      showToast(t('my.logoutDone'), 'check');
+      setTimeout(() => location.href = 'index.html', 650);
+    });
+  });
+}
+
+function render() {
+  applyI18n();
+  renderLangPill();
+  const box = qs('#content');
+
+  /* ---------- 未登録（ゲスト） ---------- */
+  if (!isRegistered()) {
+    box.innerHTML = `
+      <div class="profile-card reveal">
+        <div class="profile-row">
+          <div class="avatar">👤</div>
+          <div>
+            <div class="profile-name">${t('my.guest')}</div>
+            <div class="profile-id">${t('my.notRegistered') ?? ''}</div>
+          </div>
+        </div>
+        <p style="position:relative; z-index:1; font-size:12px; margin-top:14px; opacity:.94; line-height:1.7">${t('my.guest.desc')}</p>
+        <div style="position:relative; z-index:1; display:flex; gap:9px; margin-top:14px">
+          <a class="btn btn-white btn-sm" style="flex:1" href="register.html">✨ ${t('common.register')}</a>
+          <a class="btn btn-sm" style="flex:1; border:1.6px solid rgba(255,255,255,.65); color:#fff" href="login.html">${t('common.login')}</a>
+        </div>
+      </div>
+      ${settingsHTML()}`;
+    bindSettings();
+    initReveal();
+    return;
+  }
+
+  /* ---------- 登録済み ---------- */
+  const p = getProfile() || demoProfile();
+  const name = `${p.lastName || ''} ${p.firstName || ''}`.trim() || p.pinyin || 'User';
+  const initial = (p.lastName || p.pinyin || 'U').charAt(0);
+
+  const badges = [];
+  badges.push(p.jlpt && p.jlpt !== 'none' ? `${t('my.jlptPrefix')} ${p.jlpt}` : t('my.jlptNone'));
+  if (p.ssw && p.ssw.length) p.ssw.forEach(id => {
+    const f = fieldOf(id);
+    if (f) badges.push(`${t('my.sswPrefix')}：${pick(f.name)}`);
+  });
+  else badges.push(t('my.sswNone'));
+
+  const apps = getApps();
+  const appsHTML = apps.length
+    ? apps.map(a => {
+        const j = jobOf(a.id);
+        if (!j) return '';
+        const f = fieldOf(j.field);
+        return `
+          <div class="app-row" data-id="${j.id}" style="--f-color:${f.color}; cursor:pointer">
+            <span class="a-emoji">${f.emoji}</span>
+            <div class="a-main">
+              <div class="a-title">${pick(j.title)}</div>
+              <div class="a-date">${a.date}</div>
+            </div>
+            <span class="status-chip">${t('my.appStatus')}</span>
+          </div>`;
+      }).join('')
+    : `<div class="app-row"><div class="a-main" style="text-align:center; color:var(--text-sub); font-size:12.5px">${t('my.appEmpty')}</div></div>`;
+
+  const dash = '—';
+  const profileRows = [
+    [t('reg.pinyin'), esc(p.pinyin) || dash],
+    [t('reg.birth'), esc(p.birth) || dash],
+    [t('reg.gender'), p.gender ? t('reg.gender.' + p.gender) : dash],
+    [t('reg.residence'), `${t(p.residence === 'jp' ? 'reg.residence.jp' : 'reg.residence.cn')}<br><small style="color:var(--text-sub)">${esc(p.address)}</small>`],
+    [t('reg.phone'), `${esc(p.phoneCode || '')} ${esc(p.phone) || dash}`],
+    [t('reg.wechat'), esc(p.wechat) || dash],
+    [t('reg.otherQual'), esc(p.otherQual) || dash],
+  ];
+
+  box.innerHTML = `
+    <div class="profile-card reveal">
+      <div class="profile-row">
+        <div class="avatar">${esc(initial)}</div>
+        <div>
+          <div class="profile-name">${esc(name)}</div>
+          <div class="profile-id">${t('my.memberId')}：${esc(p.memberId || '')}</div>
+        </div>
+      </div>
+      <div class="qual-badges">${badges.map(b => `<span class="qual-badge">${b}</span>`).join('')}</div>
+    </div>
+
+    <h2 class="sec-h">${t('my.applications')}</h2>
+    <div class="menu-card reveal">${appsHTML}</div>
+
+    <h2 class="sec-h">${t('my.profile')}</h2>
+    <dl class="confirm-list reveal" style="margin:0 16px 14px">${profileRows.map(([k, v]) =>
+      `<div class="confirm-row"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}
+    </dl>
+
+    ${settingsHTML()}
+    <div class="footer">${t('footer.copy')}</div>`;
+
+  qsa('.app-row[data-id]', box).forEach(r =>
+    r.addEventListener('click', () => location.href = `job.html?id=${r.dataset.id}`));
+  bindSettings();
+  initReveal();
+}
+
+window.onLangChange = render;
+render();
+</script>
+</body>
+</html>

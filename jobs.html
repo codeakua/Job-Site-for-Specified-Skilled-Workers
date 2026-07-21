@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="red" data-lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>求人をさがす｜樱聘 YingPin</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>
+(function () {
+  try {
+    var d = document.documentElement;
+    d.dataset.theme = localStorage.getItem('yp_theme') === 'blue' ? 'blue' : 'red';
+    var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
+    d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div class="shell has-tabbar">
+
+  <div class="jobs-head">
+    <div class="jobs-title-row">
+      <h1 data-i18n="jobs.title"></h1>
+      <button type="button" class="lang-pill" id="lang-toggle"></button>
+    </div>
+    <div class="search-box">
+      <span class="icon" id="search-icon"></span>
+      <input type="search" id="q" data-i18n-ph="jobs.search.ph">
+    </div>
+    <div class="filter-row" id="field-chips"></div>
+    <div class="filter-row" id="sub-filters"></div>
+  </div>
+
+  <div class="count-row">
+    <span class="count" id="count"></span>
+    <span class="count" data-i18n="jobs.sort.new"></span>
+  </div>
+
+  <div class="locked-note" id="locked-note" hidden></div>
+  <div class="job-list" id="list"></div>
+
+  <div class="empty" id="empty" hidden>
+    <div class="e-emoji">🔍</div>
+    <h3 data-i18n="jobs.empty.title"></h3>
+    <p data-i18n="jobs.empty.sub"></p>
+  </div>
+</div>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+initPage({ tab: 'jobs' });
+qs('#search-icon').innerHTML = ICONS.search;
+
+const state = { field: 'all', region: 'all', tags: [], q: '' };
+
+function renderLangPill() {
+  qs('#lang-toggle').innerHTML = `${icon('globe')}<span>${getLang() === 'ja' ? '中文' : '日本語'}</span>`;
+}
+qs('#lang-toggle').addEventListener('click', () => setLang(getLang() === 'ja' ? 'zh' : 'ja'));
+
+/* ---------- フィルタUI ---------- */
+function renderFilters() {
+  /* 分野チップ */
+  const fc = qs('#field-chips');
+  fc.innerHTML =
+    `<button type="button" class="chip ${state.field === 'all' ? 'on' : ''}" data-field="all">${t('common.all')}</button>` +
+    FIELDS.map(f => `
+      <button type="button" class="chip ${state.field === f.id ? 'on' : ''}" data-field="${f.id}">
+        <span class="emoji">${f.emoji}</span>${pick(f.name)}
+      </button>`).join('');
+  qsa('button', fc).forEach(b => b.addEventListener('click', () => {
+    state.field = b.dataset.field;
+    renderFilters(); renderList();
+  }));
+
+  /* エリア＋こだわりタグ */
+  const sf = qs('#sub-filters');
+  const regionLabel = state.region === 'all' ? t('jobs.area') : t('region.' + state.region);
+  sf.innerHTML =
+    `<button type="button" class="chip ${state.region !== 'all' ? 'on' : ''}" id="area-chip">
+       ${icon('pin')}${regionLabel}
+     </button>` +
+    QUICK_TAGS.map(tag => `
+      <button type="button" class="chip ${state.tags.includes(tag) ? 'on' : ''}" data-tag="${tag}">
+        ${t('tag.' + tag)}
+      </button>`).join('');
+  qs('#area-chip').addEventListener('click', openAreaSheet);
+  qsa('[data-tag]', sf).forEach(b => b.addEventListener('click', () => {
+    const tag = b.dataset.tag;
+    const i = state.tags.indexOf(tag);
+    if (i >= 0) state.tags.splice(i, 1); else state.tags.push(tag);
+    renderFilters(); renderList();
+  }));
+}
+
+function openAreaSheet() {
+  const opts = ['all', ...REGIONS];
+  const { el, close } = openSheet(
+    opts.map(r => `
+      <button type="button" class="list-opt ${state.region === r ? 'on' : ''}" data-region="${r}">
+        ${r === 'all' ? '🗾' : '📍'} ${t('region.' + r)}
+        <span class="icon">${ICONS.check}</span>
+      </button>`).join(''),
+    'area.sheetTitle');
+  qsa('[data-region]', el).forEach(b => b.addEventListener('click', () => {
+    state.region = b.dataset.region;
+    close(); renderFilters(); renderList();
+  }));
+}
+
+/* ---------- 一覧 ---------- */
+function filteredJobs() {
+  const q = state.q.trim().toLowerCase();
+  return JOBS
+    .filter(j => state.field === 'all' || j.field === state.field)
+    .filter(j => state.region === 'all' || j.region === state.region)
+    .filter(j => state.tags.every(tag => j.tags.includes(tag)))
+    .filter(j => {
+      if (!q) return true;
+      const hay = [pick(j.title), pick(j.area), pick(j.desc), pick(fieldOf(j.field).name)].join(' ').toLowerCase();
+      return hay.includes(q);
+    })
+    .sort((a, b) => (b.isNew - a.isNew) || (a.id - b.id));
+}
+
+function renderList() {
+  const jobs = filteredJobs();
+  const locked = !isRegistered();
+
+  qs('#count').innerHTML = t('jobs.count', { n: `<b>${jobs.length}</b>` });
+
+  const note = qs('#locked-note');
+  note.hidden = !locked;
+  if (locked) note.innerHTML = `${icon('lock')}<span>${t('jobs.lockedNote')}</span>`;
+
+  const list = qs('#list');
+  list.innerHTML = jobs.map(j => jobCardHTML(j, { locked })).join('');
+  bindJobCards(list);
+  qs('#empty').hidden = jobs.length > 0;
+  initReveal();
+}
+
+qs('#q').addEventListener('input', e => { state.q = e.target.value; renderList(); });
+
+window.onLangChange = () => { renderLangPill(); renderFilters(); renderList(); };
+
+renderLangPill();
+renderFilters();
+renderList();
+</script>
+</body>
+</html>

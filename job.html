@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="red" data-lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>求人詳細｜樱聘 YingPin</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>
+(function () {
+  try {
+    var d = document.documentElement;
+    d.dataset.theme = localStorage.getItem('yp_theme') === 'blue' ? 'blue' : 'red';
+    var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
+    d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div class="shell" id="shell">
+  <header class="topbar">
+    <button type="button" class="icon-btn" onclick="history.length > 1 ? history.back() : location.href='jobs.html'">
+      <span class="icon" id="back-icon"></span>
+    </button>
+    <div class="topbar-title" id="topbar-title"></div>
+    <div class="spacer"></div>
+    <button type="button" class="lang-pill" id="lang-toggle"></button>
+  </header>
+
+  <main id="main"></main>
+</div>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+initPage({});
+qs('#back-icon').innerHTML = ICONS.back;
+
+const job = jobOf(new URLSearchParams(location.search).get('id'));
+
+function renderLangPill() {
+  qs('#lang-toggle').innerHTML = `${icon('globe')}<span>${getLang() === 'ja' ? '中文' : '日本語'}</span>`;
+}
+qs('#lang-toggle').addEventListener('click', () => setLang(getLang() === 'ja' ? 'zh' : 'ja'));
+
+function infoRow(label, value) {
+  return `<div class="info-row"><dt>${label}</dt><dd>${value}</dd></div>`;
+}
+
+function render() {
+  renderLangPill();
+  const main = qs('#main');
+  qs('.job-actions')?.remove();
+
+  /* 求人が存在しない */
+  if (!job) {
+    qs('#topbar-title').textContent = '';
+    main.innerHTML = `
+      <div class="empty">
+        <div class="e-emoji">😢</div>
+        <h3>${t('job.notFound')}</h3>
+        <a class="btn btn-primary" href="jobs.html">${t('favs.browse')}</a>
+      </div>`;
+    return;
+  }
+
+  /* 未登録は閲覧不可（会員限定） */
+  if (!isRegistered()) {
+    qs('#topbar-title').textContent = t('lock.badge');
+    main.innerHTML = `
+      <div class="empty">
+        <div class="e-emoji">🔒</div>
+        <h3>${t('lock.title')}</h3>
+        <p>${t('lock.desc')}</p>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:22px">
+          <a class="btn btn-primary btn-block" href="register.html">${t('lock.register')}</a>
+          <a class="btn btn-ghost btn-block" href="login.html">${t('lock.login')}</a>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const f = fieldOf(job.field);
+  qs('#topbar-title').textContent = pick(f.name);
+  qs('#shell').classList.add('has-ctabar');
+
+  const benefits = job.benefits.map(b => `
+    <div class="ben-item">${icon('check')}<span>${t('ben.' + b)}</span></div>`).join('');
+  const duties = pick(job.duties).map(d => `<li>${icon('check')}<span>${esc(d)}</span></li>`).join('');
+
+  const related = JOBS.filter(j => j.field === job.field && j.id !== job.id).slice(0, 4);
+  const relatedHTML = related.length ? `
+    <h2 class="sec-h">${t('related.title')}</h2>
+    <div class="related-scroll">
+      ${related.map(j => `
+        <div class="related-card" data-id="${j.id}" style="--f-color:${fieldOf(j.field).color}">
+          <div class="rc-head">
+            <span class="rc-emoji">${fieldOf(j.field).emoji}</span>
+            <span class="rc-field">${pick(fieldOf(j.field).name)}</span>
+          </div>
+          <h3>${pick(j.title)}</h3>
+          <div class="rc-bottom">
+            <span class="rc-area">${pick(j.area)}</span>
+            <span class="salary"><b>${j.salaryMin}〜${j.salaryMax}</b><span class="salary-unit">${getLang() === 'zh' ? '万日元' : '万円'}</span></span>
+          </div>
+        </div>`).join('')}
+    </div>` : '';
+
+  main.innerHTML = `
+    <div class="job-hero" style="--f-color:${f.color}">
+      <div class="job-hero-icon">${f.emoji}</div>
+      <div class="badges">
+        <span class="badge-soft">${pick(f.name)}</span>
+        ${job.isNew ? `<span class="badge-new">${t('jobs.new')}</span>` : ''}
+        ${job.tags.map(tag => `<span class="tag">${t('tag.' + tag)}</span>`).join('')}
+      </div>
+      <h1>${pick(job.title)}</h1>
+      <div class="job-meta">${icon('pin')}<span>${pick(job.area)}（${t('region.' + job.region)}）</span></div>
+    </div>
+
+    <div class="salary-band reveal">
+      <div class="big">
+        <span>${t('job.monthly')}</span>
+        <b>${job.salaryMin}〜${job.salaryMax}</b><small>${getLang() === 'zh' ? '万日元' : '万円'}</small>
+      </div>
+      <div class="annual">
+        <span>${t('job.annual')}</span>
+        <b>${annualText(job)}</b>
+      </div>
+    </div>
+
+    ${job.chineseSupport ? `
+      <div class="cn-support reveal">
+        ${icon('chat')}
+        <div>${t('tag.chinese')}${job.chineseStaff ? `<small>${pick(job.chineseStaff)}</small>` : ''}</div>
+      </div>` : ''}
+
+    <div class="card-sec reveal">
+      <h2>${t('sec.desc')}</h2>
+      <p class="desc">${pick(job.desc)}</p>
+    </div>
+
+    <div class="card-sec reveal">
+      <h2>${t('sec.duties')}</h2>
+      <ul class="duty-list">${duties}</ul>
+    </div>
+
+    <div class="card-sec reveal">
+      <h2>${t('sec.salary')}</h2>
+      <dl>
+        ${infoRow(t('job.monthly'), `<b style="color:var(--primary)">${salaryText(job).replace(t('job.monthly') + ' ', '')}</b>`)}
+        ${infoRow(t('job.annual'), annualText(job))}
+        ${infoRow(t('job.bonusRaise'), pick(job.bonus))}
+      </dl>
+    </div>
+
+    <div class="card-sec reveal">
+      <h2>${t('sec.time')}</h2>
+      <dl>
+        ${infoRow(t('sec.time'), pick(job.hours))}
+        ${infoRow(t('job.overtime'), pick(job.overtime))}
+      </dl>
+    </div>
+
+    <div class="card-sec reveal">
+      <h2>${t('sec.holiday')}</h2>
+      <dl>${infoRow(t('job.holidays'), pick(job.holidays))}</dl>
+    </div>
+
+    <div class="card-sec reveal">
+      <h2>${t('sec.location')}</h2>
+      <dl>
+        ${infoRow(t('sec.location'), pick(job.area))}
+        ${infoRow(t('job.housing'), pick(job.housing))}
+      </dl>
+    </div>
+
+    <div class="card-sec reveal">
+      <h2>${t('sec.benefits')}</h2>
+      <div class="ben-grid">${benefits}</div>
+    </div>
+
+    <div class="card-sec reveal">
+      <h2>${t('sec.requirements')}</h2>
+      <p class="desc">${pick(job.requirements)}</p>
+    </div>
+
+    <div class="card-sec reveal">
+      <h2>${t('sec.company')}</h2>
+      <p class="desc">${pick(job.company)}</p>
+      ${job.chineseStaff ? `<p class="desc" style="margin-top:6px">🇨🇳 ${pick(job.chineseStaff)}</p>` : ''}
+      <p class="company-note">${t('job.companyNote')}</p>
+    </div>
+
+    ${relatedHTML}
+  `;
+
+  qsa('.related-card', main).forEach(c =>
+    c.addEventListener('click', () => location.href = `job.html?id=${c.dataset.id}`));
+
+  renderActions();
+  initReveal();
+}
+
+function renderActions() {
+  qs('.job-actions')?.remove();
+  const bar = document.createElement('div');
+  bar.className = 'job-actions';
+  const faved = getFavs().includes(job.id);
+  const applied = hasApplied(job.id);
+  bar.innerHTML = `
+    <button type="button" class="fav-btn fav-square ${faved ? 'on' : ''}" id="act-fav">
+      <span class="ic-off">${ICONS.heart}</span><span class="ic-on">${ICONS.heartFill}</span>
+    </button>
+    <button type="button" class="btn-wechat" id="act-wechat">${icon('chat')}${t('job.wechatBtn')}</button>
+    <button type="button" class="btn btn-primary btn-apply" id="act-apply" ${applied ? 'disabled' : ''}>
+      ${applied ? '✓ ' + t('job.applied') : t('job.apply')}
+    </button>`;
+  document.body.appendChild(bar);
+
+  qs('#act-fav').addEventListener('click', () => {
+    const on = toggleFav(job.id);
+    const btn = qs('#act-fav');
+    btn.classList.toggle('on', on);
+    btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+    showToast(t(on ? 'job.favAdd' : 'job.favRemove'), on ? 'heartFill' : 'heart');
+  });
+  qs('#act-wechat').addEventListener('click', openWechatDialog);
+  qs('#act-apply').addEventListener('click', openApplyDialog);
+}
+
+function openApplyDialog() {
+  const { el, close } = openDialog(`
+    <div class="gate">
+      <div class="gate-icon">${icon('briefcase')}</div>
+      <h3>${t('apply.title')}</h3>
+      <p>${t('apply.desc')}</p>
+      <button type="button" class="btn btn-primary btn-block" id="apply-confirm">${t('apply.confirm')}</button>
+      <button type="button" class="btn btn-ghost btn-block" data-close>${t('common.cancel')}</button>
+    </div>`);
+  qs('#apply-confirm', el).addEventListener('click', () => {
+    addApp(job.id);
+    close();
+    celebrate();
+    openDialog(`
+      <div class="gate">
+        <div class="gate-icon" style="background:#E8FBF0; color:#07A050">${icon('check')}</div>
+        <h3>${t('apply.done.title')}</h3>
+        <p>${t('apply.done.desc')}</p>
+        <button type="button" class="btn btn-primary btn-block" data-close>${t('common.ok')}</button>
+      </div>`);
+    renderActions();
+  });
+}
+
+window.onLangChange = render;
+render();
+</script>
+</body>
+</html>

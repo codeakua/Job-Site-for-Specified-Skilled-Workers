@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="red" data-lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>樱聘 YingPin｜日本ではたらく、を叶える</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>
+/* FOUC防止: 保存済みのテーマ・言語を描画前に適用 */
+(function () {
+  try {
+    var d = document.documentElement;
+    d.dataset.theme = localStorage.getItem('yp_theme') === 'blue' ? 'blue' : 'red';
+    var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
+    d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div class="shell" id="shell">
+
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">🌸</span>
+      <span>
+        <span class="brand-name">樱聘</span>
+        <span class="brand-sub">YINGPIN</span>
+      </span>
+    </a>
+    <div class="spacer"></div>
+    <button type="button" class="lang-pill" id="lang-toggle"></button>
+    <a class="login-link" id="topbar-login" href="login.html" data-i18n="common.login"></a>
+  </header>
+
+  <section class="hero">
+    <span class="hero-sticker" style="right:18px; top:74px; animation-delay:.2s">🗼</span>
+    <span class="hero-sticker" style="right:64px; top:150px; font-size:20px; animation-delay:1.1s">✈️</span>
+    <span class="hero-sticker" style="right:26px; top:196px; font-size:22px; animation-delay:.6s">🌸</span>
+    <div class="hero-badge">⛩️ <span data-i18n="landing.badge"></span></div>
+    <h1 data-i18n="app.tagline"></h1>
+    <p class="hero-sub" data-i18n="landing.heroSub"></p>
+    <div class="hero-cta" id="hero-cta"></div>
+  </section>
+
+  <div class="stats reveal">
+    <div class="stat"><b data-i18n="landing.stats.jobsVal"></b><span data-i18n="landing.stats.jobs"></span></div>
+    <div class="stat"><b data-i18n="landing.stats.fieldsVal"></b><span data-i18n="landing.stats.fields"></span></div>
+    <div class="stat"><b data-i18n="landing.stats.supportVal"></b><span data-i18n="landing.stats.support"></span></div>
+  </div>
+
+  <h2 class="sec-h" data-i18n="features.title"></h2>
+  <div class="features">
+    <div class="feature reveal">
+      <div class="f-emoji">💬</div>
+      <h3 data-i18n="features.f1.title"></h3>
+      <p data-i18n="features.f1.desc"></p>
+    </div>
+    <div class="feature reveal">
+      <div class="f-emoji">🛂</div>
+      <h3 data-i18n="features.f2.title"></h3>
+      <p data-i18n="features.f2.desc"></p>
+    </div>
+    <div class="feature reveal">
+      <div class="f-emoji">🏠</div>
+      <h3 data-i18n="features.f3.title"></h3>
+      <p data-i18n="features.f3.desc"></p>
+    </div>
+    <div class="feature reveal">
+      <div class="f-emoji">🔒</div>
+      <h3 data-i18n="features.f4.title"></h3>
+      <p data-i18n="features.f4.desc"></p>
+    </div>
+  </div>
+
+  <h2 class="sec-h" data-i18n="how.title"></h2>
+  <div class="how">
+    <div class="how-step reveal">
+      <div class="how-num">1</div>
+      <div class="how-body"><h3 data-i18n="how.s1.title"></h3><p data-i18n="how.s1.desc"></p></div>
+    </div>
+    <div class="how-step reveal">
+      <div class="how-num">2</div>
+      <div class="how-body"><h3 data-i18n="how.s2.title"></h3><p data-i18n="how.s2.desc"></p></div>
+    </div>
+    <div class="how-step reveal">
+      <div class="how-num">3</div>
+      <div class="how-body"><h3 data-i18n="how.s3.title"></h3><p data-i18n="how.s3.desc"></p></div>
+    </div>
+  </div>
+
+  <h2 class="sec-h" data-i18n="preview.title"></h2>
+  <div class="job-list" id="preview-list"></div>
+
+  <div class="note-box" data-i18n="landing.note"></div>
+  <footer class="footer" data-i18n="footer.copy"></footer>
+</div>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+initPage({ tab: isRegistered() ? 'home' : null });
+
+function render() {
+  applyI18n();
+
+  /* 言語切替ピル：切替先の言語名を表示 */
+  qs('#lang-toggle').innerHTML = `${icon('globe')}<span>${getLang() === 'ja' ? '中文' : '日本語'}</span>`;
+
+  /* 登録済みならログインリンクを隠す */
+  qs('#topbar-login').style.display = isRegistered() ? 'none' : '';
+
+  /* ヒーローCTA */
+  const cta = qs('#hero-cta');
+  if (isRegistered()) {
+    cta.innerHTML = `<a class="btn btn-white btn-block" href="jobs.html">${icon('search')}${t('reg.done.cta')}</a>`;
+  } else {
+    cta.innerHTML = `
+      <a class="btn btn-white btn-block" href="register.html">✨ ${t('common.register')}</a>
+      <div class="hero-login">${t('landing.haveAccount')} <a href="login.html">${t('common.login')}</a></div>`;
+  }
+
+  /* 新着求人プレビュー（未登録時はロック表示） */
+  const locked = !isRegistered();
+  const list = qs('#preview-list');
+  const jobs = JOBS.filter(j => j.isNew).concat(JOBS).slice(0, 3);
+  list.innerHTML =
+    jobs.map(j => jobCardHTML(j, { locked })).join('') +
+    (locked
+      ? `<button type="button" class="btn btn-primary btn-block" id="preview-cta">${icon('lock')}${t('preview.more')}</button>`
+      : `<a class="btn btn-outline btn-block" href="jobs.html">${t('preview.more')}</a>`);
+  bindJobCards(list);
+  if (locked) qs('#preview-cta').addEventListener('click', () => location.href = 'register.html');
+
+  /* 未登録時のみ下部固定CTA */
+  qs('.cta-bar')?.remove();
+  document.body.querySelector('.tabbar')?.remove();
+  if (locked) {
+    const bar = document.createElement('div');
+    bar.className = 'cta-bar';
+    bar.innerHTML = `<a class="btn btn-primary btn-block" href="register.html">✨ ${t('common.register')}</a>`;
+    document.body.appendChild(bar);
+    qs('#shell').classList.add('has-ctabar');
+  } else {
+    renderTabbar('home');
+    qs('#shell').classList.add('has-tabbar');
+  }
+  initReveal();
+}
+
+qs('#lang-toggle').addEventListener('click', () => setLang(getLang() === 'ja' ? 'zh' : 'ja'));
+window.onLangChange = render;
+render();
+</script>
+</body>
+</html>

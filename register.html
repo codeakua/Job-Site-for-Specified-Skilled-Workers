@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="red" data-lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>新規登録｜樱聘 YingPin</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>
+(function () {
+  try {
+    var d = document.documentElement;
+    d.dataset.theme = localStorage.getItem('yp_theme') === 'blue' ? 'blue' : 'red';
+    var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
+    d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <button type="button" class="icon-btn" onclick="history.length > 1 ? history.back() : location.href='index.html'">
+      <span class="icon" id="back-icon"></span>
+    </button>
+    <div class="topbar-title" data-i18n="reg.title"></div>
+    <div class="spacer"></div>
+    <button type="button" class="lang-pill" id="lang-toggle"></button>
+  </header>
+
+  <div id="wizard">
+    <div class="steps" id="steps">
+      <div class="step" data-step="1"><div class="step-dot">1</div><span data-i18n="reg.step1"></span></div>
+      <div class="step" data-step="2"><div class="step-dot">2</div><span data-i18n="reg.step2"></span></div>
+      <div class="step" data-step="3"><div class="step-dot">3</div><span data-i18n="reg.step3"></span></div>
+      <div class="step" data-step="4"><div class="step-dot">4</div><span data-i18n="reg.step4"></span></div>
+    </div>
+
+    <!-- STEP 1: 基本情報 -->
+    <section class="step-panel" data-panel="1">
+      <div class="step-head">
+        <h2 data-i18n="reg.step1.title"></h2>
+        <p data-i18n="reg.step1.sub"></p>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label class="label" for="f-last"><span data-i18n="reg.lastName"></span><span class="req" data-i18n="common.required"></span></label>
+          <input class="input" id="f-last" type="text" data-i18n-ph="reg.lastName.ph">
+        </div>
+        <div class="field">
+          <label class="label" for="f-first"><span data-i18n="reg.firstName"></span><span class="req" data-i18n="common.required"></span></label>
+          <input class="input" id="f-first" type="text" data-i18n-ph="reg.firstName.ph">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-pinyin"><span data-i18n="reg.pinyin"></span><span class="req" data-i18n="common.required"></span></label>
+        <input class="input" id="f-pinyin" type="text" style="text-transform:uppercase" data-i18n-ph="reg.pinyin.ph">
+      </div>
+      <div class="field">
+        <label class="label" for="f-birth"><span data-i18n="reg.birth"></span><span class="req" data-i18n="common.required"></span></label>
+        <input class="input" id="f-birth" type="date" max="2008-12-31" min="1960-01-01">
+      </div>
+      <div class="field">
+        <div class="label"><span data-i18n="reg.gender"></span><span class="req" data-i18n="common.required"></span></div>
+        <div class="opt-chips" id="f-gender">
+          <label class="opt-chip"><input type="radio" name="gender" value="male"><span data-i18n="reg.gender.male"></span></label>
+          <label class="opt-chip"><input type="radio" name="gender" value="female"><span data-i18n="reg.gender.female"></span></label>
+          <label class="opt-chip"><input type="radio" name="gender" value="other"><span data-i18n="reg.gender.other"></span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-nationality"><span data-i18n="reg.nationality"></span><span class="req" data-i18n="common.required"></span></label>
+        <select class="input" id="f-nationality">
+          <option value="cn" selected></option>
+          <option value="other"></option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="label"><span data-i18n="reg.residence"></span><span class="req" data-i18n="common.required"></span></div>
+        <div class="opt-chips" id="f-residence">
+          <label class="opt-chip"><input type="radio" name="residence" value="jp" checked><span>🇯🇵 <span data-i18n="reg.residence.jp"></span></span></label>
+          <label class="opt-chip"><input type="radio" name="residence" value="cn"><span>🇨🇳 <span data-i18n="reg.residence.cn"></span></span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-address"><span data-i18n="reg.address"></span><span class="req" data-i18n="common.required"></span></label>
+        <input class="input" id="f-address" type="text">
+      </div>
+      <div class="step-nav">
+        <button type="button" class="btn btn-primary btn-block" data-next>
+          <span data-i18n="common.next"></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 2: 連絡先 -->
+    <section class="step-panel" data-panel="2" hidden>
+      <div class="step-head">
+        <h2 data-i18n="reg.step2.title"></h2>
+        <p data-i18n="reg.step2.sub"></p>
+      </div>
+      <div class="field">
+        <label class="label" for="f-phone"><span data-i18n="reg.phone"></span><span class="req" data-i18n="common.required"></span></label>
+        <div class="input-row">
+          <select class="input code" id="f-phone-code">
+            <option value="+81">🇯🇵 +81</option>
+            <option value="+86">🇨🇳 +86</option>
+          </select>
+          <input class="input" id="f-phone" type="tel" data-i18n-ph="reg.phone.ph">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-wechat"><span data-i18n="reg.wechat"></span><span class="req" data-i18n="common.required"></span></label>
+        <input class="input" id="f-wechat" type="text" data-i18n-ph="reg.wechat.ph">
+        <p class="hint">💬 <span data-i18n="reg.wechat.note"></span></p>
+      </div>
+      <div class="field">
+        <label class="label" for="f-email"><span data-i18n="reg.email"></span><span class="opt" data-i18n="common.optional"></span></label>
+        <input class="input" id="f-email" type="email" data-i18n-ph="reg.email.ph">
+      </div>
+      <div class="step-nav">
+        <button type="button" class="btn btn-back" data-back data-i18n="common.back"></button>
+        <button type="button" class="btn btn-primary" data-next><span data-i18n="common.next"></span></button>
+      </div>
+    </section>
+
+    <!-- STEP 3: 資格 -->
+    <section class="step-panel" data-panel="3" hidden>
+      <div class="step-head">
+        <h2 data-i18n="reg.step3.title"></h2>
+        <p data-i18n="reg.step3.sub"></p>
+      </div>
+      <div class="field">
+        <div class="label"><span data-i18n="reg.jlpt"></span><span class="req" data-i18n="common.required"></span></div>
+        <div class="opt-chips" id="f-jlpt">
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N1"><span>N1</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N2"><span>N2</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N3"><span>N3</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N4"><span>N4</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N5"><span>N5</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="none" checked><span data-i18n="reg.jlpt.none"></span></label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label"><span data-i18n="reg.ssw"></span></div>
+        <p class="hint" style="margin:0 0 10px" data-i18n="reg.ssw.note"></p>
+        <div class="opt-chips" id="f-ssw"></div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-other"><span data-i18n="reg.otherQual"></span><span class="opt" data-i18n="common.optional"></span></label>
+        <textarea class="input" id="f-other" rows="3" data-i18n-ph="reg.otherQual.ph"></textarea>
+      </div>
+      <div class="step-nav">
+        <button type="button" class="btn btn-back" data-back data-i18n="common.back"></button>
+        <button type="button" class="btn btn-primary" data-next><span data-i18n="common.next"></span></button>
+      </div>
+    </section>
+
+    <!-- STEP 4: 確認 -->
+    <section class="step-panel" data-panel="4" hidden>
+      <div class="step-head">
+        <h2 data-i18n="reg.step4.title"></h2>
+        <p data-i18n="reg.step4.sub"></p>
+      </div>
+      <dl class="confirm-list" id="confirm-list"></dl>
+      <label class="agree-row">
+        <input type="checkbox" id="f-agree">
+        <span class="agree-box"><span class="icon" id="agree-check"></span></span>
+        <span class="agree-text" data-i18n="reg.agree"></span>
+      </label>
+      <div class="step-nav">
+        <button type="button" class="btn btn-back" data-back data-i18n="common.back"></button>
+        <button type="button" class="btn btn-primary" id="submit-btn" data-i18n="reg.submit"></button>
+      </div>
+    </section>
+  </div>
+
+  <!-- 完了画面 -->
+  <section class="done-wrap" id="done" hidden>
+    <div class="done-ring"><div class="done-check"><span class="icon" id="done-icon"></span></div></div>
+    <h1 data-i18n="reg.done.title"></h1>
+    <p class="done-sub" data-i18n="reg.done.sub"></p>
+    <div class="member-card">
+      <span data-i18n="reg.done.accountId"></span>
+      <b id="member-id"></b>
+    </div>
+    <a class="btn btn-primary btn-block" href="jobs.html" data-i18n="reg.done.cta"></a>
+  </section>
+</div>
+
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+initPage({});
+qs('#back-icon').innerHTML = ICONS.back;
+qs('#done-icon').innerHTML = ICONS.check;
+qs('#agree-check').innerHTML = ICONS.check;
+
+let step = 1;
+const TOTAL = 4;
+
+/* 特定技能分野チップ（11分野＋未合格）を生成 */
+function renderSswChips() {
+  const box = qs('#f-ssw');
+  const checked = new Set(qsa('input:checked', box).map(i => i.value));
+  if (!box.dataset.init) checked.add('none');
+  box.innerHTML =
+    FIELDS.map(f => `
+      <label class="opt-chip"><input type="checkbox" name="ssw" value="${f.id}" ${checked.has(f.id) ? 'checked' : ''}>
+        <span>${f.emoji} ${pick(f.name)}</span></label>`).join('') +
+    `<label class="opt-chip"><input type="checkbox" name="ssw" value="none" ${checked.has('none') ? 'checked' : ''}>
+      <span data-i18n="reg.ssw.none">${t('reg.ssw.none')}</span></label>`;
+  box.dataset.init = '1';
+
+  /* 「まだ合格していない」と分野の排他制御 */
+  qsa('input', box).forEach(input => input.addEventListener('change', () => {
+    if (input.value === 'none' && input.checked) {
+      qsa('input', box).forEach(i => { if (i.value !== 'none') i.checked = false; });
+    } else if (input.value !== 'none' && input.checked) {
+      const none = qsa('input', box).find(i => i.value === 'none');
+      if (none) none.checked = false;
+    }
+  }));
+}
+
+/* 国籍セレクトの選択肢文言 */
+function renderNationality() {
+  const sel = qs('#f-nationality');
+  sel.options[0].textContent = t('reg.nationality.cn');
+  sel.options[1].textContent = t('reg.nationality.other');
+}
+
+/* 住所プレースホルダーを居住地に合わせる */
+function syncAddressPh() {
+  const residence = qsa('#f-residence input').find(i => i.checked)?.value || 'jp';
+  qs('#f-address').placeholder = t(residence === 'jp' ? 'reg.address.phJp' : 'reg.address.phCn');
+}
+
+function showStep(n) {
+  step = n;
+  qsa('.step-panel').forEach(p => p.hidden = Number(p.dataset.panel) !== n);
+  qsa('#steps .step').forEach(s => {
+    const sn = Number(s.dataset.step);
+    s.classList.toggle('done', sn < n);
+    s.classList.toggle('current', sn === n);
+    const dot = qs('.step-dot', s);
+    dot.innerHTML = sn < n ? `<span class="icon">${ICONS.check}</span>` : sn;
+  });
+  qs('#steps').style.setProperty('--p', (n - 1) / (TOTAL - 1));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (n === 4) renderConfirm();
+}
+
+function collect() {
+  const val = id => qs('#' + id).value.trim();
+  const radio = boxId => qsa(`#${boxId} input`).find(i => i.checked)?.value || '';
+  return {
+    lastName: val('f-last'), firstName: val('f-first'),
+    pinyin: val('f-pinyin').toUpperCase(), birth: val('f-birth'),
+    gender: radio('f-gender'), nationality: qs('#f-nationality').value,
+    residence: radio('f-residence'), address: val('f-address'),
+    phoneCode: qs('#f-phone-code').value, phone: val('f-phone'),
+    wechat: val('f-wechat'), email: val('f-email'),
+    jlpt: radio('f-jlpt'),
+    ssw: qsa('#f-ssw input:checked').map(i => i.value).filter(v => v !== 'none'),
+    otherQual: val('f-other'),
+  };
+}
+
+function validate(n) {
+  const d = collect();
+  if (n === 1) return d.lastName && d.firstName && d.pinyin && d.birth && d.gender && d.address;
+  if (n === 2) return d.phone && d.wechat;
+  return true;
+}
+
+function renderConfirm() {
+  const d = collect();
+  const dash = '—';
+  const genderText = d.gender ? t('reg.gender.' + d.gender) : dash;
+  const sswText = d.ssw.length ? d.ssw.map(id => pick(fieldOf(id).name)).join('、') : t('reg.ssw.none');
+  const rows = [
+    [t('reg.lastName').replace(/（.+）/, '') + '・' + t('reg.firstName').replace(/（.+）/, ''), `${esc(d.lastName)} ${esc(d.firstName)}<br><small style="color:var(--text-sub)">${esc(d.pinyin)}</small>`],
+    [t('reg.birth'), esc(d.birth) || dash],
+    [t('reg.gender'), genderText],
+    [t('reg.nationality'), t(d.nationality === 'cn' ? 'reg.nationality.cn' : 'reg.nationality.other')],
+    [t('reg.residence'), `${t(d.residence === 'jp' ? 'reg.residence.jp' : 'reg.residence.cn')}<br><small style="color:var(--text-sub)">${esc(d.address)}</small>`],
+    [t('reg.phone'), `${esc(d.phoneCode)} ${esc(d.phone)}`],
+    [t('reg.wechat'), esc(d.wechat) || dash],
+    [t('reg.email'), esc(d.email) || dash],
+    [t('reg.jlpt'), d.jlpt === 'none' ? t('reg.jlpt.none') : esc(d.jlpt)],
+    [t('reg.ssw'), sswText],
+    [t('reg.otherQual'), esc(d.otherQual) || dash],
+  ];
+  qs('#confirm-list').innerHTML = rows.map(([k, v]) =>
+    `<div class="confirm-row"><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+}
+
+/* ナビゲーション */
+qsa('[data-next]').forEach(b => b.addEventListener('click', () => {
+  if (!validate(step)) { showToast(t('reg.err.required')); return; }
+  showStep(step + 1);
+}));
+qsa('[data-back]').forEach(b => b.addEventListener('click', () => showStep(step - 1)));
+
+qs('#submit-btn').addEventListener('click', () => {
+  if (!qs('#f-agree').checked) { showToast(t('reg.err.agree')); return; }
+  const profile = collect();
+  profile.memberId = genMemberId();
+  setProfile(profile);
+  setRegistered(true);
+  qs('#wizard').hidden = true;
+  qs('#member-id').textContent = profile.memberId;
+  qs('#done').hidden = false;
+  window.scrollTo(0, 0);
+  celebrate();
+});
+
+qs('#f-residence').addEventListener('change', syncAddressPh);
+qs('#lang-toggle').addEventListener('click', () => setLang(getLang() === 'ja' ? 'zh' : 'ja'));
+
+window.onLangChange = () => {
+  qs('#lang-toggle').innerHTML = `${icon('globe')}<span>${getLang() === 'ja' ? '中文' : '日本語'}</span>`;
+  renderSswChips();
+  renderNationality();
+  syncAddressPh();
+  if (step === 4) renderConfirm();
+};
+
+/* 初期描画 */
+qs('#lang-toggle').innerHTML = `${icon('globe')}<span>${getLang() === 'ja' ? '中文' : '日本語'}</span>`;
+renderSswChips();
+renderNationality();
+syncAddressPh();
+showStep(1);
+</script>
+</body>
+</html>
