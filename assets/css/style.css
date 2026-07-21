@@ -31,31 +31,8 @@ ul, ol { list-style: none; }
   --shell-w: 480px;
 }
 
-/* 小紅書風レッド */
-:root, [data-theme="red"] {
-  --primary: #FF2442;
-  --primary-deep: #E01E3A;
-  --primary-soft: #FFEDF0;
-  --primary-softer: #FFF6F7;
-  --on-primary: #FFFFFF;
-  --accent: #FF8F1F;
-  --grad: linear-gradient(135deg, #FF2442 0%, #FF5C4D 55%, #FF9F45 110%);
-  --grad-bar: linear-gradient(180deg, #FF2442, #FF8F1F);
-  --hero-deco1: rgba(255, 255, 255, .16);
-  --hero-deco2: rgba(255, 209, 102, .35);
-  --r-xl: 26px;
-  --r-lg: 20px;
-  --r-md: 15px;
-  --r-sm: 12px;
-  --r-btn: 999px;
-  --shadow-card: 0 2px 14px rgba(255, 36, 66, .05), 0 1px 3px rgba(23, 24, 28, .05);
-  --shadow-float: 0 10px 30px rgba(23, 24, 28, .14);
-  --shadow-cta: 0 8px 22px rgba(255, 36, 66, .34);
-  --ring: rgba(255, 36, 66, .16);
-}
-
-/* トラストブルー */
-[data-theme="blue"] {
+/* トラストブルー（デフォルト） */
+:root, [data-theme="blue"] {
   --primary: #1E6FFF;
   --primary-deep: #1557D6;
   --primary-soft: #E9F1FF;
@@ -75,6 +52,29 @@ ul, ol { list-style: none; }
   --shadow-float: 0 10px 30px rgba(15, 23, 42, .14);
   --shadow-cta: 0 8px 22px rgba(30, 111, 255, .30);
   --ring: rgba(30, 111, 255, .15);
+}
+
+/* 小紅書風レッド（⚙パネルから切替可能なオプション） */
+[data-theme="red"] {
+  --primary: #FF2442;
+  --primary-deep: #E01E3A;
+  --primary-soft: #FFEDF0;
+  --primary-softer: #FFF6F7;
+  --on-primary: #FFFFFF;
+  --accent: #FF8F1F;
+  --grad: linear-gradient(135deg, #FF2442 0%, #FF5C4D 55%, #FF9F45 110%);
+  --grad-bar: linear-gradient(180deg, #FF2442, #FF8F1F);
+  --hero-deco1: rgba(255, 255, 255, .16);
+  --hero-deco2: rgba(255, 209, 102, .35);
+  --r-xl: 26px;
+  --r-lg: 20px;
+  --r-md: 15px;
+  --r-sm: 12px;
+  --r-btn: 999px;
+  --shadow-card: 0 2px 14px rgba(255, 36, 66, .05), 0 1px 3px rgba(23, 24, 28, .05);
+  --shadow-float: 0 10px 30px rgba(23, 24, 28, .14);
+  --shadow-cta: 0 8px 22px rgba(255, 36, 66, .34);
+  --ring: rgba(255, 36, 66, .16);
 }
 
 /* テーマ切替時のなめらかな遷移 */
@@ -381,6 +381,55 @@ body.no-scroll { overflow: hidden; }
   font-size: 11px; line-height: 1.7; color: var(--text-sub);
 }
 .footer { padding: 26px 16px 30px; text-align: center; font-size: 11px; color: var(--text-faint); }
+
+/* 完全無料・保証金なしの安心カード */
+.trust-card {
+  margin: 0 16px; padding: 18px;
+  background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-card);
+  border: 1.5px solid color-mix(in srgb, var(--primary) 22%, #fff);
+}
+.trust-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 8px 0; font-size: 14.5px; font-weight: 800;
+}
+.trust-row::before {
+  content: '✓'; flex: none;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--grad); color: #fff;
+  display: grid; place-items: center;
+  font-size: 14px; font-weight: 900;
+}
+.trust-note {
+  margin-top: 10px; padding: 10px 13px;
+  background: var(--primary-softer); border-radius: var(--r-sm);
+  font-size: 11px; line-height: 1.7; color: var(--text-sub);
+}
+
+/* 入社後サポート体制 */
+.support-desc { padding: 0 20px 14px; font-size: 12.5px; line-height: 1.75; color: var(--text-sub); }
+.org-tag {
+  display: inline-flex; align-items: center;
+  margin: 4px 0 5px; padding: 4px 10px; border-radius: 999px;
+  background: var(--primary-soft); color: var(--primary);
+  font-size: 11px; font-weight: 800;
+}
+.support-stat {
+  margin: 6px 16px 0; padding: 16px 18px;
+  background: var(--grad); border-radius: var(--r-lg); box-shadow: var(--shadow-cta);
+  color: var(--on-primary); display: flex; align-items: baseline; gap: 12px;
+}
+.support-stat b { font-size: 30px; font-weight: 900; letter-spacing: -.01em; }
+.support-stat span { font-size: 12px; font-weight: 700; opacity: .94; }
+
+/* 運営会社情報 */
+.op-info {
+  margin: 24px 16px 0; padding: 16px 6px 0;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.op-info .op-title { font-size: 10.5px; font-weight: 800; color: var(--text-faint); letter-spacing: .08em; }
+.op-info .op-name { font-size: 14px; font-weight: 900; margin-top: 4px; }
+.op-info .op-line { font-size: 11px; color: var(--text-sub); margin-top: 3px; line-height: 1.6; }
 
 /* 下部固定CTA（未登録ランディング） */
 .cta-bar {

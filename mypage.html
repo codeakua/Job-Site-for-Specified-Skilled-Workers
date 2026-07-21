@@ -192,6 +192,12 @@ function render() {
     </dl>
 
     ${settingsHTML()}
+    <div class="op-info">
+      <div class="op-title">${t('op.title')}</div>
+      <div class="op-name">${t('op.name')}</div>
+      <div class="op-line">${t('op.license')}</div>
+      <div class="op-line">${t('op.support')}</div>
+    </div>
     <div class="footer">${t('footer.copy')}</div>`;
 
   qsa('.app-row[data-id]', box).forEach(r =>
