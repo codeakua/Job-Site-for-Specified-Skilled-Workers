@@ -9,8 +9,9 @@
 いずれかの方法で開けます。
 
 1. **そのまま開く** — `index.html` をダブルクリックしてブラウザで開く
-2. **ローカルサーバ** — `python3 -m http.server 8000` を実行して `http://localhost:8000` を開く
-3. **GitHub Pages** — リポジトリの Settings → Pages でブランチを公開すると、スマホ実機からもURLで確認できます
+2. **1ファイル版** — `preview.html` は全画面を1つのHTMLに束ねた自己完結版。このファイル1つを渡すだけで共有できます（`node tools/build-preview.js` で再生成）
+3. **ローカルサーバ** — `python3 -m http.server 8000` を実行して `http://localhost:8000` を開く
+4. **GitHub Pages** — リポジトリの Settings → Pages でブランチを公開すると、スマホ実機からもURLで確認できます
 
 スマホ表示（幅480px以下）を前提にデザインしています。PCで開いた場合は中央にアプリ枠が表示されます。
 
@@ -44,6 +45,10 @@
 ```
 ├── index.html / register.html / login.html
 ├── jobs.html / job.html / favs.html / mypage.html
+├── preview.html            # 1ファイル版（自動生成物。編集はtools/側で）
+├── tools/
+│   ├── build-preview.js    # preview.html を生成するスクリプト
+│   └── preview-views.js    # 1ファイル版用のルーター＆画面定義
 ├── assets/
 │   ├── css/style.css      # 全スタイル（2テーマはCSS変数 [data-theme] で切替）
 │   └── js/

@@ -1,0 +1,3317 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="blue" data-lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>樱聘 YingPin｜特定技能求人サイト モック</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<script>(function () {
+  try {
+    var d = document.documentElement;
+    d.dataset.theme = localStorage.getItem('yp_theme') === 'red' ? 'red' : 'blue';
+    var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
+    d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
+  } catch (e) {}
+})();</script>
+<style>
+/* =========================================================
+ * 樱聘 YingPin — スタイルシート
+ * モバイルファースト（〜480px想定）／PCでは中央のアプリ枠表示
+ * 2テーマ: [data-theme="red"]  小紅書風レッド
+ *          [data-theme="blue"] トラストブルー
+ * ======================================================= */
+
+/* ---------- リセット ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: none; border: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+ul, ol { list-style: none; }
+[hidden] { display: none !important; }
+
+/* ---------- デザイントークン ---------- */
+:root {
+  --font-base: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  --font-zh: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', system-ui, sans-serif;
+
+  --bg: #F6F7F9;
+  --card: #FFFFFF;
+  --text: #17181C;
+  --text-sub: #7B828C;
+  --text-faint: #A6ACB5;
+  --line: #ECEDF1;
+  --danger: #E5484D;
+  --warn: #F59E0B;
+  --shell-w: 480px;
+}
+
+/* トラストブルー（デフォルト） */
+:root, [data-theme="blue"] {
+  --primary: #1E6FFF;
+  --primary-deep: #1557D6;
+  --primary-soft: #E9F1FF;
+  --primary-softer: #F4F8FF;
+  --on-primary: #FFFFFF;
+  --accent: #00C2FF;
+  --grad: linear-gradient(135deg, #1E6FFF 0%, #2E9BFF 60%, #00C2FF 110%);
+  --grad-bar: linear-gradient(180deg, #1E6FFF, #00C2FF);
+  --hero-deco1: rgba(255, 255, 255, .14);
+  --hero-deco2: rgba(0, 194, 255, .30);
+  --r-xl: 20px;
+  --r-lg: 16px;
+  --r-md: 12px;
+  --r-sm: 10px;
+  --r-btn: 14px;
+  --shadow-card: 0 2px 12px rgba(30, 111, 255, .05), 0 1px 3px rgba(15, 23, 42, .06);
+  --shadow-float: 0 10px 30px rgba(15, 23, 42, .14);
+  --shadow-cta: 0 8px 22px rgba(30, 111, 255, .30);
+  --ring: rgba(30, 111, 255, .15);
+}
+
+/* 小紅書風レッド（⚙パネルから切替可能なオプション） */
+[data-theme="red"] {
+  --primary: #FF2442;
+  --primary-deep: #E01E3A;
+  --primary-soft: #FFEDF0;
+  --primary-softer: #FFF6F7;
+  --on-primary: #FFFFFF;
+  --accent: #FF8F1F;
+  --grad: linear-gradient(135deg, #FF2442 0%, #FF5C4D 55%, #FF9F45 110%);
+  --grad-bar: linear-gradient(180deg, #FF2442, #FF8F1F);
+  --hero-deco1: rgba(255, 255, 255, .16);
+  --hero-deco2: rgba(255, 209, 102, .35);
+  --r-xl: 26px;
+  --r-lg: 20px;
+  --r-md: 15px;
+  --r-sm: 12px;
+  --r-btn: 999px;
+  --shadow-card: 0 2px 14px rgba(255, 36, 66, .05), 0 1px 3px rgba(23, 24, 28, .05);
+  --shadow-float: 0 10px 30px rgba(23, 24, 28, .14);
+  --shadow-cta: 0 8px 22px rgba(255, 36, 66, .34);
+  --ring: rgba(255, 36, 66, .16);
+}
+
+/* テーマ切替時のなめらかな遷移 */
+html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
+  transition: background-color .35s ease, background .35s ease, color .35s ease,
+              border-color .35s ease, box-shadow .35s ease !important;
+}
+
+/* ---------- ベース ---------- */
+body {
+  font-family: var(--font-base);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+[data-lang="zh"] body { font-family: var(--font-zh); }
+body.no-scroll { overflow: hidden; }
+
+/* PCでは中央にアプリ枠を表示 */
+.shell {
+  position: relative;
+  max-width: var(--shell-w);
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--bg);
+}
+@media (min-width: 560px) {
+  body { background: linear-gradient(160deg, #EEF0F4 0%, #E4E8EF 100%); }
+  [data-theme="red"] body { background: linear-gradient(160deg, #FFF1F2 0%, #FFE9E4 45%, #F4E9F6 100%); }
+  [data-theme="blue"] body { background: linear-gradient(160deg, #EAF2FF 0%, #E1F3FF 45%, #EDEAFB 100%); }
+  .shell { box-shadow: 0 0 0 1px rgba(23, 24, 28, .05), 0 24px 70px rgba(23, 24, 28, .18); }
+}
+
+.px { padding-inline: 16px; }
+.has-tabbar { padding-bottom: 92px; }
+.has-ctabar { padding-bottom: 104px; }
+
+::placeholder { color: var(--text-faint); }
+
+/* ---------- アイコン ---------- */
+.icon { display: inline-flex; width: 20px; height: 20px; flex: none; }
+.icon svg { width: 100%; height: 100%; }
+
+/* ---------- トップバー ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: 10px;
+  height: 58px; padding-inline: 16px;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+}
+.topbar .spacer { flex: 1; }
+
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 11px;
+  background: var(--grad); box-shadow: var(--shadow-cta);
+  display: grid; place-items: center; font-size: 17px;
+}
+.brand-name { font-size: 19px; font-weight: 900; letter-spacing: .02em; line-height: 1.1; }
+.brand-sub { font-size: 9.5px; font-weight: 700; color: var(--text-faint); letter-spacing: .14em; }
+
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center; color: var(--text);
+  transition: background .2s;
+}
+.icon-btn:active { background: rgba(23, 24, 28, .06); }
+.topbar-title { font-size: 16px; font-weight: 800; }
+
+.lang-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 34px; padding: 0 12px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: var(--card);
+  font-size: 12.5px; font-weight: 700; color: var(--text-sub);
+  transition: transform .15s;
+}
+.lang-pill .icon { width: 15px; height: 15px; }
+.lang-pill:active { transform: scale(.95); }
+
+.login-link { font-size: 13px; font-weight: 700; color: var(--primary); padding: 8px 2px 8px 8px; }
+
+/* ---------- ボタン ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 52px; padding: 0 22px; border-radius: var(--r-btn);
+  font-size: 15px; font-weight: 800; letter-spacing: .01em;
+  transition: transform .16s ease, box-shadow .2s ease, opacity .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(.965); }
+.btn-primary { background: var(--grad); color: var(--on-primary); box-shadow: var(--shadow-cta); }
+.btn-outline { border: 1.6px solid var(--primary); color: var(--primary); background: var(--card); }
+.btn-ghost { color: var(--text-sub); font-weight: 700; }
+.btn-white { background: #fff; color: var(--primary); box-shadow: 0 6px 18px rgba(0, 0, 0, .16); }
+.btn-block { width: 100%; }
+.btn-sm { height: 42px; padding: 0 16px; font-size: 13.5px; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+
+/* ---------- セグメント（切替） ---------- */
+.seg {
+  display: flex; gap: 4px; padding: 4px;
+  background: #EEEFF3; border-radius: 999px;
+}
+.seg > button, .seg > label {
+  flex: 1; height: 40px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 13.5px; font-weight: 700; color: var(--text-sub);
+  transition: all .2s; cursor: pointer; white-space: nowrap;
+}
+.seg > .on {
+  background: var(--card); color: var(--primary);
+  box-shadow: 0 2px 8px rgba(23, 24, 28, .10);
+}
+
+/* ---------- チップ ---------- */
+.chips {
+  display: flex; gap: 8px; overflow-x: auto; padding: 2px 16px 6px;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none; display: inline-flex; align-items: center; gap: 6px;
+  height: 38px; padding: 0 14px; border-radius: 999px;
+  background: var(--card); border: 1.5px solid var(--line);
+  font-size: 13px; font-weight: 700; color: var(--text-sub);
+  transition: all .18s; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.chip:active { transform: scale(.95); }
+.chip.on {
+  background: var(--primary-soft); border-color: var(--primary);
+  color: var(--primary);
+}
+.chip .emoji { font-size: 15px; }
+
+/* ---------- タグ・バッジ ---------- */
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px; border-radius: 7px;
+  background: #F1F2F5; color: var(--text-sub);
+  font-size: 10.5px; font-weight: 700; white-space: nowrap;
+}
+.badge-new {
+  display: inline-flex; align-items: center;
+  padding: 2px 7px; border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), #FFB800);
+  color: #fff; font-size: 9.5px; font-weight: 900; letter-spacing: .06em;
+}
+.badge-soft {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--primary-soft); color: var(--primary);
+  font-size: 11px; font-weight: 800;
+}
+
+/* ---------- 求人カード ---------- */
+.job-list { display: flex; flex-direction: column; gap: 12px; padding: 4px 16px 16px; }
+.job-card {
+  position: relative; background: var(--card);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-card);
+  cursor: pointer; overflow: hidden;
+  transition: transform .18s ease, box-shadow .2s ease;
+}
+.job-card:active { transform: scale(.98); }
+.job-card-inner { display: flex; gap: 12px; padding: 15px 14px; }
+.job-icon {
+  width: 52px; height: 52px; flex: none; border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--f-color, #999) 13%, #fff);
+  border: 1px solid color-mix(in srgb, var(--f-color, #999) 20%, #fff);
+  display: grid; place-items: center; font-size: 26px;
+}
+.job-main { flex: 1; min-width: 0; }
+.job-head { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+.job-field {
+  font-size: 10.5px; font-weight: 800;
+  color: color-mix(in srgb, var(--f-color, var(--primary)) 78%, #000);
+}
+.job-title {
+  font-size: 15px; font-weight: 800; line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.job-meta {
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 4px; color: var(--text-sub); font-size: 12px;
+}
+.job-meta .icon { width: 14px; height: 14px; }
+.job-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+.job-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-top: 7px; }
+.salary { display: flex; align-items: baseline; gap: 3px; color: var(--primary); white-space: nowrap; }
+.salary-label { font-size: 10.5px; font-weight: 700; color: var(--text-sub); margin-right: 1px; }
+.salary b { font-size: 18px; font-weight: 900; letter-spacing: -.01em; }
+.salary-unit { font-size: 11px; font-weight: 800; }
+.fav-btn {
+  position: absolute; top: 10px; right: 10px;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center; color: #C9CED6;
+  -webkit-tap-highlight-color: transparent;
+}
+.fav-btn .icon, .fav-btn svg { width: 21px; height: 21px; }
+.fav-btn .ic-on { display: none; }
+.fav-btn.on { color: var(--primary); }
+.fav-btn.on .ic-on { display: block; }
+.fav-btn.on .ic-off { display: none; }
+.fav-btn.pop .ic-on { animation: heartPop .42s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes heartPop { 0% { transform: scale(.4); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+/* 会員限定ロック表示 */
+.job-card.is-locked .job-card-inner { filter: blur(7px); pointer-events: none; user-select: none; }
+.job-card.is-locked .fav-btn { display: none; }
+.job-lock {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  background: rgba(255, 255, 255, .42);
+  color: var(--text); font-size: 12px; font-weight: 800;
+}
+.job-lock .icon {
+  width: 38px; height: 38px; border-radius: 50%; padding: 9px;
+  background: var(--card); color: var(--primary); box-shadow: var(--shadow-card);
+}
+
+/* ---------- セクション見出し ---------- */
+.sec-h {
+  display: flex; align-items: center; gap: 9px;
+  padding: 22px 16px 12px; font-size: 17px; font-weight: 900;
+}
+.sec-h::before { content: ''; width: 4.5px; height: 18px; border-radius: 3px; background: var(--grad-bar); }
+.sec-h .more { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--text-sub); }
+
+/* ---------- ランディング ---------- */
+.hero {
+  position: relative; overflow: hidden;
+  background: var(--grad);
+  border-radius: 0 0 var(--r-xl) var(--r-xl);
+  padding: 18px 22px 58px; color: var(--on-primary);
+}
+.hero::before, .hero::after {
+  content: ''; position: absolute; border-radius: 50%; pointer-events: none;
+}
+.hero::before { width: 240px; height: 240px; right: -80px; top: -90px; background: var(--hero-deco1); }
+.hero::after { width: 150px; height: 150px; left: -55px; bottom: -40px; background: var(--hero-deco2); filter: blur(2px); }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 999px; margin: 14px 0 18px;
+  background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .34);
+  font-size: 11px; font-weight: 800; letter-spacing: .02em;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.hero h1 {
+  font-size: 31px; font-weight: 900; line-height: 1.32;
+  letter-spacing: .01em; white-space: pre-line; position: relative; z-index: 1;
+}
+.hero-sub { margin-top: 12px; font-size: 13px; line-height: 1.75; opacity: .94; position: relative; z-index: 1; }
+.hero-cta { position: relative; z-index: 1; margin-top: 22px; display: flex; flex-direction: column; gap: 10px; }
+.hero-login { text-align: center; font-size: 12.5px; opacity: .92; }
+.hero-login a { font-weight: 900; text-decoration: underline; text-underline-offset: 3px; }
+.hero-sticker { position: absolute; font-size: 26px; opacity: .9; animation: floaty 3.4s ease-in-out infinite; }
+@keyframes floaty { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-9px) rotate(5deg); } }
+
+.stats {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  margin: -34px 16px 0; padding: 15px 6px;
+  background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-float);
+}
+.stat { text-align: center; }
+.stat + .stat { border-left: 1px solid var(--line); }
+.stat b { display: block; font-size: 19px; font-weight: 900; color: var(--primary); letter-spacing: -.01em; }
+.stat span { font-size: 10.5px; font-weight: 700; color: var(--text-sub); }
+
+.features { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; padding: 0 16px; }
+.feature {
+  background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-card);
+  padding: 16px 14px;
+}
+.feature .f-emoji {
+  width: 42px; height: 42px; border-radius: var(--r-md);
+  background: var(--primary-softer); border: 1px solid var(--primary-soft);
+  display: grid; place-items: center; font-size: 21px; margin-bottom: 10px;
+}
+.feature h3 { font-size: 13.5px; font-weight: 800; margin-bottom: 5px; }
+.feature p { font-size: 11.5px; line-height: 1.6; color: var(--text-sub); }
+
+.how { padding: 0 16px; display: flex; flex-direction: column; }
+.how-step { position: relative; display: flex; gap: 14px; padding-bottom: 20px; }
+.how-step:last-child { padding-bottom: 4px; }
+.how-num {
+  width: 40px; height: 40px; flex: none; border-radius: 50%;
+  background: var(--grad); color: var(--on-primary); box-shadow: var(--shadow-cta);
+  display: grid; place-items: center; font-size: 15px; font-weight: 900;
+}
+.how-step:not(:last-child)::before {
+  content: ''; position: absolute; left: 19px; top: 44px; bottom: 2px;
+  border-left: 2px dashed color-mix(in srgb, var(--primary) 32%, #fff);
+}
+.how-body h3 { font-size: 14.5px; font-weight: 800; padding-top: 8px; }
+.how-body p { font-size: 12px; color: var(--text-sub); margin-top: 3px; }
+
+.note-box {
+  margin: 20px 16px 0; padding: 13px 15px;
+  background: #F1F2F5; border-radius: var(--r-md);
+  font-size: 11px; line-height: 1.7; color: var(--text-sub);
+}
+.footer { padding: 26px 16px 30px; text-align: center; font-size: 11px; color: var(--text-faint); }
+
+/* 完全無料・保証金なしの安心カード */
+.trust-card {
+  margin: 0 16px; padding: 18px;
+  background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-card);
+  border: 1.5px solid color-mix(in srgb, var(--primary) 22%, #fff);
+}
+.trust-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 8px 0; font-size: 14.5px; font-weight: 800;
+}
+.trust-row::before {
+  content: '✓'; flex: none;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--grad); color: #fff;
+  display: grid; place-items: center;
+  font-size: 14px; font-weight: 900;
+}
+.trust-note {
+  margin-top: 10px; padding: 10px 13px;
+  background: var(--primary-softer); border-radius: var(--r-sm);
+  font-size: 11px; line-height: 1.7; color: var(--text-sub);
+}
+
+/* 入社後サポート体制 */
+.support-desc { padding: 0 20px 14px; font-size: 12.5px; line-height: 1.75; color: var(--text-sub); }
+.org-tag {
+  display: inline-flex; align-items: center;
+  margin: 4px 0 5px; padding: 4px 10px; border-radius: 999px;
+  background: var(--primary-soft); color: var(--primary);
+  font-size: 11px; font-weight: 800;
+}
+.support-stat {
+  margin: 6px 16px 0; padding: 16px 18px;
+  background: var(--grad); border-radius: var(--r-lg); box-shadow: var(--shadow-cta);
+  color: var(--on-primary); display: flex; align-items: baseline; gap: 12px;
+}
+.support-stat b { font-size: 30px; font-weight: 900; letter-spacing: -.01em; }
+.support-stat span { font-size: 12px; font-weight: 700; opacity: .94; }
+
+/* 運営会社情報 */
+.op-info {
+  margin: 24px 16px 0; padding: 16px 6px 0;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.op-info .op-title { font-size: 10.5px; font-weight: 800; color: var(--text-faint); letter-spacing: .08em; }
+.op-info .op-name { font-size: 14px; font-weight: 900; margin-top: 4px; }
+.op-info .op-line { font-size: 11px; color: var(--text-sub); margin-top: 3px; line-height: 1.6; }
+
+/* 下部固定CTA（未登録ランディング） */
+.cta-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: var(--shell-w); z-index: 35;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
+  display: flex; gap: 10px;
+}
+
+/* ---------- タブバー ---------- */
+.tabbar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: var(--shell-w); z-index: 35;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, #FFFFFF 92%, transparent);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 5px 0 3px; border-radius: 12px;
+  color: #9AA1AB; font-size: 10px; font-weight: 700;
+  transition: color .2s; -webkit-tap-highlight-color: transparent;
+}
+.tab .icon { width: 23px; height: 23px; transition: transform .2s; }
+.tab.active { color: var(--primary); }
+.tab.active .icon { transform: translateY(-2px) scale(1.06); }
+.tab:active .icon { transform: scale(.9); }
+
+/* ---------- デモバー ---------- */
+#demo-handle {
+  position: fixed; z-index: 38;
+  right: max(14px, calc(50% - var(--shell-w) / 2 + 14px));
+  bottom: calc(118px + env(safe-area-inset-bottom));
+  width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(23, 24, 28, .78); color: #fff;
+  display: grid; place-items: center;
+  box-shadow: 0 6px 16px rgba(23, 24, 28, .3);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  transition: transform .2s;
+}
+#demo-handle:active { transform: scale(.9) rotate(30deg); }
+#demo-handle .icon { width: 20px; height: 20px; }
+.demo-note {
+  font-size: 11px; color: var(--text-sub); line-height: 1.7;
+  background: #F1F2F5; padding: 10px 13px; border-radius: var(--r-sm); margin-bottom: 16px;
+}
+.demo-group { margin-bottom: 16px; }
+.demo-label { font-size: 12px; font-weight: 800; color: var(--text-sub); margin-bottom: 8px; }
+
+/* ---------- オーバーレイ（モーダル / シート） ---------- */
+.overlay { position: fixed; inset: 0; z-index: 50; display: grid; }
+.overlay-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(15, 17, 26, .52);
+  opacity: 0; transition: opacity .28s ease;
+}
+.overlay.open .overlay-backdrop { opacity: 1; }
+
+.dialog {
+  position: relative; z-index: 1; place-self: center;
+  width: min(calc(100% - 40px), 350px);
+  background: var(--card); border-radius: var(--r-xl);
+  padding: 24px 20px 18px; box-shadow: var(--shadow-float);
+  opacity: 0; transform: scale(.92) translateY(8px);
+  transition: opacity .28s ease, transform .28s cubic-bezier(.22, 1.2, .36, 1);
+}
+.overlay.open .dialog { opacity: 1; transform: scale(1) translateY(0); }
+
+.sheet {
+  position: relative; z-index: 1; place-self: end center;
+  width: 100%; max-width: var(--shell-w);
+  background: var(--card); border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: 10px 20px calc(22px + env(safe-area-inset-bottom));
+  box-shadow: var(--shadow-float);
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+  max-height: 82dvh; overflow-y: auto;
+}
+.overlay.open .sheet { transform: translateY(0); }
+.sheet-handle { width: 38px; height: 4.5px; border-radius: 3px; background: #DDE0E5; margin: 4px auto 14px; }
+.sheet-title { font-size: 16px; font-weight: 900; margin-bottom: 14px; }
+
+/* 登録誘導モーダル */
+.gate { text-align: center; display: flex; flex-direction: column; gap: 10px; }
+.gate-icon {
+  width: 64px; height: 64px; margin: 2px auto 4px; border-radius: 50%;
+  background: var(--primary-soft); color: var(--primary);
+  display: grid; place-items: center;
+}
+.gate-icon .icon { width: 30px; height: 30px; }
+.gate h3 { font-size: 16.5px; font-weight: 900; }
+.gate p { font-size: 12.5px; color: var(--text-sub); line-height: 1.7; margin-bottom: 6px; }
+
+/* WeChatモーダル */
+.wechat-dialog { text-align: center; display: flex; flex-direction: column; gap: 12px; }
+.wechat-head { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.wechat-head .icon { width: 26px; height: 26px; color: #07C160; }
+.wechat-head h3 { font-size: 17px; font-weight: 900; }
+.wechat-dialog > p { font-size: 12px; color: var(--text-sub); line-height: 1.7; }
+.qr-wrap {
+  width: 178px; margin: 2px auto; padding: 10px;
+  border-radius: var(--r-md); border: 1.5px solid var(--line); background: #fff;
+}
+.qr { width: 100%; height: auto; }
+.wechat-id {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 12px; color: var(--text-sub);
+}
+.wechat-id b { font-size: 14.5px; color: var(--text); font-weight: 800; letter-spacing: .02em; }
+
+/* ---------- トースト ---------- */
+#yp-toast {
+  position: fixed; z-index: 60; top: 18px; left: 50%;
+  transform: translate(-50%, -12px);
+  display: flex; align-items: center; gap: 8px;
+  max-width: calc(100% - 48px);
+  background: rgba(23, 24, 28, .88); color: #fff;
+  padding: 11px 18px; border-radius: 999px;
+  font-size: 13px; font-weight: 700;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+#yp-toast.show { opacity: 1; transform: translate(-50%, 0); }
+#yp-toast .icon { width: 17px; height: 17px; color: #fff; }
+
+/* ---------- フォーム ---------- */
+.field { margin-bottom: 18px; }
+.label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 800; margin-bottom: 8px;
+}
+.req, .opt {
+  font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 999px;
+}
+.req { background: var(--primary-soft); color: var(--primary); }
+.opt { background: #F1F2F5; color: var(--text-sub); }
+.hint { font-size: 11px; color: var(--text-faint); margin-top: 6px; line-height: 1.6; }
+
+.input, select.input, textarea.input {
+  width: 100%; height: 52px; padding: 0 16px;
+  background: #F1F2F5; border: 1.6px solid transparent;
+  border-radius: var(--r-md); font-size: 15px; color: var(--text);
+  outline: none; transition: all .2s; -webkit-appearance: none; appearance: none;
+}
+textarea.input { height: auto; min-height: 92px; padding: 13px 16px; resize: vertical; }
+.input:focus {
+  background: var(--card); border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+select.input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237B828C' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 38px;
+}
+.input-row { display: flex; gap: 8px; }
+.input-row .code { width: 118px; flex: none; }
+
+/* 選択チップ（性別・JLPT・分野など） */
+.opt-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt-chip { position: relative; }
+.opt-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.opt-chip span {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 42px; padding: 8px 15px; border-radius: 999px;
+  background: var(--card); border: 1.6px solid var(--line);
+  font-size: 13px; font-weight: 700; color: var(--text-sub);
+  transition: all .18s; cursor: pointer;
+}
+.opt-chip input:checked + span {
+  background: var(--primary-soft); border-color: var(--primary); color: var(--primary);
+}
+.opt-chip:active span { transform: scale(.96); }
+
+/* 同意チェック */
+.agree-row { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; padding: 4px 2px; }
+.agree-row input { position: absolute; opacity: 0; pointer-events: none; }
+.agree-box {
+  width: 22px; height: 22px; flex: none; margin-top: 1px;
+  border-radius: 7px; border: 2px solid #D4D8DE; background: var(--card);
+  display: grid; place-items: center; color: transparent; transition: all .18s;
+}
+.agree-box .icon { width: 13px; height: 13px; }
+.agree-row input:checked ~ .agree-box { background: var(--primary); border-color: var(--primary); color: #fff; }
+.agree-text { font-size: 12.5px; line-height: 1.6; }
+.agree-text a { color: var(--primary); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ---------- 登録ステップ ---------- */
+.steps { position: relative; display: flex; padding: 18px 26px 6px; }
+.steps::before {
+  content: ''; position: absolute; top: 31px; left: 60px; right: 60px;
+  height: 2.5px; background: var(--line); border-radius: 2px;
+}
+.steps::after {
+  content: ''; position: absolute; top: 31px; left: 60px;
+  width: calc((100% - 120px) * var(--p, 0)); height: 2.5px;
+  background: var(--grad-bar); border-radius: 2px; transition: width .4s ease;
+}
+.step { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.step-dot {
+  width: 27px; height: 27px; border-radius: 50%;
+  background: var(--card); border: 2px solid #D9DCE2;
+  display: grid; place-items: center;
+  font-size: 12px; font-weight: 900; color: var(--text-faint);
+  transition: all .25s;
+}
+.step-dot .icon { width: 13px; height: 13px; }
+.step span { font-size: 10px; font-weight: 700; color: var(--text-faint); }
+.step.current .step-dot { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 0 4px var(--ring); }
+.step.current span { color: var(--primary); }
+.step.done .step-dot { background: var(--primary); border-color: var(--primary); color: #fff; }
+.step.done span { color: var(--text-sub); }
+
+.step-panel { padding: 20px 20px 28px; }
+.step-head { margin-bottom: 20px; }
+.step-head h2 { font-size: 19px; font-weight: 900; }
+.step-head p { font-size: 12px; color: var(--text-sub); margin-top: 5px; line-height: 1.7; }
+.step-nav { display: flex; gap: 10px; margin-top: 26px; }
+.step-nav .btn-back { flex: none; width: 110px; background: #EEEFF3; color: var(--text-sub); border-radius: var(--r-btn); }
+.step-nav .btn { flex: 1; }
+
+/* 確認リスト */
+.confirm-list { background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-card); padding: 4px 18px; margin-bottom: 18px; }
+.confirm-row { display: flex; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.confirm-row:last-child { border-bottom: 0; }
+.confirm-row dt { flex: none; width: 108px; font-size: 12px; font-weight: 700; color: var(--text-sub); padding-top: 1px; }
+.confirm-row dd { flex: 1; font-size: 13.5px; font-weight: 600; line-height: 1.6; word-break: break-all; }
+
+/* 完了画面 */
+.done-wrap { min-height: calc(100dvh - 58px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 28px 60px; text-align: center; }
+.done-check {
+  width: 92px; height: 92px; border-radius: 50%;
+  background: var(--grad); color: #fff; box-shadow: var(--shadow-cta);
+  display: grid; place-items: center;
+  animation: donePop .6s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+.done-check .icon { width: 44px; height: 44px; }
+.done-ring { position: relative; }
+.done-ring::after {
+  content: ''; position: absolute; inset: -12px; border-radius: 50%;
+  border: 2px solid var(--primary); opacity: 0;
+  animation: ringPulse 1.6s ease-out .25s infinite;
+}
+@keyframes donePop { 0% { transform: scale(.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes ringPulse { 0% { transform: scale(.86); opacity: .55; } 100% { transform: scale(1.18); opacity: 0; } }
+.done-wrap h1 { font-size: 23px; font-weight: 900; margin-top: 26px; }
+.done-wrap .done-sub { font-size: 13px; color: var(--text-sub); line-height: 1.8; margin-top: 10px; white-space: pre-line; }
+.member-card {
+  margin-top: 24px; width: 100%; padding: 16px;
+  border: 1.8px dashed color-mix(in srgb, var(--primary) 45%, #fff);
+  background: var(--primary-softer); border-radius: var(--r-lg);
+}
+.member-card span { font-size: 11px; font-weight: 800; color: var(--text-sub); }
+.member-card b { display: block; font-size: 21px; font-weight: 900; color: var(--primary); letter-spacing: .04em; margin-top: 3px; }
+.done-wrap .btn { margin-top: 26px; }
+
+/* 桜吹雪 */
+.petals { position: fixed; inset: 0; z-index: 70; pointer-events: none; overflow: hidden; }
+.petal {
+  position: absolute; top: -22px; width: 13px; height: 13px;
+  border-radius: 46% 54% 60% 40% / 50% 45% 55% 50%;
+  opacity: .95; animation: petalFall linear both;
+}
+@keyframes petalFall {
+  0% { transform: translate(0, 0) rotate(0); opacity: 0; }
+  8% { opacity: .95; }
+  100% { transform: translate(var(--drift, 20px), 105dvh) rotate(var(--spin, 300deg)); opacity: .7; }
+}
+
+/* ---------- ログイン ---------- */
+.auth-wrap { padding: 30px 24px 60px; }
+.auth-logo { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 26px 0 30px; text-align: center; }
+.auth-logo .brand-mark { width: 64px; height: 64px; border-radius: 20px; font-size: 32px; }
+.auth-logo h1 { font-size: 22px; font-weight: 900; }
+.auth-logo p { font-size: 12.5px; color: var(--text-sub); }
+.auth-links { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.auth-links a { font-size: 13px; font-weight: 700; color: var(--primary); }
+.auth-links .sub { color: var(--text-sub); font-weight: 600; font-size: 12px; }
+.demo-hint {
+  margin-top: 26px; padding: 11px 14px; border-radius: var(--r-md);
+  background: #FFF8E6; border: 1px solid #FFE9B3;
+  font-size: 11px; color: #8A6D1A; line-height: 1.7;
+}
+
+/* ---------- 求人一覧 ---------- */
+.jobs-head {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  padding-bottom: 4px;
+}
+.jobs-title-row { display: flex; align-items: center; gap: 10px; padding: 14px 16px 10px; }
+.jobs-title-row h1 { font-size: 21px; font-weight: 900; flex: 1; }
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 16px 10px; padding: 0 15px; height: 46px;
+  background: var(--card); border-radius: 999px; box-shadow: var(--shadow-card);
+}
+.search-box .icon { width: 18px; height: 18px; color: var(--text-faint); }
+.search-box input { flex: 1; border: 0; outline: 0; background: none; font-size: 14px; }
+.filter-row { display: flex; gap: 8px; padding: 2px 16px 8px; overflow-x: auto; scrollbar-width: none; }
+.filter-row::-webkit-scrollbar { display: none; }
+.count-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px 6px; }
+.count-row .count { font-size: 12px; font-weight: 700; color: var(--text-sub); }
+.count-row .count b { color: var(--primary); font-size: 14px; }
+
+.locked-note {
+  display: flex; align-items: center; gap: 8px; justify-content: center;
+  margin: 4px 16px 10px; padding: 10px;
+  background: var(--primary-softer); border: 1px dashed color-mix(in srgb, var(--primary) 40%, #fff);
+  border-radius: var(--r-md); color: var(--primary); font-size: 11.5px; font-weight: 800;
+}
+.locked-note .icon { width: 15px; height: 15px; }
+
+.empty { padding: 70px 30px; text-align: center; }
+.empty .e-emoji { font-size: 46px; margin-bottom: 14px; }
+.empty h3 { font-size: 15px; font-weight: 800; }
+.empty p { font-size: 12.5px; color: var(--text-sub); margin-top: 6px; }
+.empty .btn { margin-top: 20px; }
+
+/* エリア選択シート */
+.list-opt {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 15px 6px; border-bottom: 1px solid var(--line);
+  font-size: 14.5px; font-weight: 700; color: var(--text); text-align: left;
+}
+.list-opt:last-child { border-bottom: 0; }
+.list-opt .icon { margin-left: auto; color: var(--primary); width: 19px; height: 19px; opacity: 0; }
+.list-opt.on { color: var(--primary); }
+.list-opt.on .icon { opacity: 1; }
+
+/* ---------- 求人詳細 ---------- */
+.job-hero {
+  position: relative; padding: 20px 20px 22px; overflow: hidden;
+  background: linear-gradient(180deg, var(--primary-softer), var(--bg));
+}
+.job-hero-icon {
+  width: 64px; height: 64px; border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--f-color, #999) 14%, #fff);
+  border: 1px solid color-mix(in srgb, var(--f-color, #999) 22%, #fff);
+  display: grid; place-items: center; font-size: 32px; margin-bottom: 12px;
+}
+.job-hero .badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.job-hero h1 { font-size: 20px; font-weight: 900; line-height: 1.45; }
+.job-hero .job-meta { margin-top: 8px; font-size: 13px; }
+
+.salary-band {
+  margin: 4px 16px 12px; padding: 16px 18px;
+  background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-card);
+  display: flex; align-items: center; gap: 16px;
+}
+.salary-band .big { flex: 1; }
+.salary-band .big span { font-size: 11px; font-weight: 800; color: var(--text-sub); display: block; }
+.salary-band .big b { font-size: 24px; font-weight: 900; color: var(--primary); letter-spacing: -.01em; }
+.salary-band .big small { font-size: 13px; font-weight: 800; color: var(--primary); }
+.salary-band .annual { text-align: right; }
+.salary-band .annual span { display: block; font-size: 10.5px; font-weight: 700; color: var(--text-faint); }
+.salary-band .annual b { font-size: 13.5px; font-weight: 800; color: var(--text-sub); }
+
+.card-sec {
+  margin: 0 16px 12px; padding: 18px;
+  background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-card);
+}
+.card-sec h2 { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 900; margin-bottom: 12px; }
+.card-sec h2::before { content: ''; width: 4px; height: 15px; border-radius: 3px; background: var(--grad-bar); }
+.card-sec .desc { font-size: 13.5px; line-height: 1.85; }
+.duty-list li { display: flex; gap: 9px; padding: 6px 0; font-size: 13.5px; line-height: 1.6; }
+.duty-list .icon { width: 17px; height: 17px; color: var(--primary); margin-top: 3px; }
+
+.info-row { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.info-row:last-child { border-bottom: 0; padding-bottom: 2px; }
+.info-row:first-of-type { padding-top: 2px; }
+.info-row dt { flex: none; width: 84px; font-size: 12px; font-weight: 800; color: var(--text-sub); padding-top: 2px; }
+.info-row dd { flex: 1; font-size: 13.5px; line-height: 1.65; font-weight: 600; }
+
+.ben-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ben-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 12px; border-radius: var(--r-sm);
+  background: var(--primary-softer); font-size: 12px; font-weight: 700;
+}
+.ben-item .icon { width: 15px; height: 15px; color: var(--primary); }
+
+.cn-support {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 16px 12px; padding: 14px 16px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, #07C160 0%, #05A87E 100%);
+  color: #fff; font-size: 13px; font-weight: 800; box-shadow: 0 6px 18px rgba(7, 193, 96, .25);
+}
+.cn-support .icon { width: 22px; height: 22px; }
+.cn-support small { display: block; font-size: 10.5px; font-weight: 600; opacity: .9; }
+
+.company-note { font-size: 11px; color: var(--text-faint); line-height: 1.7; margin-top: 10px; }
+
+.related-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 2px 16px 14px; scrollbar-width: none; }
+.related-scroll::-webkit-scrollbar { display: none; }
+.related-card {
+  flex: none; width: 240px; padding: 13px 14px;
+  background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+.related-card .rc-head { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.related-card .rc-emoji {
+  width: 34px; height: 34px; border-radius: 10px; font-size: 17px;
+  background: color-mix(in srgb, var(--f-color, #999) 13%, #fff);
+  display: grid; place-items: center;
+}
+.related-card .rc-field { font-size: 10px; font-weight: 800; color: var(--text-sub); }
+.related-card h3 {
+  font-size: 12.5px; font-weight: 800; line-height: 1.5; height: 2.9em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.related-card .rc-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; }
+.related-card .rc-area { font-size: 10.5px; color: var(--text-sub); }
+.related-card .salary b { font-size: 14px; }
+
+/* 詳細下部アクションバー */
+.job-actions {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: var(--shell-w); z-index: 35;
+  display: flex; gap: 10px; align-items: center;
+  padding: 11px 16px calc(11px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, #FFFFFF 90%, transparent);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+}
+.job-actions .fav-square {
+  width: 52px; height: 52px; flex: none; border-radius: var(--r-md);
+  border: 1.6px solid var(--line); background: var(--card);
+  display: grid; place-items: center; color: #C9CED6; position: static;
+}
+.job-actions .fav-square.on { color: var(--primary); border-color: var(--primary-soft); background: var(--primary-softer); }
+.job-actions .btn-wechat {
+  height: 52px; flex: none; padding: 0 16px; border-radius: var(--r-btn);
+  background: #E8FBF0; color: #07A050; font-weight: 800; font-size: 13.5px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.job-actions .btn-apply { flex: 1; }
+
+/* ---------- お気に入り / マイページ ---------- */
+.page-head { padding: 16px 16px 6px; }
+.page-head h1 { font-size: 21px; font-weight: 900; }
+
+.profile-card {
+  position: relative; overflow: hidden;
+  margin: 8px 16px 14px; padding: 20px 18px;
+  border-radius: var(--r-xl); background: var(--grad);
+  color: var(--on-primary); box-shadow: var(--shadow-cta);
+}
+.profile-card::after {
+  content: ''; position: absolute; width: 170px; height: 170px; border-radius: 50%;
+  right: -55px; top: -70px; background: rgba(255, 255, 255, .16);
+}
+.profile-row { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+.avatar {
+  width: 58px; height: 58px; flex: none; border-radius: 50%;
+  background: rgba(255, 255, 255, .22); border: 2px solid rgba(255, 255, 255, .55);
+  display: grid; place-items: center; font-size: 24px; font-weight: 900;
+}
+.profile-name { font-size: 18px; font-weight: 900; }
+.profile-id { font-size: 11px; opacity: .85; margin-top: 2px; letter-spacing: .03em; }
+.qual-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; position: relative; z-index: 1; }
+.qual-badge {
+  padding: 5px 11px; border-radius: 999px;
+  background: rgba(255, 255, 255, .2); border: 1px solid rgba(255, 255, 255, .4);
+  font-size: 11px; font-weight: 800; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+
+.menu-card { margin: 0 16px 14px; background: var(--card); border-radius: var(--r-lg); box-shadow: var(--shadow-card); overflow: hidden; }
+.menu-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 15px 16px; border-bottom: 1px solid var(--line);
+  font-size: 14px; font-weight: 700; text-align: left; color: var(--text);
+  transition: background .15s;
+}
+.menu-item:last-child { border-bottom: 0; }
+.menu-item:active { background: var(--primary-softer); }
+.menu-item .m-icon {
+  width: 36px; height: 36px; border-radius: 11px; flex: none;
+  background: var(--primary-softer); color: var(--primary);
+  display: grid; place-items: center;
+}
+.menu-item .m-icon .icon { width: 18px; height: 18px; }
+.menu-item .chev { margin-left: auto; color: var(--text-faint); width: 17px; height: 17px; }
+.menu-item .m-value { margin-left: auto; font-size: 12px; color: var(--text-sub); font-weight: 600; }
+
+.app-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+.app-row:last-child { border-bottom: 0; }
+.app-row .a-emoji {
+  width: 42px; height: 42px; border-radius: 12px; flex: none; font-size: 20px;
+  background: color-mix(in srgb, var(--f-color, #999) 13%, #fff);
+  display: grid; place-items: center;
+}
+.app-row .a-main { flex: 1; min-width: 0; }
+.app-row .a-title { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-row .a-date { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+.status-chip {
+  flex: none; padding: 4px 10px; border-radius: 999px;
+  background: #FFF4E0; color: #C77700; font-size: 10.5px; font-weight: 800;
+}
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.menu-item.danger { color: var(--danger); }
+.menu-item.danger .m-icon { background: #FDECEC; color: var(--danger); }
+
+/* ---------- スクロールリビール ---------- */
+.reveal { opacity: 0; transform: translateY(16px); }
+.reveal.in { opacity: 1; transform: none; transition: opacity .5s ease, transform .55s cubic-bezier(.22, 1, .36, 1); }
+
+/* ---------- 細部調整 ---------- */
+@media (max-width: 360px) {
+  .hero h1 { font-size: 27px; }
+  .features { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+<div class="shell" id="shell"></div>
+<script>
+/* =========================================================
+ * 樱聘 YingPin — 文言辞書（日本語 / 简体中文）
+ * すべてのUI文言をここで一元管理する。
+ * 最終実装で中国語のみにする場合は zh をベースに差し替える。
+ * ======================================================= */
+
+const I18N = {
+  /* ---------------- 日本語 ---------------- */
+  ja: {
+    'app.name': '樱聘',
+    'app.nameSub': 'YingPin',
+    'app.tagline': '日本ではたらく、\nを叶える。',
+    'app.taglineShort': '日本ではたらく、を叶える。',
+
+    // ナビゲーション
+    'nav.home': 'ホーム',
+    'nav.jobs': 'さがす',
+    'nav.favs': 'お気に入り',
+    'nav.mypage': 'マイページ',
+
+    // 共通
+    'common.back': '戻る',
+    'common.next': '次へ',
+    'common.close': '閉じる',
+    'common.cancel': 'キャンセル',
+    'common.ok': 'OK',
+    'common.copy': 'IDをコピー',
+    'common.copied': 'コピーしました',
+    'common.all': 'すべて',
+    'common.required': '必須',
+    'common.optional': '任意',
+    'common.login': 'ログイン',
+    'common.register': '無料で会員登録',
+    'common.perMonth': '月給',
+    'common.man': '万円',
+
+    // デモバー（モック用設定）
+    'demo.open': 'モック設定',
+    'demo.title': 'モック表示設定',
+    'demo.note': 'この設定パネルはデザイン確認用です。実際のサイトには表示されません。',
+    'demo.theme': 'デザインテーマ',
+    'demo.theme.red': '小紅書風レッド',
+    'demo.theme.blue': 'トラストブルー',
+    'demo.lang': '表示言語',
+    'demo.reset': '登録状態をリセット（未登録に戻す）',
+    'demo.resetDone': '未登録の状態に戻しました',
+
+    // 会員限定ロック
+    'lock.badge': '会員限定',
+    'lock.title': '会員限定の求人情報です',
+    'lock.desc': '無料登録すると、給与・勤務条件などすべての求人情報が閲覧できます。',
+    'lock.register': '無料で登録して求人を見る',
+    'lock.login': 'アカウントをお持ちの方はログイン',
+    'lock.cardNote': '登録すると閲覧できます',
+
+    // ランディング
+    'landing.badge': '特定技能に特化した中国人向け求人サービス',
+    'landing.heroSub': '特定技能2号を目指せる11分野の求人だけを掲載。中国語サポート付きで、日本での仕事探しを応援します。',
+    'landing.haveAccount': 'アカウントをお持ちの方は',
+    'landing.stats.jobs': '掲載求人',
+    'landing.stats.jobsVal': '120+',
+    'landing.stats.fields': '対応分野',
+    'landing.stats.fieldsVal': '11分野',
+    'landing.stats.support': '中国語対応',
+    'landing.stats.supportVal': '100%',
+    'features.title': '樱聘が選ばれる理由',
+    'features.f1.title': '中国語で相談できる',
+    'features.f1.desc': '中国人スタッフが登録から入社までWeChatでサポート。日本語に自信がなくても安心です。',
+    'features.f2.title': '2号移行対象の仕事だけ',
+    'features.f2.desc': '在留期間の更新上限がない「特定技能2号」を目指せる11分野の求人のみを掲載しています。',
+    'features.f3.title': '寮・渡航サポート充実',
+    'features.f3.desc': '寮付き・渡航費支援ありの求人を多数掲載。中国在住のままでも応募できます。',
+    'features.f4.title': '求人は会員だけに公開',
+    'features.f4.desc': '求人情報は登録した会員だけに公開される安心設計。じっくり比較して選べます。',
+    'how.title': 'かんたん3ステップ',
+    'how.s1.title': '無料登録',
+    'how.s1.desc': '基本情報と資格を入力してアカウント発行',
+    'how.s2.title': '求人をさがす',
+    'how.s2.desc': '職種・エリアで自分に合う仕事を絞り込み',
+    'how.s3.title': '相談・応募',
+    'how.s3.desc': 'WeChatで気軽に相談してから応募できます',
+    'preview.title': '新着求人',
+    'preview.more': '登録して全ての求人を見る',
+    'landing.note': '※ 本サイトはデザイン確認用のモックです。掲載されている求人・数値はすべてサンプルです。',
+    'footer.copy': '© 2026 樱聘 YingPin（モック版）',
+
+    // 安心のお約束（完全無料・保証金なし）
+    'trust.title': '求職者は完全無料',
+    'trust.i1': '紹介料・登録料 0円',
+    'trust.i2': '保証金・違約金 一切なし',
+    'trust.i3': '登録・退会はいつでも自由',
+    'trust.note': '日本の法律により、求職者のみなさまから手数料をいただくことはありません。安心してご利用ください。',
+
+    // 入社後サポート体制
+    'support.title': '入社後も、ずっと中国語でサポート',
+    'support.desc': '樱聘は「紹介して終わり」ではありません。お仕事探しから入社後の生活まで、グループ一体であなたを支えます。',
+    'support.s1.title': 'お仕事探し〜入社まで',
+    'support.s1.org': '株式会社パートナー（有料職業紹介）',
+    'support.s1.desc': '求人のご紹介、面接の調整、雇用契約や在留資格手続きのサポート',
+    'support.s2.title': '入社後の生活サポート',
+    'support.s2.org': 'パートナー協同組合（登録支援機関）',
+    'support.s2.desc': '住まい探し、役所・銀行手続きの同行、日本語学習の支援、仕事や生活の相談（中国語OK）',
+    'support.stat': 'サポートした外国人材の定着率',
+    'support.statVal': '98%以上',
+
+    // 運営会社情報
+    'op.title': '運営会社',
+    'op.name': '株式会社パートナー',
+    'op.license': '有料職業紹介事業 許可番号 11-ユ-301340',
+    'op.support': '登録支援機関：パートナー協同組合',
+
+    // 登録
+    'reg.title': '新規登録',
+    'reg.step1': '基本情報',
+    'reg.step2': '連絡先',
+    'reg.step3': '資格',
+    'reg.step4': '確認',
+    'reg.step1.title': 'あなたについて教えてください',
+    'reg.step1.sub': '本人確認のための基本情報です。パスポートの記載どおりに入力してください。',
+    'reg.lastName': '姓（漢字）',
+    'reg.lastName.ph': '例：王',
+    'reg.firstName': '名（漢字）',
+    'reg.firstName.ph': '例：小美',
+    'reg.pinyin': 'ピンイン（パスポート表記）',
+    'reg.pinyin.ph': '例：WANG XIAOMEI',
+    'reg.birth': '生年月日',
+    'reg.gender': '性別',
+    'reg.gender.male': '男性',
+    'reg.gender.female': '女性',
+    'reg.gender.other': 'その他',
+    'reg.nationality': '国籍',
+    'reg.nationality.cn': '中国',
+    'reg.nationality.other': 'その他',
+    'reg.residence': '現在の居住地',
+    'reg.residence.jp': '日本在住',
+    'reg.residence.cn': '中国在住',
+    'reg.address': '住所',
+    'reg.address.phJp': '例：東京都新宿区西新宿1-2-3',
+    'reg.address.phCn': '例：上海市浦東新区張江路100号',
+    'reg.step2.title': '連絡先を教えてください',
+    'reg.step2.sub': '担当者からのご連絡・お仕事のご案内に使用します。',
+    'reg.phone': '電話番号',
+    'reg.phone.ph': '例：90-1234-5678',
+    'reg.wechat': 'WeChat ID（微信号）',
+    'reg.wechat.ph': '例：xiaomei_2026',
+    'reg.wechat.note': '応募後のやり取りは主にWeChatで行います',
+    'reg.email': 'メールアドレス（任意）',
+    'reg.email.ph': '例：xiaomei@example.com',
+    'reg.step3.title': 'お持ちの資格を教えてください',
+    'reg.step3.sub': 'あなたに合った求人のご案内に使用します。',
+    'reg.jlpt': '日本語能力（JLPT）',
+    'reg.jlpt.none': '未取得・学習中',
+    'reg.ssw': '特定技能評価試験の合格分野',
+    'reg.ssw.note': '合格している分野をすべて選択してください（複数選択可）',
+    'reg.ssw.none': 'まだ合格していない',
+    'reg.otherQual': 'その他の資格（任意）',
+    'reg.otherQual.ph': '例：普通運転免許、調理師 など',
+    'reg.step4.title': '入力内容の確認',
+    'reg.step4.sub': '内容に間違いがないかご確認ください。',
+    'reg.agree': '利用規約とプライバシーポリシーに同意する',
+    'reg.submit': 'この内容で登録する',
+    'reg.err.required': '未入力の必須項目があります',
+    'reg.err.agree': '規約への同意が必要です',
+    'reg.done.badge': '登録完了',
+    'reg.done.title': '登録が完了しました！',
+    'reg.done.sub': 'あなたのアカウントが発行されました。\nさっそく求人を見てみましょう。',
+    'reg.done.accountId': '会員ID',
+    'reg.done.cta': '求人を見る',
+
+    // ログイン
+    'login.title': 'おかえりなさい',
+    'login.sub': '登録した電話番号でログインしてください',
+    'login.phone': '電話番号',
+    'login.password': 'パスワード',
+    'login.password.ph': '8文字以上',
+    'login.btn': 'ログイン',
+    'login.forgot': 'パスワードをお忘れですか？',
+    'login.toRegister': 'はじめての方はこちら（無料登録）',
+    'login.demoNote': '※ モックのため、任意の入力でログインできます',
+    'login.success': 'ログインしました',
+
+    // 求人一覧
+    'jobs.title': '求人をさがす',
+    'jobs.search.ph': '職種・キーワードで検索',
+    'jobs.area': 'エリア',
+    'jobs.count': '{n}件の求人',
+    'jobs.sort.new': '新着順',
+    'jobs.empty.title': '条件に合う求人が見つかりません',
+    'jobs.empty.sub': '絞り込み条件を変えて再検索してみてください',
+    'jobs.new': 'NEW',
+    'jobs.lockedNote': '残りの求人は無料登録後に閲覧できます',
+
+    // エリア
+    'region.all': '全国',
+    'region.hokkaido_tohoku': '北海道・東北',
+    'region.kanto': '関東',
+    'region.chubu': '中部',
+    'region.kansai': '関西',
+    'region.chugoku_shikoku': '中国・四国',
+    'region.kyushu_okinawa': '九州・沖縄',
+    'area.sheetTitle': 'エリアを選択',
+
+    // タグ
+    'tag.dorm': '寮あり',
+    'tag.chinese': '中国語サポート',
+    'tag.noExp': '未経験OK',
+    'tag.lowOT': '残業少なめ',
+    'tag.highPay': '高収入',
+    'tag.support2': '2号移行支援',
+
+    // 福利厚生
+    'ben.social': '社会保険完備',
+    'ben.flight': '渡航費サポート',
+    'ben.jpLesson': '日本語学習支援',
+    'ben.meal': '食事補助・まかない',
+    'ben.bonus': '賞与あり',
+    'ben.dorm': '寮・住宅サポート',
+    'ben.support2': '2号移行サポート',
+
+    // 求人詳細
+    'job.monthly': '月給',
+    'job.annual': '想定年収',
+    'job.bonusRaise': '賞与・昇給',
+    'sec.desc': '仕事内容',
+    'sec.duties': '主な業務',
+    'sec.salary': '給与',
+    'sec.time': '勤務時間',
+    'sec.holiday': '休日・休暇',
+    'sec.location': '勤務地',
+    'sec.benefits': '待遇・福利厚生',
+    'sec.requirements': '応募条件',
+    'sec.company': '企業情報',
+    'job.overtime': '残業',
+    'job.holidays': '休日',
+    'job.housing': '住まい',
+    'job.companyNote': '※ 会社名・詳細な住所は応募後に開示されます',
+    'job.field': '分野',
+    'job.apply': '応募する',
+    'job.applied': '応募済み',
+    'job.wechatBtn': 'WeChatで相談',
+    'job.favAdd': 'お気に入りに追加しました',
+    'job.favRemove': 'お気に入りを解除しました',
+    'job.notFound': '求人が見つかりませんでした',
+    'apply.title': 'この求人に応募しますか？',
+    'apply.desc': '応募すると、担当者から1〜2営業日以内にWeChatでご連絡します。',
+    'apply.confirm': '応募する',
+    'apply.done.title': '応募を受け付けました！',
+    'apply.done.desc': '担当者からのWeChat連絡をお待ちください。マイページから応募状況を確認できます。',
+    'wechat.title': 'WeChatで相談',
+    'wechat.desc': 'QRコードをスキャンするか、IDを検索して友だち追加してください。中国語でOKです。',
+    'wechat.idLabel': '公式サポートID',
+    'related.title': 'この分野の他の求人',
+
+    // お気に入り
+    'favs.title': 'お気に入り',
+    'favs.empty.title': 'お気に入りはまだありません',
+    'favs.empty.sub': '気になる求人の ♡ をタップして保存しましょう',
+    'favs.browse': '求人をさがす',
+
+    // マイページ
+    'my.title': 'マイページ',
+    'my.guest': 'ゲストさん',
+    'my.guest.desc': '無料登録すると、求人の閲覧・応募・お気に入りが使えるようになります。',
+    'my.memberId': '会員ID',
+    'my.qual': '保有資格',
+    'my.profile': '登録情報',
+    'my.applications': '応募履歴',
+    'my.appStatus': '担当者確認中',
+    'my.appEmpty': '応募履歴はまだありません',
+    'my.settings': '設定',
+    'my.lang': '表示言語 / Language',
+    'my.theme': 'デザインテーマ',
+    'my.logout': 'ログアウト',
+    'my.logoutConfirm': 'ログアウトしますか？（モックでは未登録状態に戻ります）',
+    'my.logoutDone': 'ログアウトしました',
+    'my.jlptNone': '日本語：学習中',
+    'my.sswNone': '特定技能：未取得',
+    'my.jlptPrefix': '日本語',
+    'my.sswPrefix': '特定技能',
+  },
+
+  /* ---------------- 简体中文 ---------------- */
+  zh: {
+    'app.name': '樱聘',
+    'app.nameSub': 'YingPin',
+    'app.tagline': '去日本工作，\n从这里开始。',
+    'app.taglineShort': '去日本工作，从这里开始。',
+
+    'nav.home': '首页',
+    'nav.jobs': '找工作',
+    'nav.favs': '收藏',
+    'nav.mypage': '我的',
+
+    'common.back': '返回',
+    'common.next': '下一步',
+    'common.close': '关闭',
+    'common.cancel': '取消',
+    'common.ok': '确定',
+    'common.copy': '复制微信号',
+    'common.copied': '已复制',
+    'common.all': '全部',
+    'common.required': '必填',
+    'common.optional': '选填',
+    'common.login': '登录',
+    'common.register': '免费注册会员',
+    'common.perMonth': '月薪',
+    'common.man': '万日元',
+
+    'demo.open': '演示设置',
+    'demo.title': '演示显示设置',
+    'demo.note': '此设置面板仅用于设计确认，正式网站中不会显示。',
+    'demo.theme': '设计主题',
+    'demo.theme.red': '小红书风·红',
+    'demo.theme.blue': '商务信赖·蓝',
+    'demo.lang': '显示语言',
+    'demo.reset': '重置注册状态（恢复为未注册）',
+    'demo.resetDone': '已恢复为未注册状态',
+
+    'lock.badge': '会员专享',
+    'lock.title': '该职位信息仅对会员公开',
+    'lock.desc': '免费注册后，即可查看薪资、工作条件等全部职位信息。',
+    'lock.register': '免费注册查看职位',
+    'lock.login': '已有账号？点此登录',
+    'lock.cardNote': '注册后即可查看',
+
+    'landing.badge': '专为中国人打造的特定技能求职平台',
+    'landing.heroSub': '只刊登可升级特定技能2号的11个行业的职位。全程中文支持，助您在日本安心求职。',
+    'landing.haveAccount': '已有账号？',
+    'landing.stats.jobs': '在招职位',
+    'landing.stats.jobsVal': '120+',
+    'landing.stats.fields': '覆盖行业',
+    'landing.stats.fieldsVal': '11个',
+    'landing.stats.support': '中文支持',
+    'landing.stats.supportVal': '100%',
+    'features.title': '为什么选择樱聘',
+    'features.f1.title': '可用中文咨询',
+    'features.f1.desc': '中国员工通过微信为您提供从注册到入职的全程支持，日语不好也不用担心。',
+    'features.f2.title': '只做可转2号的工作',
+    'features.f2.desc': '只刊登可升级为“特定技能2号”（居留期限无更新上限）的11个行业的职位。',
+    'features.f3.title': '宿舍·赴日支持完善',
+    'features.f3.desc': '大量职位提供宿舍和机票补助，人在中国也可以直接申请。',
+    'features.f4.title': '职位仅向会员公开',
+    'features.f4.desc': '职位信息仅向注册会员公开，安心设计，可以放心慢慢比较挑选。',
+    'how.title': '简单3步',
+    'how.s1.title': '免费注册',
+    'how.s1.desc': '填写基本信息和资格，立即开通账号',
+    'how.s2.title': '寻找职位',
+    'how.s2.desc': '按行业·地区筛选适合自己的工作',
+    'how.s3.title': '咨询·申请',
+    'how.s3.desc': '可先通过微信轻松咨询，再正式申请',
+    'preview.title': '最新职位',
+    'preview.more': '注册后查看全部职位',
+    'landing.note': '※ 本网站为设计确认用演示版，所有职位和数据均为示例。',
+    'footer.copy': '© 2026 樱聘 YingPin（演示版）',
+
+    'trust.title': '求职者完全免费',
+    'trust.i1': '介绍费·注册费 0日元',
+    'trust.i2': '绝不收取保证金·违约金',
+    'trust.i3': '注册·退会随时自由',
+    'trust.note': '根据日本法律，我们不会向求职者收取任何费用，请放心使用。',
+
+    'support.title': '入职后，中文支持也不间断',
+    'support.desc': '樱聘不是“介绍完就结束”。从找工作到入职后的日常生活，集团一体化为您保驾护航。',
+    'support.s1.title': '找工作〜入职',
+    'support.s1.org': 'Partner株式会社（有料职业介绍）',
+    'support.s1.desc': '介绍职位、安排面试、协助签订雇用合同和办理在留资格手续',
+    'support.s2.title': '入职后的生活支持',
+    'support.s2.org': 'Partner协同组合（注册支援机构）',
+    'support.s2.desc': '协助找房、陪同办理政府·银行手续、日语学习支持、工作生活咨询（可用中文）',
+    'support.stat': '所支持外国人才的留职率',
+    'support.statVal': '98%以上',
+
+    'op.title': '运营公司',
+    'op.name': '株式会社パートナー（Partner）',
+    'op.license': '日本有料职业介绍事业 许可编号 11-ユ-301340',
+    'op.support': '注册支援机构：Partner协同组合',
+
+    'reg.title': '新用户注册',
+    'reg.step1': '基本信息',
+    'reg.step2': '联系方式',
+    'reg.step3': '资格证书',
+    'reg.step4': '确认',
+    'reg.step1.title': '请填写您的基本信息',
+    'reg.step1.sub': '用于确认本人身份的基本信息，请按护照信息如实填写。',
+    'reg.lastName': '姓（汉字）',
+    'reg.lastName.ph': '例：王',
+    'reg.firstName': '名（汉字）',
+    'reg.firstName.ph': '例：小美',
+    'reg.pinyin': '拼音（护照拼写）',
+    'reg.pinyin.ph': '例：WANG XIAOMEI',
+    'reg.birth': '出生日期',
+    'reg.gender': '性别',
+    'reg.gender.male': '男',
+    'reg.gender.female': '女',
+    'reg.gender.other': '其他',
+    'reg.nationality': '国籍',
+    'reg.nationality.cn': '中国',
+    'reg.nationality.other': '其他',
+    'reg.residence': '现居住地',
+    'reg.residence.jp': '居住在日本',
+    'reg.residence.cn': '居住在中国',
+    'reg.address': '住址',
+    'reg.address.phJp': '例：東京都新宿区西新宿1-2-3',
+    'reg.address.phCn': '例：上海市浦东新区张江路100号',
+    'reg.step2.title': '请填写联系方式',
+    'reg.step2.sub': '用于工作人员与您联系、推荐职位。',
+    'reg.phone': '手机号码',
+    'reg.phone.ph': '例：138-1234-5678',
+    'reg.wechat': '微信号',
+    'reg.wechat.ph': '例：xiaomei_2026',
+    'reg.wechat.note': '申请职位后主要通过微信与您沟通',
+    'reg.email': '邮箱（选填）',
+    'reg.email.ph': '例：xiaomei@example.com',
+    'reg.step3.title': '请填写您持有的资格证书',
+    'reg.step3.sub': '用于为您推荐合适的职位。',
+    'reg.jlpt': '日语能力（JLPT）',
+    'reg.jlpt.none': '未取得·学习中',
+    'reg.ssw': '特定技能评价考试合格行业',
+    'reg.ssw.note': '请选择已合格的行业（可多选）',
+    'reg.ssw.none': '尚未合格',
+    'reg.otherQual': '其他资格证书（选填）',
+    'reg.otherQual.ph': '例：驾照、厨师证 等',
+    'reg.step4.title': '确认填写内容',
+    'reg.step4.sub': '请确认以下信息无误。',
+    'reg.agree': '同意《用户协议》和《隐私政策》',
+    'reg.submit': '确认注册',
+    'reg.err.required': '有未填写的必填项',
+    'reg.err.agree': '请先同意用户协议',
+    'reg.done.badge': '注册成功',
+    'reg.done.title': '注册成功！',
+    'reg.done.sub': '您的账号已开通。\n快去看看适合您的职位吧。',
+    'reg.done.accountId': '会员ID',
+    'reg.done.cta': '查看职位',
+
+    'login.title': '欢迎回来',
+    'login.sub': '请使用注册时的手机号登录',
+    'login.phone': '手机号码',
+    'login.password': '密码',
+    'login.password.ph': '8位以上',
+    'login.btn': '登录',
+    'login.forgot': '忘记密码？',
+    'login.toRegister': '新用户？免费注册',
+    'login.demoNote': '※ 演示版：任意输入即可登录',
+    'login.success': '登录成功',
+
+    'jobs.title': '找工作',
+    'jobs.search.ph': '搜索职位·关键词',
+    'jobs.area': '地区',
+    'jobs.count': '共 {n} 个职位',
+    'jobs.sort.new': '最新优先',
+    'jobs.empty.title': '没有找到符合条件的职位',
+    'jobs.empty.sub': '请尝试更换筛选条件后重新搜索',
+    'jobs.new': '新',
+    'jobs.lockedNote': '其余职位免费注册后即可查看',
+
+    'region.all': '全国',
+    'region.hokkaido_tohoku': '北海道·东北',
+    'region.kanto': '关东',
+    'region.chubu': '中部',
+    'region.kansai': '关西',
+    'region.chugoku_shikoku': '中国·四国',
+    'region.kyushu_okinawa': '九州·冲绳',
+    'area.sheetTitle': '选择地区',
+
+    'tag.dorm': '有宿舍',
+    'tag.chinese': '中文支持',
+    'tag.noExp': '无经验可',
+    'tag.lowOT': '加班少',
+    'tag.highPay': '高薪',
+    'tag.support2': '支持转2号',
+
+    'ben.social': '日本社保齐全',
+    'ben.flight': '机票补助',
+    'ben.jpLesson': '日语学习支持',
+    'ben.meal': '员工餐补助',
+    'ben.bonus': '有奖金',
+    'ben.dorm': '宿舍·住房支持',
+    'ben.support2': '转2号支持',
+
+    'job.monthly': '月薪',
+    'job.annual': '预计年收入',
+    'job.bonusRaise': '奖金·加薪',
+    'sec.desc': '工作内容',
+    'sec.duties': '主要工作',
+    'sec.salary': '薪资待遇',
+    'sec.time': '工作时间',
+    'sec.holiday': '休息·休假',
+    'sec.location': '工作地点',
+    'sec.benefits': '福利待遇',
+    'sec.requirements': '应聘条件',
+    'sec.company': '企业信息',
+    'job.overtime': '加班',
+    'job.holidays': '休息日',
+    'job.housing': '住房',
+    'job.companyNote': '※ 公司名称和详细地址将在申请后告知',
+    'job.field': '行业',
+    'job.apply': '立即申请',
+    'job.applied': '已申请',
+    'job.wechatBtn': '微信咨询',
+    'job.favAdd': '已加入收藏',
+    'job.favRemove': '已取消收藏',
+    'job.notFound': '未找到该职位',
+    'apply.title': '确认申请该职位吗？',
+    'apply.desc': '申请后，工作人员将在1〜2个工作日内通过微信与您联系。',
+    'apply.confirm': '确认申请',
+    'apply.done.title': '申请成功！',
+    'apply.done.desc': '请等待工作人员的微信联系。您可以在“我的”页面查看申请进度。',
+    'wechat.title': '微信咨询',
+    'wechat.desc': '请扫描二维码，或搜索微信号添加好友。可直接用中文咨询。',
+    'wechat.idLabel': '官方客服微信号',
+    'related.title': '相关职位',
+
+    'favs.title': '我的收藏',
+    'favs.empty.title': '还没有收藏的职位',
+    'favs.empty.sub': '点击职位卡片上的 ♡ 即可收藏',
+    'favs.browse': '去找工作',
+
+    'my.title': '我的',
+    'my.guest': '游客',
+    'my.guest.desc': '免费注册后，即可查看职位、申请工作和收藏。',
+    'my.memberId': '会员ID',
+    'my.qual': '持有资格',
+    'my.profile': '我的资料',
+    'my.applications': '申请记录',
+    'my.appStatus': '工作人员确认中',
+    'my.appEmpty': '还没有申请记录',
+    'my.settings': '设置',
+    'my.lang': '显示语言 / Language',
+    'my.theme': '设计主题',
+    'my.logout': '退出登录',
+    'my.logoutConfirm': '确定退出登录吗？（演示版将恢复为未注册状态）',
+    'my.logoutDone': '已退出登录',
+    'my.jlptNone': '日语：学习中',
+    'my.sswNone': '特定技能：未取得',
+    'my.jlptPrefix': '日语',
+    'my.sswPrefix': '特定技能',
+  },
+};
+
+</script>
+<script>
+/* =========================================================
+ * 樱聘 YingPin — マスタデータ＆求人ダミーデータ
+ * ・FIELDS: 特定技能2号移行対象の11分野（介護は2号対象外のため除外）
+ * ・JOBS  : サンプル求人14件（企業が特定されない情報のみ）
+ * 文言は { ja, zh } の形で保持し、表示時に言語で出し分ける。
+ * ======================================================= */
+
+/* 特定技能2号移行対象 11分野 */
+const FIELDS = [
+  { id: 'building',      emoji: '🧹', color: '#38BDF8', name: { ja: 'ビルクリーニング', zh: '楼宇清洁' } },
+  { id: 'manufacturing', emoji: '🏭', color: '#6366F1', name: { ja: '工業製品製造業', zh: '工业产品制造业' } },
+  { id: 'construction',  emoji: '🏗️', color: '#F59E0B', name: { ja: '建設', zh: '建筑' } },
+  { id: 'shipbuilding',  emoji: '🚢', color: '#0EA5E9', name: { ja: '造船・舶用工業', zh: '造船·船舶工业' } },
+  { id: 'automobile',    emoji: '🔧', color: '#8B5CF6', name: { ja: '自動車整備', zh: '汽车维修' } },
+  { id: 'aviation',      emoji: '✈️', color: '#06B6D4', name: { ja: '航空', zh: '航空' } },
+  { id: 'accommodation', emoji: '🏨', color: '#EC4899', name: { ja: '宿泊', zh: '酒店住宿' } },
+  { id: 'agriculture',   emoji: '🌾', color: '#22C55E', name: { ja: '農業', zh: '农业' } },
+  { id: 'fishery',       emoji: '🐟', color: '#3B82F6', name: { ja: '漁業', zh: '渔业' } },
+  { id: 'food_mfg',      emoji: '🍱', color: '#F97316', name: { ja: '飲食料品製造業', zh: '食品饮料制造' } },
+  { id: 'restaurant',    emoji: '🍜', color: '#EF4444', name: { ja: '外食業', zh: '餐饮业' } },
+];
+
+/* エリア（地方ブロック） */
+const REGIONS = ['hokkaido_tohoku', 'kanto', 'chubu', 'kansai', 'chugoku_shikoku', 'kyushu_okinawa'];
+
+/* こだわりタグ（クイックフィルタに使用） */
+const QUICK_TAGS = ['dorm', 'chinese', 'noExp', 'lowOT'];
+
+/* WeChat公式サポートID（モック用ダミー） */
+const WECHAT_ID = 'yingpin-support';
+
+/* 求人ダミーデータ */
+const JOBS = [
+  {
+    id: 1, field: 'restaurant', isNew: true, region: 'kanto',
+    title: { ja: 'ラーメンチェーンのキッチンスタッフ', zh: '拉面连锁店 后厨员工' },
+    area: { ja: '東京都 新宿区', zh: '东京都 新宿区' },
+    salaryMin: 21, salaryMax: 25, annualMin: 300, annualMax: 360,
+    tags: ['dorm', 'chinese', 'noExp'],
+    benefits: ['social', 'meal', 'jpLesson', 'bonus', 'dorm', 'support2'],
+    chineseSupport: true,
+    hours: { ja: 'シフト制・実働8時間（10:00〜23:00の間）', zh: '排班制·实际工作8小时（10:00〜23:00之间）' },
+    holidays: { ja: '週休2日制・年間休日110日', zh: '每周休2天·全年休110天' },
+    overtime: { ja: '月平均10時間程度', zh: '月均约10小时' },
+    housing: { ja: '借上げ社宅あり（家賃の50%を会社負担）', zh: '公司租赁宿舍（房租公司承担50%）' },
+    requirements: { ja: '特定技能1号（外食業）／日本語N4以上', zh: '特定技能1号（餐饮业）／日语N4以上' },
+    bonus: { ja: '賞与年2回（計2ヶ月分）・昇給年1回', zh: '奖金每年2次（共2个月工资）·每年加薪1次' },
+    company: { ja: '全国200店舗以上を展開する外食チェーン（従業員約1,200名）', zh: '全国拥有200多家门店的连锁餐饮企业（员工约1,200人）' },
+    chineseStaff: { ja: '中国人スタッフ15名在籍', zh: '已有15名中国员工' },
+    desc: {
+      ja: '人気ラーメンチェーンの店舗キッチンで、仕込み・調理・盛り付けを担当します。マニュアルと研修が充実しており、日本での飲食経験がなくても安心してスタートできます。',
+      zh: '在人气拉面连锁店的后厨，负责备料、烹饪和摆盘。操作手册和培训体系完善，即使没有在日本餐饮业的经验也能安心上手。',
+    },
+    duties: {
+      ja: ['仕込み・調理・盛り付け', '食材の発注・在庫管理の補助', 'キッチンの衛生管理'],
+      zh: ['备料·烹饪·摆盘', '协助食材订购·库存管理', '后厨卫生管理'],
+    },
+  },
+  {
+    id: 2, field: 'restaurant', isNew: false, region: 'kansai',
+    title: { ja: '中華レストランのホール・キッチンスタッフ', zh: '中餐厅 前厅·后厨员工' },
+    area: { ja: '大阪府 大阪市（難波）', zh: '大阪府 大阪市（难波）' },
+    salaryMin: 20, salaryMax: 24, annualMin: 280, annualMax: 340,
+    tags: ['dorm', 'chinese'],
+    benefits: ['social', 'meal', 'bonus', 'dorm'],
+    chineseSupport: true,
+    hours: { ja: 'シフト制・実働8時間（11:00〜23:00の間）', zh: '排班制·实际工作8小时（11:00〜23:00之间）' },
+    holidays: { ja: '週休2日制（シフト）・年間休日105日', zh: '每周休2天（排班制）·全年休105天' },
+    overtime: { ja: '月平均15時間程度', zh: '月均约15小时' },
+    housing: { ja: '寮あり（個室・家賃2万円）', zh: '有宿舍（单人间·月租2万日元）' },
+    requirements: { ja: '特定技能1号（外食業）／日本語N4以上（ホールはN3歓迎）', zh: '特定技能1号（餐饮业）／日语N4以上（前厅欢迎N3）' },
+    bonus: { ja: '賞与年1回・昇給あり', zh: '奖金每年1次·有加薪' },
+    company: { ja: '関西で30店舗を展開する中華料理チェーン（従業員約400名）', zh: '在关西拥有30家门店的中餐连锁企业（员工约400人）' },
+    chineseStaff: { ja: '中国人スタッフ28名在籍・店長登用実績あり', zh: '已有28名中国员工·有晋升店长的先例' },
+    desc: {
+      ja: '本格中華レストランでホールまたはキッチンを担当します。中国語がそのまま活かせる職場で、同郷の仲間も多く、日本が初めてでも働きやすい環境です。',
+      zh: '在正宗中餐厅担任前厅或后厨工作。可以直接发挥中文优势，同乡同事多，即使初到日本也能轻松适应。',
+    },
+    duties: {
+      ja: ['ホール接客・オーダー対応', '調理・調理補助', '開店・閉店作業'],
+      zh: ['前厅接待·点单服务', '烹饪·烹饪辅助', '开店·闭店作业'],
+    },
+  },
+  {
+    id: 3, field: 'food_mfg', isNew: false, region: 'kanto',
+    title: { ja: 'お弁当・お惣菜工場の製造スタッフ', zh: '便当·熟食工厂 生产员工' },
+    area: { ja: '埼玉県 川越市', zh: '埼玉县 川越市' },
+    salaryMin: 19, salaryMax: 23, annualMin: 260, annualMax: 320,
+    tags: ['dorm', 'noExp', 'lowOT', 'chinese'],
+    benefits: ['social', 'meal', 'dorm', 'jpLesson', 'bonus'],
+    chineseSupport: true,
+    hours: { ja: '2交替制（6:00〜15:00／13:00〜22:00）', zh: '两班倒（6:00〜15:00／13:00〜22:00）' },
+    holidays: { ja: '週休2日（工場カレンダー）・年間休日115日', zh: '每周休2天（按工厂日历）·全年休115天' },
+    overtime: { ja: '月平均10時間程度', zh: '月均约10小时' },
+    housing: { ja: '寮あり（家具家電付き・家賃1.5万円）', zh: '有宿舍（带家具家电·月租1.5万日元）' },
+    requirements: { ja: '特定技能1号（飲食料品製造業）／日本語N5以上', zh: '特定技能1号（食品饮料制造）／日语N5以上' },
+    bonus: { ja: '賞与年2回・昇給年1回', zh: '奖金每年2次·每年加薪1次' },
+    company: { ja: 'コンビニ向け食品を製造する大手食品メーカーグループ（従業員約800名）', zh: '为便利店生产食品的大型食品集团（员工约800人）' },
+    chineseStaff: { ja: '中国人スタッフ35名在籍', zh: '已有35名中国员工' },
+    desc: {
+      ja: '有名コンビニのお弁当・お惣菜を作る清潔な工場でのお仕事です。ライン作業が中心で、日本語がまだ少なくても始めやすく、先輩の中国人スタッフも多数活躍しています。',
+      zh: '在为知名便利店生产便当和熟食的洁净工厂工作。以流水线作业为主，日语基础不多也容易上手，有很多中国前辈员工。',
+    },
+    duties: {
+      ja: ['食材の計量・盛り付け', '製造ラインでの調理補助', '検品・梱包'],
+      zh: ['食材称量·摆盘', '流水线烹饪辅助', '检验·包装'],
+    },
+  },
+  {
+    id: 4, field: 'food_mfg', isNew: true, region: 'hokkaido_tohoku',
+    title: { ja: '乳製品工場の製造オペレーター', zh: '乳制品工厂 生产操作员' },
+    area: { ja: '北海道 帯広市', zh: '北海道 带广市' },
+    salaryMin: 18, salaryMax: 22, annualMin: 250, annualMax: 310,
+    tags: ['dorm', 'lowOT', 'noExp'],
+    benefits: ['social', 'dorm', 'flight', 'bonus'],
+    chineseSupport: false,
+    hours: { ja: '日勤中心（8:00〜17:00）', zh: '以白班为主（8:00〜17:00）' },
+    holidays: { ja: '週休2日・年間休日120日', zh: '每周休2天·全年休120天' },
+    overtime: { ja: '月平均5時間程度', zh: '月均约5小时' },
+    housing: { ja: '寮あり（家賃1万円・水道光熱費込み）', zh: '有宿舍（月租1万日元·含水电费）' },
+    requirements: { ja: '特定技能1号（飲食料品製造業）／日本語N5以上', zh: '特定技能1号（食品饮料制造）／日语N5以上' },
+    bonus: { ja: '賞与年2回', zh: '奖金每年2次' },
+    company: { ja: '北海道の乳製品メーカー（従業員約300名）', zh: '北海道的乳制品企业（员工约300人）' },
+    chineseStaff: null,
+    desc: {
+      ja: '北海道の大自然の中で、チーズ・バターなどの乳製品づくりを担当します。残業が少なく、生活費を抑えながら落ち着いて働ける環境です。',
+      zh: '在北海道的大自然中，负责奶酪、黄油等乳制品的生产。加班少，生活成本低，工作环境安稳。',
+    },
+    duties: {
+      ja: ['製造機械のオペレーション', '原料の投入・充填', '品質チェック'],
+      zh: ['生产设备操作', '原料投放·灌装', '质量检查'],
+    },
+  },
+  {
+    id: 5, field: 'accommodation', isNew: true, region: 'kansai',
+    title: { ja: '温泉旅館のフロント・接客スタッフ', zh: '温泉旅馆 前台·接待员工' },
+    area: { ja: '京都府 京都市', zh: '京都府 京都市' },
+    salaryMin: 20, salaryMax: 26, annualMin: 290, annualMax: 370,
+    tags: ['dorm', 'chinese', 'highPay'],
+    benefits: ['social', 'meal', 'dorm', 'jpLesson', 'bonus', 'support2'],
+    chineseSupport: true,
+    hours: { ja: 'シフト制（早番7:00〜16:00／遅番13:00〜22:00）', zh: '排班制（早班7:00〜16:00／晚班13:00〜22:00）' },
+    holidays: { ja: '週休2日・年間休日107日', zh: '每周休2天·全年休107天' },
+    overtime: { ja: '月平均12時間程度', zh: '月均约12小时' },
+    housing: { ja: '寮あり（旅館まで徒歩5分・家賃1万円）', zh: '有宿舍（步行5分钟到旅馆·月租1万日元）' },
+    requirements: { ja: '特定技能1号（宿泊）／日本語N3以上', zh: '特定技能1号（酒店住宿）／日语N3以上' },
+    bonus: { ja: '賞与年2回（計2.5ヶ月分）', zh: '奖金每年2次（共2.5个月工资）' },
+    company: { ja: '創業100年の老舗温泉旅館（客室50室・従業員約120名）', zh: '拥有100年历史的老字号温泉旅馆（50间客房·员工约120人）' },
+    chineseStaff: { ja: '中国人スタッフ6名在籍・中国語対応手当あり', zh: '已有6名中国员工·有中文接待津贴' },
+    desc: {
+      ja: '京都の老舗温泉旅館で、中国からのお客様を中心とした接客・フロント業務を担当します。あなたの中国語がそのまま強みになり、手当にも反映されるお仕事です。',
+      zh: '在京都老字号温泉旅馆，主要负责接待中国客人和前台工作。您的中文能力就是最大的优势，还能获得相应津贴。',
+    },
+    duties: {
+      ja: ['チェックイン・チェックアウト対応', '中国語圏のお客様の案内・通訳', '館内の接客サービス'],
+      zh: ['办理入住·退房手续', '接待中文圈客人·翻译', '馆内接待服务'],
+    },
+  },
+  {
+    id: 6, field: 'accommodation', isNew: false, region: 'kyushu_okinawa',
+    title: { ja: 'リゾートホテルのレストラン・客室スタッフ', zh: '度假酒店 餐厅·客房员工' },
+    area: { ja: '沖縄県 那覇市', zh: '冲绳县 那霸市' },
+    salaryMin: 19, salaryMax: 24, annualMin: 270, annualMax: 330,
+    tags: ['dorm', 'chinese', 'noExp'],
+    benefits: ['social', 'meal', 'dorm', 'bonus'],
+    chineseSupport: true,
+    hours: { ja: 'シフト制・実働8時間', zh: '排班制·实际工作8小时' },
+    holidays: { ja: '週休2日・年間休日110日', zh: '每周休2天·全年休110天' },
+    overtime: { ja: '月平均8時間程度', zh: '月均约8小时' },
+    housing: { ja: '社員寮あり（家賃1.5万円）', zh: '有员工宿舍（月租1.5万日元）' },
+    requirements: { ja: '特定技能1号（宿泊）／日本語N4以上', zh: '特定技能1号（酒店住宿）／日语N4以上' },
+    bonus: { ja: '賞与年2回', zh: '奖金每年2次' },
+    company: { ja: '沖縄県内で3施設を運営するリゾートホテルグループ（従業員約500名）', zh: '在冲绳运营3家度假酒店的集团（员工约500人）' },
+    chineseStaff: { ja: '中国人スタッフ12名在籍', zh: '已有12名中国员工' },
+    desc: {
+      ja: '沖縄の人気リゾートホテルで、レストランサービスや客室業務を担当します。海外からのお客様が多く、語学力を活かして活躍できます。',
+      zh: '在冲绳人气度假酒店，负责餐厅服务和客房工作。外国客人多，可以充分发挥语言能力。',
+    },
+    duties: {
+      ja: ['朝食・夕食レストランのサービス', '客室清掃の管理・チェック', 'お客様の案内対応'],
+      zh: ['早餐·晚餐餐厅服务', '客房清扫管理·检查', '为客人提供向导服务'],
+    },
+  },
+  {
+    id: 7, field: 'construction', isNew: false, region: 'kanto',
+    title: { ja: '建設現場の型枠・鉄筋スタッフ', zh: '建筑工地 模板·钢筋工' },
+    area: { ja: '神奈川県 横浜市', zh: '神奈川县 横滨市' },
+    salaryMin: 24, salaryMax: 30, annualMin: 340, annualMax: 430,
+    tags: ['dorm', 'highPay', 'support2', 'chinese'],
+    benefits: ['social', 'dorm', 'bonus', 'support2', 'jpLesson'],
+    chineseSupport: true,
+    hours: { ja: '8:00〜17:00（実働8時間）', zh: '8:00〜17:00（实际工作8小时）' },
+    holidays: { ja: '週休2日（土日）・年間休日110日', zh: '每周休2天（周六日）·全年休110天' },
+    overtime: { ja: '月平均20時間程度（手当全額支給）', zh: '月均约20小时（加班费全额支付）' },
+    housing: { ja: '寮あり（個室・家賃無料）', zh: '有宿舍（单人间·免房租）' },
+    requirements: { ja: '特定技能1号（建設）／日本語N4以上／経験1年以上歓迎', zh: '特定技能1号（建筑）／日语N4以上／欢迎1年以上经验者' },
+    bonus: { ja: '賞与年2回・資格取得で手当あり', zh: '奖金每年2次·取得资格证有津贴' },
+    company: { ja: '首都圏のマンション・商業施設を手がける建設会社（従業員約250名）', zh: '承建首都圈公寓·商业设施的建筑公司（员工约250人）' },
+    chineseStaff: { ja: '中国人スタッフ8名在籍', zh: '已有8名中国员工' },
+    desc: {
+      ja: 'マンションや商業施設の建設現場で、型枠・鉄筋工事を担当します。資格取得支援があり、特定技能2号への移行実績も多数。頑張った分だけ高収入を目指せます。',
+      zh: '在公寓和商业设施的建筑工地，负责模板和钢筋施工。公司支持考取资格证，有多名前辈成功转为特定技能2号。多劳多得，可以争取高收入。',
+    },
+    duties: {
+      ja: ['型枠の組立・解体', '鉄筋の加工・組立', '現場の安全確認・整理整頓'],
+      zh: ['模板的组装·拆除', '钢筋的加工·绑扎', '工地安全确认·整理整顿'],
+    },
+  },
+  {
+    id: 8, field: 'manufacturing', isNew: true, region: 'chubu',
+    title: { ja: '自動車部品の機械加工・検査スタッフ', zh: '汽车零部件 机械加工·检验员工' },
+    area: { ja: '愛知県 岡崎市', zh: '爱知县 冈崎市' },
+    salaryMin: 23, salaryMax: 28, annualMin: 330, annualMax: 400,
+    tags: ['dorm', 'highPay', 'chinese', 'support2'],
+    benefits: ['social', 'dorm', 'bonus', 'flight', 'support2'],
+    chineseSupport: true,
+    hours: { ja: '2交替制（8:00〜17:00／20:00〜翌5:00）', zh: '两班倒（8:00〜17:00／20:00〜次日5:00）' },
+    holidays: { ja: '週休2日（土日）・年間休日121日', zh: '每周休2天（周六日）·全年休121天' },
+    overtime: { ja: '月平均15時間程度（手当全額支給）', zh: '月均约15小时（加班费全额支付）' },
+    housing: { ja: '寮あり（1R・家賃1万円）', zh: '有宿舍（单间·月租1万日元）' },
+    requirements: { ja: '特定技能1号（工業製品製造業）／日本語N4以上', zh: '特定技能1号（工业产品制造业）／日语N4以上' },
+    bonus: { ja: '賞与年2回（計4ヶ月分）・昇給年1回', zh: '奖金每年2次（共4个月工资）·每年加薪1次' },
+    company: { ja: '大手自動車メーカー系列の部品メーカー（従業員約1,500名）', zh: '大型汽车厂商旗下的零部件企业（员工约1,500人）' },
+    chineseStaff: { ja: '中国人スタッフ40名在籍・通訳スタッフ常駐', zh: '已有40名中国员工·常驻翻译人员' },
+    desc: {
+      ja: '大手メーカー系列の工場で、自動車部品の機械オペレーションと検査を担当します。賞与4ヶ月分の手厚い待遇で、長く安定して働けます。',
+      zh: '在大型厂商旗下的工厂，负责汽车零部件的机械操作和检验。年奖金4个月工资的优厚待遇，工作长期稳定。',
+    },
+    duties: {
+      ja: ['加工機械のオペレーション', '部品の寸法検査・外観検査', '設備の簡単なメンテナンス'],
+      zh: ['加工设备操作', '零部件尺寸检验·外观检验', '设备的简单维护'],
+    },
+  },
+  {
+    id: 9, field: 'shipbuilding', isNew: false, region: 'chugoku_shikoku',
+    title: { ja: '造船所の溶接スタッフ', zh: '造船厂 焊接工' },
+    area: { ja: '広島県 尾道市', zh: '广岛县 尾道市' },
+    salaryMin: 24, salaryMax: 29, annualMin: 350, annualMax: 420,
+    tags: ['dorm', 'highPay', 'support2'],
+    benefits: ['social', 'dorm', 'bonus', 'support2', 'meal'],
+    chineseSupport: true,
+    hours: { ja: '8:00〜17:00（実働8時間）', zh: '8:00〜17:00（实际工作8小时）' },
+    holidays: { ja: '週休2日・年間休日112日', zh: '每周休2天·全年休112天' },
+    overtime: { ja: '月平均20時間程度', zh: '月均约20小时' },
+    housing: { ja: '寮あり（家賃5千円・社員食堂あり）', zh: '有宿舍（月租5千日元·有员工食堂）' },
+    requirements: { ja: '特定技能1号（造船・舶用工業）／溶接経験1年以上／日本語N4以上', zh: '特定技能1号（造船·船舶工业）／1年以上焊接经验／日语N4以上' },
+    bonus: { ja: '賞与年2回・技能手当あり', zh: '奖金每年2次·有技能津贴' },
+    company: { ja: '瀬戸内海に面した中堅造船所（従業員約600名）', zh: '面向濑户内海的中型造船厂（员工约600人）' },
+    chineseStaff: { ja: '中国人スタッフ20名在籍', zh: '已有20名中国员工' },
+    desc: {
+      ja: '大型船舶の建造現場で溶接を担当します。技能がそのまま給与に反映される評価制度があり、特定技能2号へ移行した先輩も多数活躍中です。',
+      zh: '在大型船舶的建造现场负责焊接工作。技能水平直接反映在工资上，已有多名前辈成功转为特定技能2号。',
+    },
+    duties: {
+      ja: ['船体ブロックの溶接', '図面の確認・仮組み', '品質検査の補助'],
+      zh: ['船体分段焊接', '图纸确认·预组装', '协助质量检验'],
+    },
+  },
+  {
+    id: 10, field: 'automobile', isNew: false, region: 'chubu',
+    title: { ja: '自動車整備士（ディーラー整備工場）', zh: '汽车维修技师（4S店维修工厂）' },
+    area: { ja: '静岡県 浜松市', zh: '静冈县 滨松市' },
+    salaryMin: 21, salaryMax: 26, annualMin: 300, annualMax: 370,
+    tags: ['support2', 'lowOT'],
+    benefits: ['social', 'bonus', 'jpLesson', 'support2'],
+    chineseSupport: false,
+    hours: { ja: '9:30〜18:30（実働8時間）', zh: '9:30〜18:30（实际工作8小时）' },
+    holidays: { ja: '週休2日（火曜＋シフト）・年間休日105日', zh: '每周休2天（周二＋排班）·全年休105天' },
+    overtime: { ja: '月平均15時間程度', zh: '月均约15小时' },
+    housing: { ja: '家賃補助あり（月2万円）', zh: '有房租补贴（每月2万日元）' },
+    requirements: { ja: '特定技能1号（自動車整備）／整備経験または関連資格／日本語N4以上', zh: '特定技能1号（汽车维修）／维修经验或相关资格证／日语N4以上' },
+    bonus: { ja: '賞与年2回・資格手当あり', zh: '奖金每年2次·有资格证津贴' },
+    company: { ja: '国産車ディーラーの整備工場（従業員約150名）', zh: '日系汽车4S店的维修工厂（员工约150人）' },
+    chineseStaff: null,
+    desc: {
+      ja: '正規ディーラーの整備工場で、点検・整備を担当します。最新設備と丁寧な研修があり、国家資格（自動車整備士）の取得もサポートします。',
+      zh: '在正规4S店的维修工厂，负责车辆检查和保养。设备先进、培训细致，还支持考取日本国家资格（汽车维修技师）。',
+    },
+    duties: {
+      ja: ['定期点検・車検整備', 'エンジンオイル・タイヤ交換', '故障診断の補助'],
+      zh: ['定期检查·车检保养', '更换机油·轮胎', '协助故障诊断'],
+    },
+  },
+  {
+    id: 11, field: 'aviation', isNew: false, region: 'kanto',
+    title: { ja: '空港グランドハンドリングスタッフ', zh: '机场地勤员工（行李·货物）' },
+    area: { ja: '千葉県 成田市', zh: '千叶县 成田市' },
+    salaryMin: 20, salaryMax: 25, annualMin: 290, annualMax: 350,
+    tags: ['dorm', 'noExp', 'chinese'],
+    benefits: ['social', 'dorm', 'bonus', 'flight'],
+    chineseSupport: true,
+    hours: { ja: 'シフト制（早朝・日勤・夜勤）', zh: '排班制（早班·白班·夜班）' },
+    holidays: { ja: '週休2日・年間休日115日', zh: '每周休2天·全年休115天' },
+    overtime: { ja: '月平均10時間程度', zh: '月均约10小时' },
+    housing: { ja: '寮あり（家賃2万円・空港まで送迎あり）', zh: '有宿舍（月租2万日元·有班车接送）' },
+    requirements: { ja: '特定技能1号（航空）／日本語N4以上／普通運転免許歓迎', zh: '特定技能1号（航空）／日语N4以上／欢迎持有驾照者' },
+    bonus: { ja: '賞与年2回', zh: '奖金每年2次' },
+    company: { ja: '国際空港で航空機の地上支援を行う会社（従業員約900名）', zh: '在国际机场从事航空器地面保障的公司（员工约900人）' },
+    chineseStaff: { ja: '中国人スタッフ10名在籍', zh: '已有10名中国员工' },
+    desc: {
+      ja: '国際空港で、航空機の誘導や手荷物・貨物の搭載を担当します。世界とつながる空港で働ける、やりがいのあるお仕事です。',
+      zh: '在国际机场，负责航空器引导和行李·货物装卸。在连接世界的机场工作，很有成就感。',
+    },
+    duties: {
+      ja: ['手荷物・貨物の仕分け・搭載', '航空機の誘導・けん引の補助', 'カート・車両の運転'],
+      zh: ['行李·货物的分拣·装卸', '协助航空器引导·牵引', '驾驶行李车·作业车辆'],
+    },
+  },
+  {
+    id: 12, field: 'agriculture', isNew: false, region: 'kanto',
+    title: { ja: 'トマト農園スタッフ（施設園芸）', zh: '番茄农场员工（温室栽培）' },
+    area: { ja: '茨城県 つくば市', zh: '茨城县 筑波市' },
+    salaryMin: 18, salaryMax: 22, annualMin: 250, annualMax: 300,
+    tags: ['dorm', 'noExp', 'lowOT'],
+    benefits: ['social', 'dorm', 'meal'],
+    chineseSupport: true,
+    hours: { ja: '8:00〜17:00（季節により変動あり）', zh: '8:00〜17:00（随季节有变动）' },
+    holidays: { ja: '週休2日（シフト）・年間休日100日', zh: '每周休2天（排班制）·全年休100天' },
+    overtime: { ja: '月平均5時間程度', zh: '月均约5小时' },
+    housing: { ja: '寮あり（一軒家シェア・家賃1万円）', zh: '有宿舍（合租独栋·月租1万日元）' },
+    requirements: { ja: '特定技能1号（農業）／日本語N5以上', zh: '特定技能1号（农业）／日语N5以上' },
+    bonus: { ja: '昇給あり・皆勤手当あり', zh: '有加薪·有全勤奖' },
+    company: { ja: '最新設備のトマト農園を運営する農業法人（従業員約80名）', zh: '运营现代化番茄农场的农业法人（员工约80人）' },
+    chineseStaff: { ja: '中国人スタッフ5名在籍', zh: '已有5名中国员工' },
+    desc: {
+      ja: '最新の温室でトマトの栽培・収穫を担当します。未経験でも丁寧に教えてもらえる、アットホームな職場です。',
+      zh: '在现代化温室负责番茄的栽培和采摘。没有经验也会有人耐心指导，工作氛围温馨。',
+    },
+    duties: {
+      ja: ['収穫・選別・箱詰め', '苗の管理・水やり', '出荷準備'],
+      zh: ['采摘·分拣·装箱', '苗木管理·浇水', '发货准备'],
+    },
+  },
+  {
+    id: 13, field: 'fishery', isNew: false, region: 'kyushu_okinawa',
+    title: { ja: '海上養殖スタッフ（ブリ・マグロ）', zh: '海上养殖员工（鰤鱼·金枪鱼）' },
+    area: { ja: '長崎県 対馬市', zh: '长崎县 对马市' },
+    salaryMin: 19, salaryMax: 24, annualMin: 280, annualMax: 340,
+    tags: ['dorm', 'noExp'],
+    benefits: ['social', 'dorm', 'meal', 'bonus'],
+    chineseSupport: false,
+    hours: { ja: '6:00〜15:00（季節変動あり）', zh: '6:00〜15:00（随季节有变动）' },
+    holidays: { ja: '週休2日・年間休日105日', zh: '每周休2天·全年休105天' },
+    overtime: { ja: '月平均8時間程度', zh: '月均约8小时' },
+    housing: { ja: '寮あり（家賃無料・食事付き）', zh: '有宿舍（免房租·包餐）' },
+    requirements: { ja: '特定技能1号（漁業）／日本語N5以上／船酔いしにくい方', zh: '特定技能1号（渔业）／日语N5以上／不易晕船者' },
+    bonus: { ja: '賞与年1回・水揚げ手当あり', zh: '奖金每年1次·有渔获津贴' },
+    company: { ja: '対馬近海で養殖業を営む水産会社（従業員約60名）', zh: '在对马近海从事养殖业的水产公司（员工约60人）' },
+    chineseStaff: null,
+    desc: {
+      ja: '美しい海でブリ・マグロの養殖を担当します。寮費・食費の負担がほとんどなく、しっかり貯金できる環境です。',
+      zh: '在美丽的大海上负责鰤鱼和金枪鱼的养殖。几乎不用负担房租和伙食费，很适合攒钱。',
+    },
+    duties: {
+      ja: ['餌やり・生け簀（網）の管理', '魚の健康チェック', '水揚げ・出荷作業'],
+      zh: ['投喂饲料·渔网管理', '鱼类健康检查', '捕捞·发货作业'],
+    },
+  },
+  {
+    id: 14, field: 'building', isNew: false, region: 'kanto',
+    title: { ja: 'オフィスビルの清掃スタッフ', zh: '写字楼保洁员工' },
+    area: { ja: '東京都 港区', zh: '东京都 港区' },
+    salaryMin: 19, salaryMax: 22, annualMin: 260, annualMax: 300,
+    tags: ['noExp', 'lowOT', 'chinese'],
+    benefits: ['social', 'bonus', 'jpLesson'],
+    chineseSupport: true,
+    hours: { ja: '7:00〜16:00（実働8時間）', zh: '7:00〜16:00（实际工作8小时）' },
+    holidays: { ja: '週休2日（土日中心）・年間休日120日', zh: '每周休2天（以周六日为主）·全年休120天' },
+    overtime: { ja: 'ほぼなし（月5時間以下）', zh: '基本没有（每月5小时以下）' },
+    housing: { ja: '家賃補助あり（月1.5万円）', zh: '有房租补贴（每月1.5万日元）' },
+    requirements: { ja: '特定技能1号（ビルクリーニング）／日本語N5以上', zh: '特定技能1号（楼宇清洁）／日语N5以上' },
+    bonus: { ja: '賞与年2回・昇給年1回', zh: '奖金每年2次·每年加薪1次' },
+    company: { ja: '都内のオフィスビルを管理する清掃会社（従業員約350名）', zh: '管理东京市内写字楼的保洁公司（员工约350人）' },
+    chineseStaff: { ja: '中国人スタッフ18名在籍', zh: '已有18名中国员工' },
+    desc: {
+      ja: '都心のきれいなオフィスビルで、日常清掃を担当します。残業がほとんどなく、生活リズムを保ちやすいお仕事です。',
+      zh: '在市中心整洁的写字楼负责日常保洁。几乎不加班，容易保持规律的生活节奏。',
+    },
+    duties: {
+      ja: ['共用部の清掃（床・トイレ等）', 'ゴミの回収・分別', '清掃用具の管理'],
+      zh: ['公共区域保洁（地面·卫生间等）', '垃圾回收·分类', '保洁用具管理'],
+    },
+  },
+];
+
+</script>
+<script>
+/* =========================================================
+ * 樱聘 YingPin — 共通ロジック
+ * テーマ切替（小紅書風レッド / トラストブルー）
+ * 言語切替（日本語 / 简体中文）
+ * 登録状態のシミュレーション（localStorage）
+ * 共通UI（タブバー・デモバー・モーダル・トースト・求人カード）
+ * ======================================================= */
+
+const LS = {
+  theme: 'yp_theme',
+  lang: 'yp_lang',
+  registered: 'yp_registered',
+  profile: 'yp_profile',
+  favs: 'yp_favs',
+  apps: 'yp_apps',
+};
+
+/* ---------- 基本状態 ---------- */
+function getTheme() { return localStorage.getItem(LS.theme) === 'red' ? 'red' : 'blue'; }
+function getLang() { return localStorage.getItem(LS.lang) === 'zh' ? 'zh' : 'ja'; }
+function isRegistered() { return localStorage.getItem(LS.registered) === '1'; }
+
+function setTheme(theme) {
+  localStorage.setItem(LS.theme, theme);
+  document.documentElement.classList.add('theme-anim');
+  applyPrefs();
+  setTimeout(() => document.documentElement.classList.remove('theme-anim'), 400);
+}
+
+function setLang(lang) {
+  localStorage.setItem(LS.lang, lang);
+  applyPrefs();
+  applyI18n();
+  if (typeof window.onLangChange === 'function') window.onLangChange();
+}
+
+function setRegistered(v) {
+  if (v) localStorage.setItem(LS.registered, '1');
+  else localStorage.removeItem(LS.registered);
+}
+
+function getProfile() {
+  try { return JSON.parse(localStorage.getItem(LS.profile) || 'null'); } catch (e) { return null; }
+}
+function setProfile(p) { localStorage.setItem(LS.profile, JSON.stringify(p)); }
+
+function getFavs() {
+  try { return JSON.parse(localStorage.getItem(LS.favs) || '[]'); } catch (e) { return []; }
+}
+function toggleFav(id) {
+  const favs = getFavs();
+  const i = favs.indexOf(id);
+  if (i >= 0) favs.splice(i, 1); else favs.push(id);
+  localStorage.setItem(LS.favs, JSON.stringify(favs));
+  return favs.includes(id);
+}
+
+function getApps() {
+  try { return JSON.parse(localStorage.getItem(LS.apps) || '[]'); } catch (e) { return []; }
+}
+function addApp(id) {
+  const apps = getApps();
+  if (!apps.some(a => a.id === id)) {
+    apps.unshift({ id, date: new Date().toISOString().slice(0, 10) });
+    localStorage.setItem(LS.apps, JSON.stringify(apps));
+  }
+}
+function hasApplied(id) { return getApps().some(a => a.id === id); }
+
+function genMemberId() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `YP-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+/* ログインモック用のデモプロフィール */
+function demoProfile() {
+  return {
+    lastName: '王', firstName: '小美', pinyin: 'WANG XIAOMEI',
+    birth: '1998-05-12', gender: 'female', nationality: 'cn',
+    residence: 'jp', address: '東京都新宿区西新宿2-8-1',
+    phoneCode: '+81', phone: '90-1234-5678', wechat: 'xiaomei_2026', email: '',
+    jlpt: 'N3', ssw: ['restaurant'], otherQual: '普通運転免許',
+    memberId: genMemberId(),
+  };
+}
+
+/* ---------- i18n ---------- */
+function t(key, vars) {
+  const lang = getLang();
+  let s = (I18N[lang] && I18N[lang][key]) ?? I18N.ja[key] ?? key;
+  if (vars) for (const k of Object.keys(vars)) s = s.replaceAll(`{${k}}`, vars[k]);
+  return s;
+}
+function pick(obj) {
+  if (obj == null) return '';
+  const lang = getLang();
+  return obj[lang] ?? obj.ja ?? '';
+}
+
+function applyPrefs() {
+  const html = document.documentElement;
+  html.dataset.theme = getTheme();
+  html.dataset.lang = getLang();
+  html.lang = getLang() === 'zh' ? 'zh-CN' : 'ja';
+}
+
+function applyI18n(root) {
+  const scope = root || document;
+  scope.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  scope.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+}
+
+/* ---------- ユーティリティ ---------- */
+const qs = (sel, root) => (root || document).querySelector(sel);
+const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function fieldOf(id) { return FIELDS.find(f => f.id === id); }
+function jobOf(id) { return JOBS.find(j => j.id === Number(id)); }
+
+function salaryText(job) {
+  return getLang() === 'zh'
+    ? `月薪 ${job.salaryMin}〜${job.salaryMax}万日元`
+    : `月給 ${job.salaryMin}〜${job.salaryMax}万円`;
+}
+function salaryHTML(job) {
+  const unit = getLang() === 'zh' ? '万日元' : '万円';
+  const label = getLang() === 'zh' ? '月薪' : '月給';
+  return `<span class="salary"><span class="salary-label">${label}</span><b>${job.salaryMin}〜${job.salaryMax}</b><span class="salary-unit">${unit}</span></span>`;
+}
+function annualText(job) {
+  return getLang() === 'zh'
+    ? `${job.annualMin}〜${job.annualMax}万日元`
+    : `${job.annualMin}〜${job.annualMax}万円`;
+}
+
+/* ---------- SVGアイコン ---------- */
+const ICONS = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.5-4.7-10-9.3C.6 8.6 2.6 4.5 6.7 4.5c2.2 0 3.9 1.2 5.3 3 1.4-1.8 3.1-3 5.3-3 4.1 0 6.1 4.1 4.7 7.2C19.5 16.3 12 21 12 21Z"/></svg>',
+  heartFill: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.7-10-9.3C.6 8.6 2.6 4.5 6.7 4.5c2.2 0 3.9 1.2 5.3 3 1.4-1.8 3.1-3 5.3-3 4.1 0 6.1 4.1 4.7 7.2C19.5 16.3 12 21 12 21Z"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5.5 8-5.5s6.5 2 8 5.5"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>',
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4 5.8 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.8-4-9s1.2-6.4 4-9Z"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.5-2.4 1a7.6 7.6 0 0 0-2-1.2L14 3h-4l-.5 2.6a7.6 7.6 0 0 0-2 1.2l-2.4-1-2 3.5 2 1.5a7 7 0 0 0 0 2.4l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 0 0 2 1.2L10 21h4l.5-2.6a7.6 7.6 0 0 0 2-1.2l2.4 1 2-3.5-2-1.5c.06-.4.1-.8.1-1.2Z"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H4l2-3.2A8 8 0 1 1 21 12Z"/><circle cx="9" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="17" cy="12" r="1" fill="currentColor" stroke="none"/></svg>',
+  briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/></svg>',
+  building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/></svg>',
+  yen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l6 8 6-8M12 12v8M8 14h8M8 17.5h8"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>',
+  sparkle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 5.9L20 10l-5.9 2.1L12 18l-2.1-5.9L4 10l5.9-2.1L12 2Z"/><path d="M19 15l1 2.8L22.8 19 20 20l-1 2.8L18 20l-2.8-1 2.8-1.2L19 15Z" opacity=".7"/></svg>',
+};
+function icon(name, cls) { return `<span class="icon ${cls || ''}">${ICONS[name] || ''}</span>`; }
+
+/* ---------- トースト ---------- */
+let toastTimer = null;
+function showToast(msg, iconName) {
+  let box = qs('#yp-toast');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'yp-toast';
+    document.body.appendChild(box);
+  }
+  box.innerHTML = `${iconName ? icon(iconName) : ''}<span>${esc(msg)}</span>`;
+  box.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => box.classList.remove('show'), 2200);
+}
+
+/* ---------- モーダル / ボトムシート ---------- */
+function openOverlay(inner, kind) {
+  const wrap = document.createElement('div');
+  wrap.className = `overlay ${kind}`;
+  wrap.innerHTML = `<div class="overlay-backdrop"></div>${inner}`;
+  document.body.appendChild(wrap);
+  document.body.classList.add('no-scroll');
+  requestAnimationFrame(() => wrap.classList.add('open'));
+  const close = () => {
+    wrap.classList.remove('open');
+    document.body.classList.remove('no-scroll');
+    setTimeout(() => wrap.remove(), 280);
+  };
+  qs('.overlay-backdrop', wrap).addEventListener('click', close);
+  qsa('[data-close]', wrap).forEach(b => b.addEventListener('click', close));
+  return { el: wrap, close };
+}
+
+function openDialog(html) { return openOverlay(`<div class="dialog">${html}</div>`, 'is-dialog'); }
+function openSheet(html, titleKey) {
+  return openOverlay(
+    `<div class="sheet">
+       <div class="sheet-handle"></div>
+       ${titleKey ? `<div class="sheet-title">${t(titleKey)}</div>` : ''}
+       <div class="sheet-body">${html}</div>
+     </div>`, 'is-sheet');
+}
+
+/* 未登録ユーザー向け：登録誘導モーダル */
+function openRegisterGate() {
+  openDialog(`
+    <div class="gate">
+      <div class="gate-icon">${icon('lock')}</div>
+      <h3>${t('lock.title')}</h3>
+      <p>${t('lock.desc')}</p>
+      <a class="btn btn-primary btn-block" href="#register">${t('lock.register')}</a>
+      <a class="btn btn-ghost btn-block" href="#login">${t('lock.login')}</a>
+    </div>`);
+}
+
+/* ---------- デモバー（モック確認用） ---------- */
+function renderDemoBar() {
+  const handle = document.createElement('button');
+  handle.id = 'demo-handle';
+  handle.type = 'button';
+  handle.setAttribute('aria-label', t('demo.open'));
+  handle.innerHTML = icon('settings');
+  handle.addEventListener('click', openDemoSheet);
+  document.body.appendChild(handle);
+}
+
+function openDemoSheet() {
+  const theme = getTheme();
+  const lang = getLang();
+  const { el, close } = openSheet(`
+    <p class="demo-note">${t('demo.note')}</p>
+    <div class="demo-group">
+      <div class="demo-label">${t('demo.theme')}</div>
+      <div class="seg" id="demo-theme">
+        <button type="button" data-v="blue" class="${theme === 'blue' ? 'on' : ''}">🌊 ${t('demo.theme.blue')}</button>
+        <button type="button" data-v="red" class="${theme === 'red' ? 'on' : ''}">🌸 ${t('demo.theme.red')}</button>
+      </div>
+    </div>
+    <div class="demo-group">
+      <div class="demo-label">${t('demo.lang')}</div>
+      <div class="seg" id="demo-lang">
+        <button type="button" data-v="ja" class="${lang === 'ja' ? 'on' : ''}">日本語</button>
+        <button type="button" data-v="zh" class="${lang === 'zh' ? 'on' : ''}">简体中文</button>
+      </div>
+    </div>
+    <button type="button" class="btn btn-outline btn-block" id="demo-reset">${t('demo.reset')}</button>
+  `, 'demo.title');
+
+  qsa('#demo-theme button', el).forEach(b => b.addEventListener('click', () => {
+    setTheme(b.dataset.v);
+    qsa('#demo-theme button', el).forEach(x => x.classList.toggle('on', x === b));
+  }));
+  qsa('#demo-lang button', el).forEach(b => b.addEventListener('click', () => {
+    setLang(b.dataset.v);
+    close();
+  }));
+  qs('#demo-reset', el).addEventListener('click', () => {
+    [LS.registered, LS.profile, LS.favs, LS.apps].forEach(k => localStorage.removeItem(k));
+    close();
+    showToast(t('demo.resetDone'), 'check');
+    setTimeout(() => { location.hash = '#home'; route(); }, 700);
+  });
+}
+
+/* ---------- 下部タブバー ---------- */
+function renderTabbar(active) {
+  const tabs = [
+    { id: 'home', href: '#home', icon: 'home', key: 'nav.home' },
+    { id: 'jobs', href: '#jobs', icon: 'search', key: 'nav.jobs' },
+    { id: 'favs', href: '#favs', icon: 'heart', key: 'nav.favs' },
+    { id: 'mypage', href: '#mypage', icon: 'user', key: 'nav.mypage' },
+  ];
+  const nav = document.createElement('nav');
+  nav.className = 'tabbar';
+  nav.innerHTML = tabs.map(tb => `
+    <a href="${tb.href}" class="tab ${tb.id === active ? 'active' : ''}">
+      ${icon(tb.icon)}<span data-i18n="${tb.key}">${t(tb.key)}</span>
+    </a>`).join('');
+  document.body.appendChild(nav);
+}
+
+/* ---------- 求人カード ---------- */
+function jobCardHTML(job, opts) {
+  const o = opts || {};
+  const f = fieldOf(job.field);
+  const faved = getFavs().includes(job.id);
+  const tags = job.tags.slice(0, 3).map(tag => `<span class="tag">${t('tag.' + tag)}</span>`).join('');
+  const lockedCls = o.locked ? ' is-locked' : '';
+  const newBadge = job.isNew ? `<span class="badge-new">${t('jobs.new')}</span>` : '';
+  return `
+  <article class="job-card reveal${lockedCls}" data-id="${job.id}">
+    <div class="job-card-inner">
+      <div class="job-icon" style="--f-color:${f.color}"><span>${f.emoji}</span></div>
+      <div class="job-main">
+        <div class="job-head">
+          <span class="job-field" style="--f-color:${f.color}">${pick(f.name)}</span>
+          ${newBadge}
+        </div>
+        <h3 class="job-title">${pick(job.title)}</h3>
+        <div class="job-meta">${icon('pin')}<span>${pick(job.area)}</span></div>
+        <div class="job-tags">${tags}</div>
+        <div class="job-bottom">${salaryHTML(job)}</div>
+      </div>
+      <button type="button" class="fav-btn ${faved ? 'on' : ''}" data-fav="${job.id}" aria-label="favorite">
+        <span class="ic-off">${ICONS.heart}</span><span class="ic-on">${ICONS.heartFill}</span>
+      </button>
+    </div>
+    ${o.locked ? `
+      <div class="job-lock">
+        ${icon('lock')}<span>${t('lock.cardNote')}</span>
+      </div>` : ''}
+  </article>`;
+}
+
+/* カード挿入後のイベント付与（お気に入り・遷移） */
+function bindJobCards(container, opts) {
+  const o = opts || {};
+  qsa('.job-card', container).forEach(card => {
+    const id = Number(card.dataset.id);
+    card.addEventListener('click', e => {
+      if (e.target.closest('.fav-btn')) return;
+      if (card.classList.contains('is-locked')) { openRegisterGate(); return; }
+      location.hash = '#job/' + id;
+    });
+    const favBtn = qs('.fav-btn', card);
+    if (favBtn) favBtn.addEventListener('click', () => {
+      if (!isRegistered()) { openRegisterGate(); return; }
+      const on = toggleFav(id);
+      favBtn.classList.toggle('on', on);
+      favBtn.classList.remove('pop');
+      void favBtn.offsetWidth; /* reflow でアニメ再発火 */
+      favBtn.classList.add('pop');
+      showToast(t(on ? 'job.favAdd' : 'job.favRemove'), on ? 'heartFill' : 'heart');
+      if (typeof o.onFavChange === 'function') o.onFavChange();
+    });
+  });
+}
+
+/* ---------- ダミーQRコード（SVG） ---------- */
+function qrSVG() {
+  const size = 21, cell = 8, pad = 2;
+  /* 疑似乱数（固定シード）で毎回同じパターンを描く */
+  let seed = 20260721;
+  const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  let rects = '';
+  const finder = (x, y) => `
+    <rect x="${x * cell}" y="${y * cell}" width="${7 * cell}" height="${7 * cell}" fill="#111"/>
+    <rect x="${(x + 1) * cell}" y="${(y + 1) * cell}" width="${5 * cell}" height="${5 * cell}" fill="#fff"/>
+    <rect x="${(x + 2) * cell}" y="${(y + 2) * cell}" width="${3 * cell}" height="${3 * cell}" fill="#111"/>`;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const inFinder = (x < 8 && y < 8) || (x > size - 9 && y < 8) || (x < 8 && y > size - 9);
+      if (!inFinder && rnd() > 0.52) rects += `<rect x="${x * cell}" y="${y * cell}" width="${cell}" height="${cell}" fill="#111"/>`;
+    }
+  }
+  const px = (size + pad * 2) * cell;
+  return `<svg viewBox="${-pad * cell} ${-pad * cell} ${px} ${px}" class="qr">
+    <rect x="${-pad * cell}" y="${-pad * cell}" width="${px}" height="${px}" fill="#fff"/>
+    ${rects}${finder(0, 0)}${finder(size - 7, 0)}${finder(0, size - 7)}
+  </svg>`;
+}
+
+/* WeChat相談モーダル */
+function openWechatDialog() {
+  const { el } = openDialog(`
+    <div class="wechat-dialog">
+      <div class="wechat-head">${icon('chat')}<h3>${t('wechat.title')}</h3></div>
+      <p>${t('wechat.desc')}</p>
+      <div class="qr-wrap">${qrSVG()}</div>
+      <div class="wechat-id"><span>${t('wechat.idLabel')}</span><b>${WECHAT_ID}</b></div>
+      <button type="button" class="btn btn-primary btn-block" id="copy-wechat">${t('common.copy')}</button>
+      <button type="button" class="btn btn-ghost btn-block" data-close>${t('common.close')}</button>
+    </div>`);
+  qs('#copy-wechat', el).addEventListener('click', () => {
+    if (navigator.clipboard) navigator.clipboard.writeText(WECHAT_ID).catch(() => {});
+    showToast(t('common.copied'), 'check');
+  });
+}
+
+/* ---------- スクロールリビール ---------- */
+function initReveal() {
+  const els = qsa('.reveal');
+  if (!('IntersectionObserver' in window)) { els.forEach(el => el.classList.add('in')); return; }
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, { threshold: 0.08 });
+  els.forEach(el => io.observe(el));
+}
+
+/* ---------- 桜吹雪（登録完了などのお祝い演出） ---------- */
+function celebrate() {
+  const wrap = document.createElement('div');
+  wrap.className = 'petals';
+  const colors = getTheme() === 'blue'
+    ? ['#7cc0ff', '#a5d8ff', '#4d9fff', '#cfe8ff', '#ffd166']
+    : ['#ffb7c5', '#ff8fab', '#ff2442', '#ffd166', '#ffe3e8'];
+  for (let i = 0; i < 28; i++) {
+    const p = document.createElement('span');
+    p.className = 'petal';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.background = colors[i % colors.length];
+    p.style.animationDelay = (Math.random() * 1.2) + 's';
+    p.style.animationDuration = (2.6 + Math.random() * 2) + 's';
+    p.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+    p.style.setProperty('--spin', (Math.random() * 720 - 360) + 'deg');
+    wrap.appendChild(p);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 5200);
+}
+
+/* ---------- ページ初期化 ---------- */
+function initPage(opts) {
+  const o = opts || {};
+  applyPrefs();
+  applyI18n();
+  renderDemoBar();
+  if (o.tab) renderTabbar(o.tab);
+  requestAnimationFrame(initReveal);
+}
+
+</script>
+<script>
+/* =========================================================
+ * 樱聘 YingPin — 単一ファイル版（preview.html）用ルーター＆ビュー
+ * 各HTMLページを #home / #jobs / #job/1 ... のハッシュ切替に移植。
+ * build-preview.js が本体JS（i18n/data/app）と共に1ファイルへ束ねる。
+ * ======================================================= */
+
+/* ---------- 共通ヘルパー ---------- */
+const shellEl = document.getElementById('shell');
+
+function renderLangPill() {
+  qsa('.lang-pill').forEach(el => {
+    el.innerHTML = `${icon('globe')}<span>${getLang() === 'ja' ? '中文' : '日本語'}</span>`;
+  });
+}
+
+const TOPBAR_BRAND = `
+  <header class="topbar">
+    <a class="brand" href="#home">
+      <span class="brand-mark">🌸</span>
+      <span><span class="brand-name">樱聘</span><span class="brand-sub">YINGPIN</span></span>
+    </a>
+    <div class="spacer"></div>
+    <button type="button" class="lang-pill"></button>
+    <a class="login-link" id="topbar-login" href="#login" data-i18n="common.login"></a>
+  </header>`;
+
+function topbarPage(titleKey, backHash) {
+  return `
+  <header class="topbar">
+    <a class="icon-btn" href="${backHash}"><span class="icon">${ICONS.back}</span></a>
+    <div class="topbar-title" ${titleKey ? `data-i18n="${titleKey}"` : 'id="topbar-title"'}></div>
+    <div class="spacer"></div>
+    <button type="button" class="lang-pill"></button>
+  </header>`;
+}
+
+/* ---------- ホーム（ランディング） ---------- */
+function viewHome() {
+  shellEl.innerHTML = `
+  ${TOPBAR_BRAND}
+  <section class="hero">
+    <span class="hero-sticker" style="right:18px; top:74px; animation-delay:.2s">🗼</span>
+    <span class="hero-sticker" style="right:64px; top:150px; font-size:20px; animation-delay:1.1s">✈️</span>
+    <span class="hero-sticker" style="right:26px; top:196px; font-size:22px; animation-delay:.6s">🌸</span>
+    <div class="hero-badge">⛩️ <span data-i18n="landing.badge"></span></div>
+    <h1 data-i18n="app.tagline"></h1>
+    <p class="hero-sub" data-i18n="landing.heroSub"></p>
+    <div class="hero-cta" id="hero-cta"></div>
+  </section>
+  <div class="stats reveal">
+    <div class="stat"><b data-i18n="landing.stats.jobsVal"></b><span data-i18n="landing.stats.jobs"></span></div>
+    <div class="stat"><b data-i18n="landing.stats.fieldsVal"></b><span data-i18n="landing.stats.fields"></span></div>
+    <div class="stat"><b data-i18n="landing.stats.supportVal"></b><span data-i18n="landing.stats.support"></span></div>
+  </div>
+  <h2 class="sec-h" data-i18n="trust.title"></h2>
+  <div class="trust-card reveal">
+    <div class="trust-row" data-i18n="trust.i1"></div>
+    <div class="trust-row" data-i18n="trust.i2"></div>
+    <div class="trust-row" data-i18n="trust.i3"></div>
+    <p class="trust-note" data-i18n="trust.note"></p>
+  </div>
+  <h2 class="sec-h" data-i18n="features.title"></h2>
+  <div class="features">
+    <div class="feature reveal"><div class="f-emoji">💬</div><h3 data-i18n="features.f1.title"></h3><p data-i18n="features.f1.desc"></p></div>
+    <div class="feature reveal"><div class="f-emoji">🛂</div><h3 data-i18n="features.f2.title"></h3><p data-i18n="features.f2.desc"></p></div>
+    <div class="feature reveal"><div class="f-emoji">🏠</div><h3 data-i18n="features.f3.title"></h3><p data-i18n="features.f3.desc"></p></div>
+    <div class="feature reveal"><div class="f-emoji">🔒</div><h3 data-i18n="features.f4.title"></h3><p data-i18n="features.f4.desc"></p></div>
+  </div>
+  <h2 class="sec-h" data-i18n="support.title"></h2>
+  <p class="support-desc" data-i18n="support.desc"></p>
+  <div class="how">
+    <div class="how-step reveal">
+      <div class="how-num">🤝</div>
+      <div class="how-body">
+        <h3 data-i18n="support.s1.title"></h3>
+        <div><span class="org-tag" data-i18n="support.s1.org"></span></div>
+        <p data-i18n="support.s1.desc"></p>
+      </div>
+    </div>
+    <div class="how-step reveal">
+      <div class="how-num">🏠</div>
+      <div class="how-body">
+        <h3 data-i18n="support.s2.title"></h3>
+        <div><span class="org-tag" data-i18n="support.s2.org"></span></div>
+        <p data-i18n="support.s2.desc"></p>
+      </div>
+    </div>
+  </div>
+  <div class="support-stat reveal"><b data-i18n="support.statVal"></b><span data-i18n="support.stat"></span></div>
+  <h2 class="sec-h" data-i18n="how.title"></h2>
+  <div class="how">
+    <div class="how-step reveal"><div class="how-num">1</div><div class="how-body"><h3 data-i18n="how.s1.title"></h3><p data-i18n="how.s1.desc"></p></div></div>
+    <div class="how-step reveal"><div class="how-num">2</div><div class="how-body"><h3 data-i18n="how.s2.title"></h3><p data-i18n="how.s2.desc"></p></div></div>
+    <div class="how-step reveal"><div class="how-num">3</div><div class="how-body"><h3 data-i18n="how.s3.title"></h3><p data-i18n="how.s3.desc"></p></div></div>
+  </div>
+  <h2 class="sec-h" data-i18n="preview.title"></h2>
+  <div class="job-list" id="preview-list"></div>
+  <div class="note-box" data-i18n="landing.note"></div>
+  <div class="op-info">
+    <div class="op-title" data-i18n="op.title"></div>
+    <div class="op-name" data-i18n="op.name"></div>
+    <div class="op-line" data-i18n="op.license"></div>
+    <div class="op-line" data-i18n="op.support"></div>
+  </div>
+  <footer class="footer" data-i18n="footer.copy"></footer>`;
+
+  function render() {
+    applyI18n();
+    renderLangPill();
+    qs('#topbar-login').style.display = isRegistered() ? 'none' : '';
+
+    const cta = qs('#hero-cta');
+    if (isRegistered()) {
+      cta.innerHTML = `<a class="btn btn-white btn-block" href="#jobs">${icon('search')}${t('reg.done.cta')}</a>`;
+    } else {
+      cta.innerHTML = `
+        <a class="btn btn-white btn-block" href="#register">✨ ${t('common.register')}</a>
+        <div class="hero-login">${t('landing.haveAccount')} <a href="#login">${t('common.login')}</a></div>`;
+    }
+
+    const locked = !isRegistered();
+    const list = qs('#preview-list');
+    const jobs = JOBS.filter(j => j.isNew).concat(JOBS).slice(0, 3);
+    list.innerHTML =
+      jobs.map(j => jobCardHTML(j, { locked })).join('') +
+      (locked
+        ? `<button type="button" class="btn btn-primary btn-block" id="preview-cta">${icon('lock')}${t('preview.more')}</button>`
+        : `<a class="btn btn-outline btn-block" href="#jobs">${t('preview.more')}</a>`);
+    bindJobCards(list);
+    if (locked) qs('#preview-cta').addEventListener('click', () => { location.hash = '#register'; });
+
+    qsa('.cta-bar, .tabbar').forEach(el => el.remove());
+    shellEl.className = 'shell';
+    if (locked) {
+      const bar = document.createElement('div');
+      bar.className = 'cta-bar';
+      bar.innerHTML = `<a class="btn btn-primary btn-block" href="#register">✨ ${t('common.register')}</a>`;
+      document.body.appendChild(bar);
+      shellEl.classList.add('has-ctabar');
+    } else {
+      renderTabbar('home');
+      shellEl.classList.add('has-tabbar');
+    }
+    initReveal();
+  }
+  window.onLangChange = render;
+  render();
+}
+
+/* ---------- 新規登録 ---------- */
+function viewRegister() {
+  shellEl.innerHTML = `
+  ${topbarPage('reg.title', '#home')}
+  <div id="wizard">
+    <div class="steps" id="steps">
+      <div class="step" data-step="1"><div class="step-dot">1</div><span data-i18n="reg.step1"></span></div>
+      <div class="step" data-step="2"><div class="step-dot">2</div><span data-i18n="reg.step2"></span></div>
+      <div class="step" data-step="3"><div class="step-dot">3</div><span data-i18n="reg.step3"></span></div>
+      <div class="step" data-step="4"><div class="step-dot">4</div><span data-i18n="reg.step4"></span></div>
+    </div>
+    <section class="step-panel" data-panel="1">
+      <div class="step-head"><h2 data-i18n="reg.step1.title"></h2><p data-i18n="reg.step1.sub"></p></div>
+      <div class="row2">
+        <div class="field">
+          <label class="label" for="f-last"><span data-i18n="reg.lastName"></span><span class="req" data-i18n="common.required"></span></label>
+          <input class="input" id="f-last" type="text" data-i18n-ph="reg.lastName.ph">
+        </div>
+        <div class="field">
+          <label class="label" for="f-first"><span data-i18n="reg.firstName"></span><span class="req" data-i18n="common.required"></span></label>
+          <input class="input" id="f-first" type="text" data-i18n-ph="reg.firstName.ph">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-pinyin"><span data-i18n="reg.pinyin"></span><span class="req" data-i18n="common.required"></span></label>
+        <input class="input" id="f-pinyin" type="text" style="text-transform:uppercase" data-i18n-ph="reg.pinyin.ph">
+      </div>
+      <div class="field">
+        <label class="label" for="f-birth"><span data-i18n="reg.birth"></span><span class="req" data-i18n="common.required"></span></label>
+        <input class="input" id="f-birth" type="date" max="2008-12-31" min="1960-01-01">
+      </div>
+      <div class="field">
+        <div class="label"><span data-i18n="reg.gender"></span><span class="req" data-i18n="common.required"></span></div>
+        <div class="opt-chips" id="f-gender">
+          <label class="opt-chip"><input type="radio" name="gender" value="male"><span data-i18n="reg.gender.male"></span></label>
+          <label class="opt-chip"><input type="radio" name="gender" value="female"><span data-i18n="reg.gender.female"></span></label>
+          <label class="opt-chip"><input type="radio" name="gender" value="other"><span data-i18n="reg.gender.other"></span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-nationality"><span data-i18n="reg.nationality"></span><span class="req" data-i18n="common.required"></span></label>
+        <select class="input" id="f-nationality"><option value="cn" selected></option><option value="other"></option></select>
+      </div>
+      <div class="field">
+        <div class="label"><span data-i18n="reg.residence"></span><span class="req" data-i18n="common.required"></span></div>
+        <div class="opt-chips" id="f-residence">
+          <label class="opt-chip"><input type="radio" name="residence" value="jp" checked><span>🇯🇵 <span data-i18n="reg.residence.jp"></span></span></label>
+          <label class="opt-chip"><input type="radio" name="residence" value="cn"><span>🇨🇳 <span data-i18n="reg.residence.cn"></span></span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-address"><span data-i18n="reg.address"></span><span class="req" data-i18n="common.required"></span></label>
+        <input class="input" id="f-address" type="text">
+      </div>
+      <div class="step-nav">
+        <button type="button" class="btn btn-primary btn-block" data-next><span data-i18n="common.next"></span></button>
+      </div>
+    </section>
+    <section class="step-panel" data-panel="2" hidden>
+      <div class="step-head"><h2 data-i18n="reg.step2.title"></h2><p data-i18n="reg.step2.sub"></p></div>
+      <div class="field">
+        <label class="label" for="f-phone"><span data-i18n="reg.phone"></span><span class="req" data-i18n="common.required"></span></label>
+        <div class="input-row">
+          <select class="input code" id="f-phone-code"><option value="+81">🇯🇵 +81</option><option value="+86">🇨🇳 +86</option></select>
+          <input class="input" id="f-phone" type="tel" data-i18n-ph="reg.phone.ph">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-wechat"><span data-i18n="reg.wechat"></span><span class="req" data-i18n="common.required"></span></label>
+        <input class="input" id="f-wechat" type="text" data-i18n-ph="reg.wechat.ph">
+        <p class="hint">💬 <span data-i18n="reg.wechat.note"></span></p>
+      </div>
+      <div class="field">
+        <label class="label" for="f-email"><span data-i18n="reg.email"></span><span class="opt" data-i18n="common.optional"></span></label>
+        <input class="input" id="f-email" type="email" data-i18n-ph="reg.email.ph">
+      </div>
+      <div class="step-nav">
+        <button type="button" class="btn btn-back" data-back data-i18n="common.back"></button>
+        <button type="button" class="btn btn-primary" data-next><span data-i18n="common.next"></span></button>
+      </div>
+    </section>
+    <section class="step-panel" data-panel="3" hidden>
+      <div class="step-head"><h2 data-i18n="reg.step3.title"></h2><p data-i18n="reg.step3.sub"></p></div>
+      <div class="field">
+        <div class="label"><span data-i18n="reg.jlpt"></span><span class="req" data-i18n="common.required"></span></div>
+        <div class="opt-chips" id="f-jlpt">
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N1"><span>N1</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N2"><span>N2</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N3"><span>N3</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N4"><span>N4</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="N5"><span>N5</span></label>
+          <label class="opt-chip"><input type="radio" name="jlpt" value="none" checked><span data-i18n="reg.jlpt.none"></span></label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label"><span data-i18n="reg.ssw"></span></div>
+        <p class="hint" style="margin:0 0 10px" data-i18n="reg.ssw.note"></p>
+        <div class="opt-chips" id="f-ssw"></div>
+      </div>
+      <div class="field">
+        <label class="label" for="f-other"><span data-i18n="reg.otherQual"></span><span class="opt" data-i18n="common.optional"></span></label>
+        <textarea class="input" id="f-other" rows="3" data-i18n-ph="reg.otherQual.ph"></textarea>
+      </div>
+      <div class="step-nav">
+        <button type="button" class="btn btn-back" data-back data-i18n="common.back"></button>
+        <button type="button" class="btn btn-primary" data-next><span data-i18n="common.next"></span></button>
+      </div>
+    </section>
+    <section class="step-panel" data-panel="4" hidden>
+      <div class="step-head"><h2 data-i18n="reg.step4.title"></h2><p data-i18n="reg.step4.sub"></p></div>
+      <dl class="confirm-list" id="confirm-list"></dl>
+      <label class="agree-row">
+        <input type="checkbox" id="f-agree">
+        <span class="agree-box"><span class="icon">${ICONS.check}</span></span>
+        <span class="agree-text" data-i18n="reg.agree"></span>
+      </label>
+      <div class="step-nav">
+        <button type="button" class="btn btn-back" data-back data-i18n="common.back"></button>
+        <button type="button" class="btn btn-primary" id="submit-btn" data-i18n="reg.submit"></button>
+      </div>
+    </section>
+  </div>
+  <section class="done-wrap" id="done" hidden>
+    <div class="done-ring"><div class="done-check"><span class="icon">${ICONS.check}</span></div></div>
+    <h1 data-i18n="reg.done.title"></h1>
+    <p class="done-sub" data-i18n="reg.done.sub"></p>
+    <div class="member-card"><span data-i18n="reg.done.accountId"></span><b id="member-id"></b></div>
+    <a class="btn btn-primary btn-block" href="#jobs" data-i18n="reg.done.cta"></a>
+  </section>`;
+
+  let step = 1;
+  const TOTAL = 4;
+
+  function renderSswChips() {
+    const box = qs('#f-ssw');
+    const checked = new Set(qsa('input:checked', box).map(i => i.value));
+    if (!box.dataset.init) checked.add('none');
+    box.innerHTML =
+      FIELDS.map(f => `
+        <label class="opt-chip"><input type="checkbox" name="ssw" value="${f.id}" ${checked.has(f.id) ? 'checked' : ''}>
+          <span>${f.emoji} ${pick(f.name)}</span></label>`).join('') +
+      `<label class="opt-chip"><input type="checkbox" name="ssw" value="none" ${checked.has('none') ? 'checked' : ''}>
+        <span>${t('reg.ssw.none')}</span></label>`;
+    box.dataset.init = '1';
+    qsa('input', box).forEach(input => input.addEventListener('change', () => {
+      if (input.value === 'none' && input.checked) {
+        qsa('input', box).forEach(i => { if (i.value !== 'none') i.checked = false; });
+      } else if (input.value !== 'none' && input.checked) {
+        const none = qsa('input', box).find(i => i.value === 'none');
+        if (none) none.checked = false;
+      }
+    }));
+  }
+
+  function renderNationality() {
+    const sel = qs('#f-nationality');
+    sel.options[0].textContent = t('reg.nationality.cn');
+    sel.options[1].textContent = t('reg.nationality.other');
+  }
+
+  function syncAddressPh() {
+    const residence = qsa('#f-residence input').find(i => i.checked)?.value || 'jp';
+    qs('#f-address').placeholder = t(residence === 'jp' ? 'reg.address.phJp' : 'reg.address.phCn');
+  }
+
+  function showStep(n) {
+    step = n;
+    qsa('.step-panel').forEach(p => p.hidden = Number(p.dataset.panel) !== n);
+    qsa('#steps .step').forEach(s => {
+      const sn = Number(s.dataset.step);
+      s.classList.toggle('done', sn < n);
+      s.classList.toggle('current', sn === n);
+      qs('.step-dot', s).innerHTML = sn < n ? `<span class="icon">${ICONS.check}</span>` : sn;
+    });
+    qs('#steps').style.setProperty('--p', (n - 1) / (TOTAL - 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (n === 4) renderConfirm();
+  }
+
+  function collect() {
+    const val = id => qs('#' + id).value.trim();
+    const radio = boxId => qsa(`#${boxId} input`).find(i => i.checked)?.value || '';
+    return {
+      lastName: val('f-last'), firstName: val('f-first'),
+      pinyin: val('f-pinyin').toUpperCase(), birth: val('f-birth'),
+      gender: radio('f-gender'), nationality: qs('#f-nationality').value,
+      residence: radio('f-residence'), address: val('f-address'),
+      phoneCode: qs('#f-phone-code').value, phone: val('f-phone'),
+      wechat: val('f-wechat'), email: val('f-email'),
+      jlpt: radio('f-jlpt'),
+      ssw: qsa('#f-ssw input:checked').map(i => i.value).filter(v => v !== 'none'),
+      otherQual: val('f-other'),
+    };
+  }
+
+  function validate(n) {
+    const d = collect();
+    if (n === 1) return d.lastName && d.firstName && d.pinyin && d.birth && d.gender && d.address;
+    if (n === 2) return d.phone && d.wechat;
+    return true;
+  }
+
+  function renderConfirm() {
+    const d = collect();
+    const dash = '—';
+    const sswText = d.ssw.length ? d.ssw.map(id => pick(fieldOf(id).name)).join('、') : t('reg.ssw.none');
+    const rows = [
+      [t('reg.lastName').replace(/（.+）/, '') + '・' + t('reg.firstName').replace(/（.+）/, ''), `${esc(d.lastName)} ${esc(d.firstName)}<br><small style="color:var(--text-sub)">${esc(d.pinyin)}</small>`],
+      [t('reg.birth'), esc(d.birth) || dash],
+      [t('reg.gender'), d.gender ? t('reg.gender.' + d.gender) : dash],
+      [t('reg.nationality'), t(d.nationality === 'cn' ? 'reg.nationality.cn' : 'reg.nationality.other')],
+      [t('reg.residence'), `${t(d.residence === 'jp' ? 'reg.residence.jp' : 'reg.residence.cn')}<br><small style="color:var(--text-sub)">${esc(d.address)}</small>`],
+      [t('reg.phone'), `${esc(d.phoneCode)} ${esc(d.phone)}`],
+      [t('reg.wechat'), esc(d.wechat) || dash],
+      [t('reg.email'), esc(d.email) || dash],
+      [t('reg.jlpt'), d.jlpt === 'none' ? t('reg.jlpt.none') : esc(d.jlpt)],
+      [t('reg.ssw'), sswText],
+      [t('reg.otherQual'), esc(d.otherQual) || dash],
+    ];
+    qs('#confirm-list').innerHTML = rows.map(([k, v]) =>
+      `<div class="confirm-row"><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  }
+
+  qsa('[data-next]').forEach(b => b.addEventListener('click', () => {
+    if (!validate(step)) { showToast(t('reg.err.required')); return; }
+    showStep(step + 1);
+  }));
+  qsa('[data-back]').forEach(b => b.addEventListener('click', () => showStep(step - 1)));
+
+  qs('#submit-btn').addEventListener('click', () => {
+    if (!qs('#f-agree').checked) { showToast(t('reg.err.agree')); return; }
+    const profile = collect();
+    profile.memberId = genMemberId();
+    setProfile(profile);
+    setRegistered(true);
+    qs('#wizard').hidden = true;
+    qs('#member-id').textContent = profile.memberId;
+    qs('#done').hidden = false;
+    window.scrollTo(0, 0);
+    celebrate();
+  });
+
+  qs('#f-residence').addEventListener('change', syncAddressPh);
+
+  window.onLangChange = () => {
+    renderLangPill();
+    renderSswChips();
+    renderNationality();
+    syncAddressPh();
+    if (step === 4) renderConfirm();
+  };
+
+  applyI18n();
+  renderLangPill();
+  renderSswChips();
+  renderNationality();
+  syncAddressPh();
+  showStep(1);
+}
+
+/* ---------- ログイン ---------- */
+function viewLogin() {
+  shellEl.innerHTML = `
+  ${topbarPage('', '#home')}
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <span class="brand-mark">🌸</span>
+      <div><h1 data-i18n="login.title"></h1><p data-i18n="login.sub"></p></div>
+    </div>
+    <div class="field">
+      <label class="label" for="l-phone"><span data-i18n="login.phone"></span></label>
+      <div class="input-row">
+        <select class="input code" id="l-code"><option value="+81">🇯🇵 +81</option><option value="+86">🇨🇳 +86</option></select>
+        <input class="input" id="l-phone" type="tel" data-i18n-ph="reg.phone.ph">
+      </div>
+    </div>
+    <div class="field">
+      <label class="label" for="l-pass"><span data-i18n="login.password"></span></label>
+      <input class="input" id="l-pass" type="password" data-i18n-ph="login.password.ph">
+    </div>
+    <button type="button" class="btn btn-primary btn-block" id="login-btn" data-i18n="login.btn"></button>
+    <div class="auth-links">
+      <a href="#" id="forgot" class="sub" data-i18n="login.forgot"></a>
+      <a href="#register" data-i18n="login.toRegister"></a>
+    </div>
+    <p class="demo-hint" data-i18n="login.demoNote"></p>
+  </div>`;
+
+  qs('#login-btn').addEventListener('click', () => {
+    setRegistered(true);
+    if (!getProfile()) setProfile(demoProfile());
+    showToast(t('login.success'), 'check');
+    setTimeout(() => { location.hash = '#jobs'; }, 650);
+  });
+  qs('#forgot').addEventListener('click', e => { e.preventDefault(); showToast(t('login.demoNote')); });
+
+  window.onLangChange = () => { renderLangPill(); };
+  applyI18n();
+  renderLangPill();
+}
+
+/* ---------- 求人一覧 ---------- */
+const jobsState = { field: 'all', region: 'all', tags: [], q: '' };
+
+function viewJobs() {
+  shellEl.className = 'shell has-tabbar';
+  shellEl.innerHTML = `
+  <div class="jobs-head">
+    <div class="jobs-title-row">
+      <h1 data-i18n="jobs.title"></h1>
+      <button type="button" class="lang-pill"></button>
+    </div>
+    <div class="search-box"><span class="icon">${ICONS.search}</span><input type="search" id="q" data-i18n-ph="jobs.search.ph"></div>
+    <div class="filter-row" id="field-chips"></div>
+    <div class="filter-row" id="sub-filters"></div>
+  </div>
+  <div class="count-row"><span class="count" id="count"></span><span class="count" data-i18n="jobs.sort.new"></span></div>
+  <div class="locked-note" id="locked-note" hidden></div>
+  <div class="job-list" id="list"></div>
+  <div class="empty" id="empty" hidden>
+    <div class="e-emoji">🔍</div>
+    <h3 data-i18n="jobs.empty.title"></h3>
+    <p data-i18n="jobs.empty.sub"></p>
+  </div>`;
+
+  const state = jobsState;
+
+  function renderFilters() {
+    const fc = qs('#field-chips');
+    fc.innerHTML =
+      `<button type="button" class="chip ${state.field === 'all' ? 'on' : ''}" data-field="all">${t('common.all')}</button>` +
+      FIELDS.map(f => `
+        <button type="button" class="chip ${state.field === f.id ? 'on' : ''}" data-field="${f.id}">
+          <span class="emoji">${f.emoji}</span>${pick(f.name)}
+        </button>`).join('');
+    qsa('button', fc).forEach(b => b.addEventListener('click', () => {
+      state.field = b.dataset.field;
+      renderFilters(); renderList();
+    }));
+
+    const sf = qs('#sub-filters');
+    const regionLabel = state.region === 'all' ? t('jobs.area') : t('region.' + state.region);
+    sf.innerHTML =
+      `<button type="button" class="chip ${state.region !== 'all' ? 'on' : ''}" id="area-chip">${icon('pin')}${regionLabel}</button>` +
+      QUICK_TAGS.map(tag => `
+        <button type="button" class="chip ${state.tags.includes(tag) ? 'on' : ''}" data-tag="${tag}">${t('tag.' + tag)}</button>`).join('');
+    qs('#area-chip').addEventListener('click', openAreaSheet);
+    qsa('[data-tag]', sf).forEach(b => b.addEventListener('click', () => {
+      const tag = b.dataset.tag;
+      const i = state.tags.indexOf(tag);
+      if (i >= 0) state.tags.splice(i, 1); else state.tags.push(tag);
+      renderFilters(); renderList();
+    }));
+  }
+
+  function openAreaSheet() {
+    const opts = ['all', ...REGIONS];
+    const { el, close } = openSheet(
+      opts.map(r => `
+        <button type="button" class="list-opt ${state.region === r ? 'on' : ''}" data-region="${r}">
+          ${r === 'all' ? '🗾' : '📍'} ${t('region.' + r)}
+          <span class="icon">${ICONS.check}</span>
+        </button>`).join(''),
+      'area.sheetTitle');
+    qsa('[data-region]', el).forEach(b => b.addEventListener('click', () => {
+      state.region = b.dataset.region;
+      close(); renderFilters(); renderList();
+    }));
+  }
+
+  function filteredJobs() {
+    const q = state.q.trim().toLowerCase();
+    return JOBS
+      .filter(j => state.field === 'all' || j.field === state.field)
+      .filter(j => state.region === 'all' || j.region === state.region)
+      .filter(j => state.tags.every(tag => j.tags.includes(tag)))
+      .filter(j => {
+        if (!q) return true;
+        const hay = [pick(j.title), pick(j.area), pick(j.desc), pick(fieldOf(j.field).name)].join(' ').toLowerCase();
+        return hay.includes(q);
+      })
+      .sort((a, b) => (b.isNew - a.isNew) || (a.id - b.id));
+  }
+
+  function renderList() {
+    const jobs = filteredJobs();
+    const locked = !isRegistered();
+    qs('#count').innerHTML = t('jobs.count', { n: `<b>${jobs.length}</b>` });
+    const note = qs('#locked-note');
+    note.hidden = !locked;
+    if (locked) note.innerHTML = `${icon('lock')}<span>${t('jobs.lockedNote')}</span>`;
+    const list = qs('#list');
+    list.innerHTML = jobs.map(j => jobCardHTML(j, { locked })).join('');
+    bindJobCards(list);
+    qs('#empty').hidden = jobs.length > 0;
+    initReveal();
+  }
+
+  qs('#q').value = state.q;
+  qs('#q').addEventListener('input', e => { state.q = e.target.value; renderList(); });
+
+  window.onLangChange = () => { applyI18n(); renderLangPill(); renderFilters(); renderList(); };
+  applyI18n();
+  renderLangPill();
+  renderFilters();
+  renderList();
+  renderTabbar('jobs');
+}
+
+/* ---------- 求人詳細 ---------- */
+function viewJob(param) {
+  const job = jobOf(param);
+  shellEl.innerHTML = `${topbarPage('', '#jobs')}<main id="main"></main>`;
+
+  function infoRow(label, value) {
+    return `<div class="info-row"><dt>${label}</dt><dd>${value}</dd></div>`;
+  }
+
+  function render() {
+    renderLangPill();
+    const main = qs('#main');
+    qsa('.job-actions').forEach(el => el.remove());
+
+    if (!job) {
+      qs('#topbar-title').textContent = '';
+      main.innerHTML = `
+        <div class="empty">
+          <div class="e-emoji">😢</div>
+          <h3>${t('job.notFound')}</h3>
+          <a class="btn btn-primary" href="#jobs">${t('favs.browse')}</a>
+        </div>`;
+      return;
+    }
+
+    if (!isRegistered()) {
+      qs('#topbar-title').textContent = t('lock.badge');
+      main.innerHTML = `
+        <div class="empty">
+          <div class="e-emoji">🔒</div>
+          <h3>${t('lock.title')}</h3>
+          <p>${t('lock.desc')}</p>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:22px">
+            <a class="btn btn-primary btn-block" href="#register">${t('lock.register')}</a>
+            <a class="btn btn-ghost btn-block" href="#login">${t('lock.login')}</a>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const f = fieldOf(job.field);
+    qs('#topbar-title').textContent = pick(f.name);
+    shellEl.classList.add('has-ctabar');
+
+    const benefits = job.benefits.map(b => `<div class="ben-item">${icon('check')}<span>${t('ben.' + b)}</span></div>`).join('');
+    const duties = pick(job.duties).map(d => `<li>${icon('check')}<span>${esc(d)}</span></li>`).join('');
+
+    const related = JOBS.filter(j => j.field === job.field && j.id !== job.id).slice(0, 4);
+    const relatedHTML = related.length ? `
+      <h2 class="sec-h">${t('related.title')}</h2>
+      <div class="related-scroll">
+        ${related.map(j => `
+          <div class="related-card" data-id="${j.id}" style="--f-color:${fieldOf(j.field).color}">
+            <div class="rc-head">
+              <span class="rc-emoji">${fieldOf(j.field).emoji}</span>
+              <span class="rc-field">${pick(fieldOf(j.field).name)}</span>
+            </div>
+            <h3>${pick(j.title)}</h3>
+            <div class="rc-bottom">
+              <span class="rc-area">${pick(j.area)}</span>
+              <span class="salary"><b>${j.salaryMin}〜${j.salaryMax}</b><span class="salary-unit">${getLang() === 'zh' ? '万日元' : '万円'}</span></span>
+            </div>
+          </div>`).join('')}
+      </div>` : '';
+
+    main.innerHTML = `
+      <div class="job-hero" style="--f-color:${f.color}">
+        <div class="job-hero-icon">${f.emoji}</div>
+        <div class="badges">
+          <span class="badge-soft">${pick(f.name)}</span>
+          ${job.isNew ? `<span class="badge-new">${t('jobs.new')}</span>` : ''}
+          ${job.tags.map(tag => `<span class="tag">${t('tag.' + tag)}</span>`).join('')}
+        </div>
+        <h1>${pick(job.title)}</h1>
+        <div class="job-meta">${icon('pin')}<span>${pick(job.area)}（${t('region.' + job.region)}）</span></div>
+      </div>
+      <div class="salary-band reveal">
+        <div class="big">
+          <span>${t('job.monthly')}</span>
+          <b>${job.salaryMin}〜${job.salaryMax}</b><small>${getLang() === 'zh' ? '万日元' : '万円'}</small>
+        </div>
+        <div class="annual"><span>${t('job.annual')}</span><b>${annualText(job)}</b></div>
+      </div>
+      ${job.chineseSupport ? `
+        <div class="cn-support reveal">
+          ${icon('chat')}
+          <div>${t('tag.chinese')}${job.chineseStaff ? `<small>${pick(job.chineseStaff)}</small>` : ''}</div>
+        </div>` : ''}
+      <div class="card-sec reveal"><h2>${t('sec.desc')}</h2><p class="desc">${pick(job.desc)}</p></div>
+      <div class="card-sec reveal"><h2>${t('sec.duties')}</h2><ul class="duty-list">${duties}</ul></div>
+      <div class="card-sec reveal">
+        <h2>${t('sec.salary')}</h2>
+        <dl>
+          ${infoRow(t('job.monthly'), `<b style="color:var(--primary)">${salaryText(job).replace(t('job.monthly') + ' ', '')}</b>`)}
+          ${infoRow(t('job.annual'), annualText(job))}
+          ${infoRow(t('job.bonusRaise'), pick(job.bonus))}
+        </dl>
+      </div>
+      <div class="card-sec reveal">
+        <h2>${t('sec.time')}</h2>
+        <dl>${infoRow(t('sec.time'), pick(job.hours))}${infoRow(t('job.overtime'), pick(job.overtime))}</dl>
+      </div>
+      <div class="card-sec reveal"><h2>${t('sec.holiday')}</h2><dl>${infoRow(t('job.holidays'), pick(job.holidays))}</dl></div>
+      <div class="card-sec reveal">
+        <h2>${t('sec.location')}</h2>
+        <dl>${infoRow(t('sec.location'), pick(job.area))}${infoRow(t('job.housing'), pick(job.housing))}</dl>
+      </div>
+      <div class="card-sec reveal"><h2>${t('sec.benefits')}</h2><div class="ben-grid">${benefits}</div></div>
+      <div class="card-sec reveal"><h2>${t('sec.requirements')}</h2><p class="desc">${pick(job.requirements)}</p></div>
+      <div class="card-sec reveal">
+        <h2>${t('sec.company')}</h2>
+        <p class="desc">${pick(job.company)}</p>
+        ${job.chineseStaff ? `<p class="desc" style="margin-top:6px">🇨🇳 ${pick(job.chineseStaff)}</p>` : ''}
+        <p class="company-note">${t('job.companyNote')}</p>
+      </div>
+      ${relatedHTML}`;
+
+    qsa('.related-card', main).forEach(c =>
+      c.addEventListener('click', () => { location.hash = '#job/' + c.dataset.id; }));
+
+    renderActions();
+    initReveal();
+  }
+
+  function renderActions() {
+    qsa('.job-actions').forEach(el => el.remove());
+    const bar = document.createElement('div');
+    bar.className = 'job-actions';
+    const faved = getFavs().includes(job.id);
+    const applied = hasApplied(job.id);
+    bar.innerHTML = `
+      <button type="button" class="fav-btn fav-square ${faved ? 'on' : ''}" id="act-fav">
+        <span class="ic-off">${ICONS.heart}</span><span class="ic-on">${ICONS.heartFill}</span>
+      </button>
+      <button type="button" class="btn-wechat" id="act-wechat">${icon('chat')}${t('job.wechatBtn')}</button>
+      <button type="button" class="btn btn-primary btn-apply" id="act-apply" ${applied ? 'disabled' : ''}>
+        ${applied ? '✓ ' + t('job.applied') : t('job.apply')}
+      </button>`;
+    document.body.appendChild(bar);
+
+    qs('#act-fav').addEventListener('click', () => {
+      const on = toggleFav(job.id);
+      const btn = qs('#act-fav');
+      btn.classList.toggle('on', on);
+      btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+      showToast(t(on ? 'job.favAdd' : 'job.favRemove'), on ? 'heartFill' : 'heart');
+    });
+    qs('#act-wechat').addEventListener('click', openWechatDialog);
+    qs('#act-apply').addEventListener('click', openApplyDialog);
+  }
+
+  function openApplyDialog() {
+    const { el, close } = openDialog(`
+      <div class="gate">
+        <div class="gate-icon">${icon('briefcase')}</div>
+        <h3>${t('apply.title')}</h3>
+        <p>${t('apply.desc')}</p>
+        <button type="button" class="btn btn-primary btn-block" id="apply-confirm">${t('apply.confirm')}</button>
+        <button type="button" class="btn btn-ghost btn-block" data-close>${t('common.cancel')}</button>
+      </div>`);
+    qs('#apply-confirm', el).addEventListener('click', () => {
+      addApp(job.id);
+      close();
+      celebrate();
+      openDialog(`
+        <div class="gate">
+          <div class="gate-icon" style="background:#E8FBF0; color:#07A050">${icon('check')}</div>
+          <h3>${t('apply.done.title')}</h3>
+          <p>${t('apply.done.desc')}</p>
+          <button type="button" class="btn btn-primary btn-block" data-close>${t('common.ok')}</button>
+        </div>`);
+      renderActions();
+    });
+  }
+
+  window.onLangChange = render;
+  render();
+}
+
+/* ---------- お気に入り ---------- */
+function viewFavs() {
+  shellEl.className = 'shell has-tabbar';
+  shellEl.innerHTML = `
+  <div class="page-head jobs-title-row" style="display:flex; align-items:center; gap:10px">
+    <h1 data-i18n="favs.title" style="flex:1"></h1>
+    <button type="button" class="lang-pill"></button>
+  </div>
+  <div id="content"></div>`;
+
+  function render() {
+    applyI18n();
+    renderLangPill();
+    const box = qs('#content');
+    if (!isRegistered()) {
+      box.innerHTML = `
+        <div class="empty">
+          <div class="e-emoji">🔒</div>
+          <h3>${t('lock.title')}</h3>
+          <p>${t('lock.desc')}</p>
+          <a class="btn btn-primary" href="#register">${t('lock.register')}</a>
+        </div>`;
+      return;
+    }
+    const favJobs = getFavs().map(jobOf).filter(Boolean);
+    if (!favJobs.length) {
+      box.innerHTML = `
+        <div class="empty">
+          <div class="e-emoji">🤍</div>
+          <h3>${t('favs.empty.title')}</h3>
+          <p>${t('favs.empty.sub')}</p>
+          <a class="btn btn-primary" href="#jobs">${t('favs.browse')}</a>
+        </div>`;
+      return;
+    }
+    box.innerHTML = `<div class="job-list">${favJobs.map(j => jobCardHTML(j)).join('')}</div>`;
+    bindJobCards(box, { onFavChange: render });
+    initReveal();
+  }
+
+  window.onLangChange = render;
+  render();
+  renderTabbar('favs');
+}
+
+/* ---------- マイページ ---------- */
+function viewMypage() {
+  shellEl.className = 'shell has-tabbar';
+  shellEl.innerHTML = `
+  <div class="page-head jobs-title-row" style="display:flex; align-items:center; gap:10px">
+    <h1 data-i18n="my.title" style="flex:1"></h1>
+    <button type="button" class="lang-pill"></button>
+  </div>
+  <div id="content"></div>`;
+
+  function settingsHTML() {
+    const langName = getLang() === 'ja' ? '日本語' : '简体中文';
+    const themeName = t(getTheme() === 'red' ? 'demo.theme.red' : 'demo.theme.blue');
+    return `
+      <h2 class="sec-h">${t('my.settings')}</h2>
+      <div class="menu-card reveal">
+        <button type="button" class="menu-item" id="set-lang">
+          <span class="m-icon">${icon('globe')}</span>${t('my.lang')}
+          <span class="m-value">${langName}</span><span class="icon chev">${ICONS.chevron}</span>
+        </button>
+        <button type="button" class="menu-item" id="set-theme">
+          <span class="m-icon">${icon('sparkle')}</span>${t('my.theme')}
+          <span class="m-value">${themeName}</span><span class="icon chev">${ICONS.chevron}</span>
+        </button>
+        ${isRegistered() ? `
+        <button type="button" class="menu-item danger" id="set-logout">
+          <span class="m-icon">${icon('close')}</span>${t('my.logout')}
+          <span class="icon chev">${ICONS.chevron}</span>
+        </button>` : ''}
+      </div>`;
+  }
+
+  function bindSettings() {
+    qs('#set-lang')?.addEventListener('click', () => {
+      const { el, close } = openSheet(
+        [['ja', '日本語'], ['zh', '简体中文']].map(([v, label]) => `
+          <button type="button" class="list-opt ${getLang() === v ? 'on' : ''}" data-v="${v}">
+            🌐 ${label}<span class="icon">${ICONS.check}</span>
+          </button>`).join(''),
+        'my.lang');
+      qsa('[data-v]', el).forEach(b => b.addEventListener('click', () => { close(); setLang(b.dataset.v); }));
+    });
+
+    qs('#set-theme')?.addEventListener('click', () => {
+      const { el, close } = openSheet(
+        [['blue', '🌊 ' + t('demo.theme.blue')], ['red', '🌸 ' + t('demo.theme.red')]].map(([v, label]) => `
+          <button type="button" class="list-opt ${getTheme() === v ? 'on' : ''}" data-v="${v}">
+            ${label}<span class="icon">${ICONS.check}</span>
+          </button>`).join(''),
+        'my.theme');
+      qsa('[data-v]', el).forEach(b => b.addEventListener('click', () => { close(); setTheme(b.dataset.v); render(); }));
+    });
+
+    qs('#set-logout')?.addEventListener('click', () => {
+      const { el, close } = openDialog(`
+        <div class="gate">
+          <div class="gate-icon">${icon('user')}</div>
+          <p style="margin-top:4px">${t('my.logoutConfirm')}</p>
+          <button type="button" class="btn btn-primary btn-block" id="logout-yes">${t('my.logout')}</button>
+          <button type="button" class="btn btn-ghost btn-block" data-close>${t('common.cancel')}</button>
+        </div>`);
+      qs('#logout-yes', el).addEventListener('click', () => {
+        setRegistered(false);
+        close();
+        showToast(t('my.logoutDone'), 'check');
+        setTimeout(() => { location.hash = '#home'; }, 650);
+      });
+    });
+  }
+
+  function render() {
+    applyI18n();
+    renderLangPill();
+    const box = qs('#content');
+
+    if (!isRegistered()) {
+      box.innerHTML = `
+        <div class="profile-card reveal">
+          <div class="profile-row">
+            <div class="avatar">👤</div>
+            <div>
+              <div class="profile-name">${t('my.guest')}</div>
+              <div class="profile-id">${t('my.notRegistered')}</div>
+            </div>
+          </div>
+          <p style="position:relative; z-index:1; font-size:12px; margin-top:14px; opacity:.94; line-height:1.7">${t('my.guest.desc')}</p>
+          <div style="position:relative; z-index:1; display:flex; gap:9px; margin-top:14px">
+            <a class="btn btn-white btn-sm" style="flex:1" href="#register">✨ ${t('common.register')}</a>
+            <a class="btn btn-sm" style="flex:1; border:1.6px solid rgba(255,255,255,.65); color:#fff" href="#login">${t('common.login')}</a>
+          </div>
+        </div>
+        ${settingsHTML()}`;
+      bindSettings();
+      initReveal();
+      return;
+    }
+
+    const p = getProfile() || demoProfile();
+    const name = `${p.lastName || ''} ${p.firstName || ''}`.trim() || p.pinyin || 'User';
+    const initial = (p.lastName || p.pinyin || 'U').charAt(0);
+
+    const badges = [];
+    badges.push(p.jlpt && p.jlpt !== 'none' ? `${t('my.jlptPrefix')} ${p.jlpt}` : t('my.jlptNone'));
+    if (p.ssw && p.ssw.length) p.ssw.forEach(id => {
+      const f = fieldOf(id);
+      if (f) badges.push(`${t('my.sswPrefix')}：${pick(f.name)}`);
+    });
+    else badges.push(t('my.sswNone'));
+
+    const apps = getApps();
+    const appsHTML = apps.length
+      ? apps.map(a => {
+          const j = jobOf(a.id);
+          if (!j) return '';
+          const f = fieldOf(j.field);
+          return `
+            <div class="app-row" data-id="${j.id}" style="--f-color:${f.color}; cursor:pointer">
+              <span class="a-emoji">${f.emoji}</span>
+              <div class="a-main">
+                <div class="a-title">${pick(j.title)}</div>
+                <div class="a-date">${a.date}</div>
+              </div>
+              <span class="status-chip">${t('my.appStatus')}</span>
+            </div>`;
+        }).join('')
+      : `<div class="app-row"><div class="a-main" style="text-align:center; color:var(--text-sub); font-size:12.5px">${t('my.appEmpty')}</div></div>`;
+
+    const dash = '—';
+    const profileRows = [
+      [t('reg.pinyin'), esc(p.pinyin) || dash],
+      [t('reg.birth'), esc(p.birth) || dash],
+      [t('reg.gender'), p.gender ? t('reg.gender.' + p.gender) : dash],
+      [t('reg.residence'), `${t(p.residence === 'jp' ? 'reg.residence.jp' : 'reg.residence.cn')}<br><small style="color:var(--text-sub)">${esc(p.address)}</small>`],
+      [t('reg.phone'), `${esc(p.phoneCode || '')} ${esc(p.phone) || dash}`],
+      [t('reg.wechat'), esc(p.wechat) || dash],
+      [t('reg.otherQual'), esc(p.otherQual) || dash],
+    ];
+
+    box.innerHTML = `
+      <div class="profile-card reveal">
+        <div class="profile-row">
+          <div class="avatar">${esc(initial)}</div>
+          <div>
+            <div class="profile-name">${esc(name)}</div>
+            <div class="profile-id">${t('my.memberId')}：${esc(p.memberId || '')}</div>
+          </div>
+        </div>
+        <div class="qual-badges">${badges.map(b => `<span class="qual-badge">${b}</span>`).join('')}</div>
+      </div>
+      <h2 class="sec-h">${t('my.applications')}</h2>
+      <div class="menu-card reveal">${appsHTML}</div>
+      <h2 class="sec-h">${t('my.profile')}</h2>
+      <dl class="confirm-list reveal" style="margin:0 16px 14px">${profileRows.map(([k, v]) =>
+        `<div class="confirm-row"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}
+      </dl>
+      ${settingsHTML()}
+      <div class="op-info">
+        <div class="op-title">${t('op.title')}</div>
+        <div class="op-name">${t('op.name')}</div>
+        <div class="op-line">${t('op.license')}</div>
+        <div class="op-line">${t('op.support')}</div>
+      </div>
+      <div class="footer">${t('footer.copy')}</div>`;
+
+    qsa('.app-row[data-id]', box).forEach(r =>
+      r.addEventListener('click', () => { location.hash = '#job/' + r.dataset.id; }));
+    bindSettings();
+    initReveal();
+  }
+
+  window.onLangChange = render;
+  render();
+  renderTabbar('mypage');
+}
+
+/* ---------- ルーター ---------- */
+const VIEWS = {
+  home: viewHome, register: viewRegister, login: viewLogin,
+  jobs: viewJobs, job: viewJob, favs: viewFavs, mypage: viewMypage,
+};
+
+function clearChrome() {
+  qsa('.tabbar, .cta-bar, .job-actions, .overlay, .petals').forEach(el => el.remove());
+  document.body.classList.remove('no-scroll');
+  window.onLangChange = null;
+  shellEl.className = 'shell';
+}
+
+function route() {
+  clearChrome();
+  const [name, param] = (location.hash || '#home').slice(1).split('/');
+  (VIEWS[name] || viewHome)(param);
+  window.scrollTo(0, 0);
+}
+
+/* ---------- 起動 ---------- */
+applyPrefs();
+renderDemoBar();
+document.addEventListener('click', e => {
+  if (e.target.closest('.lang-pill')) setLang(getLang() === 'ja' ? 'zh' : 'ja');
+});
+window.addEventListener('hashchange', route);
+route();
+
+</script>
+</body>
+</html>
