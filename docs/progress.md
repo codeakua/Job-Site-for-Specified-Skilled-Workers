@@ -1,6 +1,6 @@
 # 進捗・引き継ぎメモ（新しいチャットはまずこれを読む）
 
-最終更新: 2026-07-22 ／ 最新コミット時点の状態。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。**
+最終更新: 2026-07-22（#7 応募通知メール 完了）／ 最新コミット時点の状態。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。**
 
 ## 0. 一言サマリー
 中国人向け特定技能求人サイトの**β版**を、モック（リポジトリ直下HTML）→ Next.js実装へ移行中。
@@ -10,7 +10,7 @@
 - **本番URL**: `https://job-site-for-specified-skilled-work.vercel.app`（Vercel、mainではなく作業ブランチを本番デプロイ）
 - **リポジトリ / 作業ブランチ**: `codeakua/Job-Site-for-Specified-Skilled-Workers` / `claude/skilled-worker-job-site-mock-lk07i6`（このブランチがVercelの本番ブランチ）
 - **Supabase**: プロジェクトURL `https://jqevswrbdbmxifauqhfi.supabase.co`（公開値）。DBスキーマ・RLS・シード投入済み。**メール確認(Confirm email)はOFF**に設定済み（電話番号＋パスワード認証のため必須）。
-- **Vercel環境変数**: `NEXT_PUBLIC_SUPABASE_URL` と `NEXT_PUBLIC_SUPABASE_ANON_KEY`（＝Supabaseのpublishable key・公開値）が設定済み。**秘密のservice_role/DBパスワードはチャットに出さない。** メール通知用 `RESEND_API_KEY`/`STAFF_NOTIFY_EMAILS`（任意で `NOTIFY_FROM_EMAIL`）は**#7実装済み・Vercelへ登録すれば通知が飛ぶ**（未登録の間はコードが自動でスキップし、応募・登録は正常動作）。キー名は `app/.env.example` 参照。
+- **Vercel環境変数**: `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`（公開値）に加え、通知用 `RESEND_API_KEY`・`STAFF_NOTIFY_EMAILS` も**登録済み（2026-07-22・本番で応募通知メール到達を確認）**。宛先は当面オーナー（`yazawa-y@partner-japan.biz`）。**秘密のservice_role/DBパスワードはチャットに出さない。** 送信元は既定の `onboarding@resend.dev`（Resendテストモード＝**当面はResendアカウント所有アドレス宛のみ到達**。他スタッフ宛にも送るには独自ドメイン認証＋`NOTIFY_FROM_EMAIL`設定が必要）。キー名は `app/.env.example` 参照。
 - **スタッフアカウント**: オーナー（会員番号 YP-20260722-9443）は `staff_users` 登録済み＝`/admin` にアクセス可能。
 
 ## 2. 重要な制約（テスト方法）
@@ -44,7 +44,7 @@
 - ✅ **#1 T-01 基盤** / **#2 T-02 DB・RLS・シード** / **#3 T-03 認証・登録ウィザード** … Claude・完了
 - ✅ **#4 求人一覧**（PR#13）/ **#5 求人詳細＋お気に入り**（PR#14）/ **#6 マイページ＋お気に入り一覧**（PR#17）… Codex・マージ済み
 - ✅ **#8 管理画面・求人管理**（PR#15）… Codex・マージ済み（基本機能のみ）
-- 🔧 **#7 応募フロー＋応募通知メール（Resend）** … Claude担当・**実装済み（ブランチ `claude/repository-progress-review-1swpi1`）**。応募APIとスタッフ通知（新規登録時・新規応募時）を追加。**Vercelへenv登録＋実機確認待ち**。詳細は §9。
+- ✅ **#7 応募フロー＋応募通知メール（Resend）** … Claude・**完了**（本番ブランチへマージ済み。**2026-07-22 実機で応募通知メール到達を確認**）。応募APIとスタッフ通知（新規登録時・新規応募時）を追加。詳細は §9。
 - ⏸ **#9 管理・会員管理** / **#10 管理・応募管理** … 未着手（管理画面の刷新方針と合わせて検討）
 - ⏸ **#11 i18n本実装移行** … 未着手（現状も辞書で動作しており優先度低）
 - ⏸ **#12 E2E・総合QA・独自ドメイン** … Claude担当・最終フェーズ
@@ -58,8 +58,8 @@
 - 会員側UIは現状「日本語＋中国語切替」で確認中。最終的に中国語をデフォルト運用にする想定。
 
 ## 7. 次にやると良いこと（提案）
-1. **#7の仕上げ**: Vercelに `RESEND_API_KEY`/`STAFF_NOTIFY_EMAILS` を登録 → 実機で「登録／応募でスタッフにメールが届く」を確認。独自ドメインのメール送信元にする場合はResendでドメイン認証し `NOTIFY_FROM_EMAIL` を設定（§9参照）。
-2. **#10 応募管理**: 応募状態(`applications.status`)を管理画面から更新できるようにすると、マイページのステータスチップ（現状「担当者確認中」固定）と連動する。
+1. **#10 応募管理**: 応募状態(`applications.status`)を管理画面から更新できるようにすると、マイページのステータスチップ（現状「担当者確認中」固定）と連動する。#7の応募データが貯まり始めたので有力。
+2. **メール通知の宛先拡張（任意）**: 現状は送信元がResendテスト用のため所有アドレス宛のみ到達。スタッフを複数宛先にする／差出人を自社ドメインにするには、Resendで独自ドメインを認証し `NOTIFY_FROM_EMAIL` を設定（#12の独自ドメイン作業と同時が効率的）。
 3. もしくはオーナーとモデル全体をレビューし、会員側の文言・体験を磨く。
 4. 独自ドメイン・利用規約/プライバシーポリシー（Claudeがドラフト→顧問弁護士レビュー）はβ公開前に。
 
@@ -68,6 +68,7 @@
 - 中国在住者は**取次機関を使わず本サイトで直接募集**する方針（オーナー決定）。労働局届出・中国国内での募集方法は顧問弁護士に確認予定（サイト実装は現方針で進行可）。
 
 ## 9. #7 応募フロー＋スタッフ通知メール 実装メモ（2026-07-22 追記）
+**状態: ✅ 完了・本番稼働中。** 2026-07-22 に本番で**応募通知メールの到達を確認**（受信 `yazawa-y@partner-japan.biz`、差出人 `onboarding@resend.dev`）。※新規登録通知は同一の送信経路（`sendStaffEmail`）を使うため動作見込み。未実測なら次回テスト登録で確認する。
 **目的**: 応募をサーバーAPIで保存（重複防止）し、新規応募・新規登録のたびにスタッフへメール通知する。
 
 - **追加ファイル**
