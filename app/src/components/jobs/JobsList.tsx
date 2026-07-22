@@ -9,7 +9,7 @@ import { FIELDS, QUICK_TAGS, REGIONS, type LocalizedText } from "@/data/mock-dat
 import { pick } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 
-type JobRow = {
+export type JobRow = {
   id: number | string;
   field_id: string | null;
   region: string | null;
@@ -27,7 +27,7 @@ type JobRow = {
   chinese_support: boolean | null;
 };
 
-type UiJob = {
+export type UiJob = {
   id: string;
   field: string;
   region: string;
@@ -58,7 +58,7 @@ function toLocalizedText(ja: string | null, zh: string | null): LocalizedText {
   return { ja: ja ?? "", zh: zh ?? ja ?? "" };
 }
 
-function normalizeJob(row: JobRow): UiJob {
+export function normalizeJob(row: JobRow): UiJob {
   return {
     id: String(row.id),
     field: row.field_id && FIELD_IDS.has(row.field_id) ? row.field_id : FIELDS[0].id,
@@ -96,7 +96,7 @@ function matchesKeyword(job: UiJob, keyword: string, lang: "ja" | "zh") {
   return haystack.includes(keyword);
 }
 
-function JobCard({ job, isFavorite, onFavorite }: { job: UiJob; isFavorite: boolean; onFavorite: (jobId: string) => void }) {
+export function JobCard({ job, isFavorite, onFavorite }: { job: UiJob; isFavorite: boolean; onFavorite: (jobId: string) => void }) {
   const { lang, t } = useAppState();
   const field = fieldOf(job.field);
   const visibleTags = job.tags.slice(0, 3);
