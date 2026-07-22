@@ -941,6 +941,13 @@ select.input {
 .menu-item.danger { color: var(--danger); }
 .menu-item.danger .m-icon { background: #FDECEC; color: var(--danger); }
 
+/* フォームのエラー表示 */
+.form-error {
+  margin: -6px 0 14px; padding: 11px 14px; border-radius: var(--r-md);
+  background: #FDECEC; border: 1px solid #F5C2C2; color: #C0392B;
+  font-size: 12.5px; font-weight: 700; line-height: 1.6;
+}
+
 /* ---------- スクロールリビール ---------- */
 .reveal { opacity: 0; transform: translateY(16px); }
 .reveal.in { opacity: 1; transform: none; transition: opacity .5s ease, transform .55s cubic-bezier(.22, 1, .36, 1); }

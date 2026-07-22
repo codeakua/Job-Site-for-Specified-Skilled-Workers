@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { useAppState } from "@/components/providers";
+import { useAuth } from "@/components/auth-provider";
+import { TabBar } from "@/components/chrome/TabBar";
 import { IconGlobe, IconSearch } from "@/components/icons";
 
 /**
- * ランディング（未登録者向け）。モック index.html の静的セクションを移植した骨組み。
- * 求人プレビューカード（JobCard）と会員状態による分岐は T-03/T-04 で本実装する。
+ * ランディング。モック index.html を移植。
+ * ログイン状態（useAuth）で下部CTAとヒーローの導線を切り替える。
+ * 求人プレビューカードは T-04 で追加予定。
  */
 export function Landing() {
   const { t, lang, toggleLang } = useAppState();
+  const { user } = useAuth();
 
   return (
-    <div className="shell has-ctabar">
+    <div className={`shell ${user ? "has-tabbar" : "has-ctabar"}`}>
       <header className="topbar">
         <Link className="brand" href="/">
           <span className="brand-mark">🌸</span>
@@ -28,9 +32,11 @@ export function Landing() {
           </span>
           <span>{lang === "ja" ? "中文" : "日本語"}</span>
         </button>
-        <Link className="login-link" href="/login">
-          {t("common.login")}
-        </Link>
+        {!user && (
+          <Link className="login-link" href="/login">
+            {t("common.login")}
+          </Link>
+        )}
       </header>
 
       <section className="hero">
@@ -41,12 +47,23 @@ export function Landing() {
         <h1 style={{ whiteSpace: "pre-line" }}>{t("app.tagline")}</h1>
         <p className="hero-sub">{t("landing.heroSub")}</p>
         <div className="hero-cta">
-          <Link className="btn btn-white btn-block" href="/register">
-            ✨ {t("common.register")}
-          </Link>
-          <div className="hero-login">
-            {t("landing.haveAccount")} <Link href="/login">{t("common.login")}</Link>
-          </div>
+          {user ? (
+            <Link className="btn btn-white btn-block" href="/jobs">
+              <span className="icon">
+                <IconSearch />
+              </span>
+              {t("reg.done.cta")}
+            </Link>
+          ) : (
+            <>
+              <Link className="btn btn-white btn-block" href="/register">
+                ✨ {t("common.register")}
+              </Link>
+              <div className="hero-login">
+                {t("landing.haveAccount")} <Link href="/login">{t("common.login")}</Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -140,14 +157,15 @@ export function Landing() {
       </div>
       <footer className="footer">{t("footer.copy")}</footer>
 
-      <div className="cta-bar">
-        <Link className="btn btn-primary btn-block" href="/register">
-          <span className="icon">
-            <IconSearch />
-          </span>
-          {t("common.register")}
-        </Link>
-      </div>
+      {user ? (
+        <TabBar />
+      ) : (
+        <div className="cta-bar">
+          <Link className="btn btn-primary btn-block" href="/register">
+            ✨ {t("common.register")}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

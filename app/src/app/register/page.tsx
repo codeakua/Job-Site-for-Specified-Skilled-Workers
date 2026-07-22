@@ -1,6 +1,6 @@
-import { Placeholder } from "@/components/Placeholder";
+import { RegisterWizard } from "@/components/auth/RegisterWizard";
 
-// T-03（Claude）で本実装。新規登録ウィザード（4ステップ）。
+// T-03: 新規登録ウィザード（4ステップ＋完了）。
 export default function RegisterPage() {
-  return <Placeholder titleKey="reg.title" ticket="T-03" showTabBar={false} />;
+  return <RegisterWizard />;
 }

@@ -1,6 +1,11 @@
-import { Placeholder } from "@/components/Placeholder";
+import { Suspense } from "react";
+import { LoginForm } from "@/components/auth/LoginForm";
 
-// T-03（Claude）で本実装。ログイン（電話番号＋パスワード）。
+// T-03: ログイン（電話番号＋パスワード）。
 export default function LoginPage() {
-  return <Placeholder titleKey="login.title" ticket="T-03" showTabBar={false} />;
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
 }

@@ -50,3 +50,13 @@ export const IconUser = (p: IconProps) => (
     <path d="M4 21c1.5-3.5 4.5-5.5 8-5.5s6.5 2 8 5.5" />
   </svg>
 );
+export const IconBack = (p: IconProps) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 5l-7 7 7 7" />
+  </svg>
+);
+export const IconCheck = (p: IconProps) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <path d="m4.5 12.5 5 5 10-11" />
+  </svg>
+);

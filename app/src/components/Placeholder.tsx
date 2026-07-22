@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAppState } from "@/components/providers";
+import { useAuth } from "@/components/auth-provider";
+import { logout } from "@/lib/auth/client-auth";
 import { IconGlobe } from "@/components/icons";
 import { TabBar } from "@/components/chrome/TabBar";
 
@@ -13,12 +16,23 @@ export function Placeholder({
   titleKey,
   ticket,
   showTabBar = true,
+  showLogout = false,
 }: {
   titleKey: string;
   ticket: string;
   showTabBar?: boolean;
+  showLogout?: boolean;
 }) {
   const { t, lang, toggleLang } = useAppState();
+  const { user } = useAuth();
+  const router = useRouter();
+
+  async function onLogout() {
+    await logout();
+    router.push("/");
+    router.refresh();
+  }
+
   return (
     <div className={`shell${showTabBar ? " has-tabbar" : ""}`}>
       <header className="topbar">
@@ -45,6 +59,11 @@ export function Placeholder({
         <Link className="btn btn-primary" href="/" style={{ marginTop: 20 }}>
           {t("nav.home")}
         </Link>
+        {showLogout && user && (
+          <button type="button" className="btn btn-ghost" onClick={onLogout} style={{ marginTop: 4 }}>
+            {t("my.logout")}
+          </button>
+        )}
       </div>
 
       {showTabBar && <TabBar />}
