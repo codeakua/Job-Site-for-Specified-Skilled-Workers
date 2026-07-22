@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Node製の開発スクリプト（CommonJS・アプリのTS規約対象外）
+    "supabase/_generate_seed.js",
   ]),
 ]);
 

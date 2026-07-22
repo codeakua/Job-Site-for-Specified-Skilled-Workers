@@ -29,10 +29,12 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("blue");
   const [ready, setReady] = useState(false);
 
-  // 初回マウント時にlocalStorageから復元（layout.tsxのthemeInitと二重反映されるが実害なし）
+  // 初回マウント時にlocalStorageから復元。SSRとhydrationの不整合を避けるため
+  // 既定値でレンダーした直後にクライアント側で一度だけ同期する（意図的なパターン）。
   useEffect(() => {
     const savedTheme = localStorage.getItem(LS_THEME) === "red" ? "red" : "blue";
     const savedLang = localStorage.getItem(LS_LANG) === "zh" ? "zh" : "ja";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 外部ストア(localStorage)からの初回同期
     setThemeState(savedTheme);
     setLangState(savedLang);
     setReady(true);
