@@ -140,7 +140,7 @@ export function MypageClient() {
               <Link className="app-row" href={`/jobs/${job?.id ?? ""}`} key={application.id}>
                 <span className="a-emoji" style={{ "--f-color": field.color } as CSSProperties}>{field.emoji}</span>
                 <span className="a-main"><span className="a-title">{pick(lang, { ja: job?.title_ja ?? "", zh: job?.title_zh ?? job?.title_ja ?? "" })}</span><span className="a-date">{application.created_at?.slice(0, 10) ?? "-"}</span></span>
-                <span className="status-chip">{t("my.appStatus")}</span>
+                <span className="status-chip">{t(`application.status.${application.status ?? "new"}`)}</span>
               </Link>
             );
           }) : <div className="empty"><div className="e-emoji">📝</div><h3>{t("my.appEmpty")}</h3></div>}
