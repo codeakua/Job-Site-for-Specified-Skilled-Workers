@@ -17,7 +17,8 @@
 - テーマ/言語の状態は `useAppState()`（`src/components/providers.tsx`）を使う。localStorageを直接触らない
 - `next/font/google` など Google 系は使用禁止（中国アクセス配慮）。フォントはCSSのシステムスタックに任せる
 - 各ページの仮実装（`Placeholder`）は、担当チケットの本実装で置き換える
-- PR前に `npm run lint && npm run build` を通す
+- **スクロール演出**: `.reveal` クラスは layout の `RevealObserver`（`src/components/RevealObserver.tsx`）が全画面で自動的に `.in` を付与して表示する。**要素に `reveal` を付けるだけでよい**（IntersectionObserver等を各コンポーネントで自作しない）。`.reveal` は初期状態が非表示(opacity:0)なので、観測の仕組みなしに付けると要素が見えなくなる点に注意。
+- PR前に `cd app && npm run lint && npm run build` を通す（`next build` だけでは検出されないlintエラーがあるため両方必須）
 
 <!-- BEGIN:nextjs-agent-rules -->
 ## This is NOT the Next.js you know
