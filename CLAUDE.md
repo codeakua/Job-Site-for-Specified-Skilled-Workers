@@ -1,5 +1,7 @@
 # CLAUDE.md — Claude向け作業メモ
 
+> **🟦 新しいチャット（新セッション）はまず `docs/progress.md` を読むこと。** 現在の稼働状況・環境・設計判断・チケット状況・次の作業候補がすべてそこにまとまっている。続いて本ファイルと `AGENTS.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読む。
+
 **共通ルールの原本は `AGENTS.md`。まずそちらを読むこと。** 本ファイルはClaude固有の役割と補足のみ。
 
 ## Claudeの役割（アーキテクチャ責任者）
