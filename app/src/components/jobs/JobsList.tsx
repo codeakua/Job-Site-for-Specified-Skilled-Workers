@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { TabBar } from "@/components/chrome/TabBar";
 import { IconCheck, IconGlobe, IconHeart, IconPin, IconSearch } from "@/components/icons";
@@ -95,14 +96,14 @@ function matchesKeyword(job: UiJob, keyword: string, lang: "ja" | "zh") {
   return haystack.includes(keyword);
 }
 
-function JobCard({ job }: { job: UiJob }) {
+function JobCard({ job, isFavorite, onFavorite }: { job: UiJob; isFavorite: boolean; onFavorite: (jobId: string) => void }) {
   const { lang, t } = useAppState();
   const field = fieldOf(job.field);
   const visibleTags = job.tags.slice(0, 3);
 
   return (
     <article className="job-card reveal" data-id={job.id}>
-      <div className="job-card-inner">
+      <Link className="job-card-inner" href={`/jobs/${job.id}`}>
         <div className="job-icon" style={{ "--f-color": field.color } as CSSProperties}>
           <span>{field.emoji}</span>
         </div>
@@ -127,7 +128,8 @@ function JobCard({ job }: { job: UiJob }) {
           </div>
           <div className="job-bottom">{salaryLabel(job, t)}</div>
         </div>
-        <button type="button" className="fav-btn" aria-label="favorite">
+      </Link>
+        <button type="button" className={`fav-btn${isFavorite ? " on" : ""}`} aria-label="favorite" onClick={() => onFavorite(job.id)}>
           <span className="ic-off">
             <IconHeart />
           </span>
@@ -135,7 +137,6 @@ function JobCard({ job }: { job: UiJob }) {
             <IconHeart />
           </span>
         </button>
-      </div>
     </article>
   );
 }
@@ -145,6 +146,8 @@ export function JobsList() {
   const [jobs, setJobs] = useState<UiJob[]>([]);
   const [filters, setFilters] = useState<FilterState>({ field: ALL, region: ALL, tags: [], q: "" });
   const [areaOpen, setAreaOpen] = useState(false);
+  const [memberId, setMemberId] = useState<string | null>(null);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     let ignore = false;
@@ -158,6 +161,15 @@ export function JobsList() {
         if (!ignore) setJobs((data ?? []).map((row) => normalizeJob(row as JobRow)));
       });
 
+    supabase.auth.getUser().then(async ({ data }) => {
+      const userId = data.user?.id ?? null;
+      if (ignore) return;
+      setMemberId(userId);
+      if (!userId) return;
+      const { data: favData } = await supabase.from("favorites").select("job_id").eq("member_id", userId);
+      if (!ignore) setFavoriteIds(new Set((favData ?? []).map((favorite) => String(favorite.job_id))));
+    });
+
     return () => {
       ignore = true;
     };
@@ -170,7 +182,7 @@ export function JobsList() {
       .filter((job) => filters.region === ALL || job.region === filters.region)
       .filter((job) => filters.tags.every((tag) => job.tags.includes(tag)))
       .filter((job) => matchesKeyword(job, keyword, lang))
-      .sort((a, b) => Number(b.isNew) - Number(a.isNew) || a.id.localeCompare(b.id));
+      .sort((a, b) => Number(b.isNew) - Number(a.isNew) || Number(a.id) - Number(b.id));
   }, [filters, jobs, lang]);
 
   const setField = (field: string) => setFilters((current) => ({ ...current, field }));
@@ -185,6 +197,20 @@ export function JobsList() {
         ? current.tags.filter((currentTag) => currentTag !== tag)
         : [...current.tags, tag],
     }));
+
+  const toggleFavorite = async (jobId: string) => {
+    if (!memberId) return;
+    const isFavorite = favoriteIds.has(jobId);
+    setFavoriteIds((current) => {
+      const next = new Set(current);
+      if (isFavorite) next.delete(jobId);
+      else next.add(jobId);
+      return next;
+    });
+    const supabase = createClient();
+    if (isFavorite) await supabase.from("favorites").delete().eq("member_id", memberId).eq("job_id", jobId);
+    else await supabase.from("favorites").insert({ member_id: memberId, job_id: jobId });
+  };
 
   const regionLabel = filters.region === ALL ? t("jobs.area") : t(`region.${filters.region}`);
   const regionOptions = [ALL, ...REGIONS];
@@ -259,7 +285,7 @@ export function JobsList() {
         {filteredJobs.length > 0 ? (
           <div className="job-list">
             {filteredJobs.map((job) => (
-              <JobCard job={job} key={job.id} />
+              <JobCard job={job} isFavorite={favoriteIds.has(job.id)} onFavorite={toggleFavorite} key={job.id} />
             ))}
           </div>
         ) : (
