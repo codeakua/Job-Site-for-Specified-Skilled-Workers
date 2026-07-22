@@ -81,6 +81,13 @@ export async function registerMember(input: RegisterInput): Promise<AuthResult> 
   });
   if (insertError) return { ok: false, error: "登録情報の保存に失敗しました：" + insertError.message };
 
+  // スタッフへ新規登録を通知（サーバー側でResend送信。失敗しても登録は成功扱いにする）。
+  try {
+    await fetch("/api/notify/registration", { method: "POST" });
+  } catch {
+    // 通知の失敗は登録結果に影響させない
+  }
+
   return { ok: true, memberNo };
 }
 
