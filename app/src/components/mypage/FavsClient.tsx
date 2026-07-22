@@ -51,7 +51,7 @@ export function FavsClient() {
             <div className="e-emoji">♡</div>
             <h3>{t("favs.empty.title")}</h3>
             <p>{t("favs.empty.sub")}</p>
-            <Link className="btn primary" href="/jobs">{t("favs.browse")}</Link>
+            <Link className="btn btn-primary" href="/jobs">{t("favs.browse")}</Link>
           </div>
         )}
       </main>

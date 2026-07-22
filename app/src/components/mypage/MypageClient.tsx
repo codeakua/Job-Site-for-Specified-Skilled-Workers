@@ -149,7 +149,7 @@ export function MypageClient() {
         <section className="menu-card reveal">
           <button type="button" className="menu-item"><span className="m-icon"><IconGlobe /></span>{t("my.settings")}</button>
           <button type="button" className="menu-item" onClick={() => setLang(lang === "ja" ? "zh" : "ja")}><span>{t("my.lang")}</span><span className="m-value">{lang === "ja" ? "日本語" : "中文"}</span></button>
-          <button type="button" className="menu-item" onClick={() => setTheme(theme === "blue" ? "red" : "blue")}><span>{t("my.theme")}</span><span className="m-value">{theme}</span></button>
+          <button type="button" className="menu-item" onClick={() => setTheme(theme === "blue" ? "red" : "blue")}><span>{t("my.theme")}</span><span className="m-value">{t(theme === "red" ? "demo.theme.red" : "demo.theme.blue")}</span></button>
           <button type="button" className="menu-item danger" onClick={handleLogout}><span className="m-icon"><IconLock /></span>{t("my.logout")}</button>
         </section>
 
