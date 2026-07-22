@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FIELDS, QUICK_TAGS, REGIONS } from "@/data/mock-data";
 import { translate } from "@/lib/i18n";
 
@@ -123,14 +123,24 @@ function JobForm({ job, action }: { job: Partial<AdminJob>; action: Props["saveJ
 export function AdminJobsManager({ jobs, saveJob, toggleStatus }: Props) {
   const [editingId, setEditingId] = useState<string | "new" | null>(null);
   const editingJob = useMemo(() => editingId === "new" ? emptyJob : jobs.find((job) => String(job.id) === editingId), [editingId, jobs]);
+  const formRef = useRef<HTMLElement>(null);
+  // 新規作成/編集を開いたら、フォーム位置へスクロールして見える状態にする。
+  useEffect(() => {
+    if (editingId && formRef.current) formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [editingId]);
 
   return (
     <main className="shell admin-shell">
-      <style>{`.admin-shell{padding-bottom:40px}.admin-nav{display:flex;gap:8px;margin:16px 0}.admin-grid{display:grid;gap:12px}.admin-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}.admin-checks{display:flex;flex-wrap:wrap;gap:8px}.admin-check{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card)}.admin-check.single{margin:auto 0}.admin-form{display:grid;gap:18px}.admin-list{display:grid;gap:10px}.admin-job{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.admin-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.status{font-weight:800;color:var(--primary)}.status.draft{color:var(--muted)}@media(max-width:720px){.admin-grid.two,.admin-grid.four{grid-template-columns:1fr}.admin-job{display:grid}.admin-actions{justify-content:flex-start}}`}</style>
+      <style>{`.admin-shell{padding-bottom:40px}.admin-nav{display:flex;gap:8px;margin:16px 0}.admin-grid{display:grid;gap:12px}.admin-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}.admin-checks{display:flex;flex-wrap:wrap;gap:8px}.admin-check{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card)}.admin-check.single{margin:auto 0}.admin-form{display:grid;gap:18px}.admin-list{display:grid;gap:10px}.admin-job{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.admin-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.status{font-weight:800;color:var(--primary)}.status.draft{color:var(--text-faint)}.sec-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.admin-editing{background:var(--primary-softer);border:1.6px solid var(--primary-soft);border-radius:var(--r-lg);padding:16px;margin-bottom:14px}@media(max-width:720px){.admin-grid.two,.admin-grid.four{grid-template-columns:1fr}.admin-job{display:grid}.admin-actions{justify-content:flex-start}}`}</style>
       <header className="hero-card reveal"><p className="eyebrow">管理画面</p><h1>求人管理</h1><p>求人の一覧・新規作成・編集・公開/停止を行います。</p></header>
       <nav className="admin-nav"><span className="chip on">求人</span><span className="chip">会員</span><span className="chip">応募</span></nav>
+      {editingJob ? (
+        <section ref={formRef} className="admin-editing">
+          <div className="sec-title"><h2>{editingId === "new" ? "求人を新規作成" : "求人を編集"}</h2><button className="btn" type="button" onClick={() => setEditingId(null)}>閉じる</button></div>
+          <JobForm job={editingJob} action={saveJob} />
+        </section>
+      ) : null}
       <section className="card-sec"><div className="sec-title"><h2>求人一覧</h2><button className="btn btn-primary" type="button" onClick={() => setEditingId("new")}>新規作成</button></div><div className="admin-list">{jobs.map((job) => (<article className="admin-job" key={job.id}><div><p className={`status ${job.status}`}>{job.status === "published" ? "公開中" : "下書き"}</p><h3>{job.title_ja}</h3><p>{job.area_ja}／月給 {job.salary_min}〜{job.salary_max}万円</p></div><div className="admin-actions"><form action={toggleStatus}><input type="hidden" name="id" value={job.id} /><input type="hidden" name="next_status" value={job.status === "published" ? "draft" : "published"} /><button className="btn" type="submit">{job.status === "published" ? "停止" : "公開"}</button></form><button className="btn" type="button" onClick={() => setEditingId(String(job.id))}>編集</button></div></article>))}</div></section>
-      {editingJob ? <section><h2>{editingId === "new" ? "求人を新規作成" : "求人を編集"}</h2><JobForm job={editingJob} action={saveJob} /></section> : null}
     </main>
   );
 }
