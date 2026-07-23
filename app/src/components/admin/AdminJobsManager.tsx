@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FIELDS, QUICK_TAGS, REGIONS } from "@/data/mock-data";
 import { translate } from "@/lib/i18n";
@@ -133,7 +134,7 @@ export function AdminJobsManager({ jobs, saveJob, toggleStatus }: Props) {
     <main className="shell admin-shell">
       <style>{`.admin-shell{padding-bottom:40px}.admin-nav{display:flex;gap:8px;margin:16px 0}.admin-grid{display:grid;gap:12px}.admin-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}.admin-checks{display:flex;flex-wrap:wrap;gap:8px}.admin-check{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card)}.admin-check.single{margin:auto 0}.admin-form{display:grid;gap:18px}.admin-list{display:grid;gap:10px}.admin-job{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.admin-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.status{font-weight:800;color:var(--primary)}.status.draft{color:var(--text-faint)}.sec-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.admin-editing{background:var(--primary-softer);border:1.6px solid var(--primary-soft);border-radius:var(--r-lg);padding:16px;margin-bottom:14px}@media(max-width:720px){.admin-grid.two,.admin-grid.four{grid-template-columns:1fr}.admin-job{display:grid}.admin-actions{justify-content:flex-start}}`}</style>
       <header className="hero-card reveal"><p className="eyebrow">管理画面</p><h1>求人管理</h1><p>求人の一覧・新規作成・編集・公開/停止を行います。</p></header>
-      <nav className="admin-nav"><span className="chip on">求人</span><span className="chip">会員</span><span className="chip">応募</span></nav>
+      <nav className="admin-nav"><span className="chip on">求人</span><Link className="chip" href="/admin/members">会員</Link><Link className="chip" href="/admin/applications">応募</Link></nav>
       {editingJob ? (
         <section ref={formRef} className="admin-editing">
           <div className="sec-title"><h2>{editingId === "new" ? "求人を新規作成" : "求人を編集"}</h2><button className="btn" type="button" onClick={() => setEditingId(null)}>閉じる</button></div>
