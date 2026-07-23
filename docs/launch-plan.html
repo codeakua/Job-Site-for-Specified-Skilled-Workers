@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>樱聘 YingPin 本格運用 実行計画書（8/18）</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+<style>
+  :root {
+    --primary: #1E6FFF; --primary-deep: #1557D6;
+    --primary-soft: #E9F1FF; --primary-softer: #F4F8FF;
+    --accent: #00C2FF;
+    --grad: linear-gradient(135deg, #1E6FFF 0%, #2E9BFF 60%, #00C2FF 110%);
+    --grad-bar: linear-gradient(180deg, #1E6FFF, #00C2FF);
+    --crit: linear-gradient(90deg,#FF7A3D,#F0532A);
+    --bg: #F6F7F9; --card: #fff;
+    --text: #17181C; --sub: #7B828C; --faint: #A6ACB5; --line: #ECEDF1;
+    --ok: #0FA968; --warn: #C77700; --danger:#D14343;
+    --r-lg: 16px; --r-md: 12px; --r-sm: 10px;
+    --shadow: 0 2px 12px rgba(30,111,255,.05), 0 1px 3px rgba(15,23,42,.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'PingFang SC', 'Noto Sans JP', 'Microsoft YaHei', system-ui, sans-serif;
+    background: var(--bg); color: var(--text);
+    font-size: 14.5px; line-height: 1.75; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 18px 70px; }
+
+  .head { background: var(--grad); color: #fff; border-radius: 0 0 22px 22px; padding: 34px 24px 30px; margin: 0 -18px 26px; position: relative; overflow: hidden; }
+  .head::after { content:''; position:absolute; width:230px; height:230px; border-radius:50%; right:-70px; top:-95px; background:rgba(255,255,255,.14); }
+  .head .tag { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.05em; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); padding:4px 12px; border-radius:999px; margin-bottom:12px; }
+  .head h1 { font-size: 25px; font-weight: 900; line-height: 1.4; position:relative; z-index:1; }
+  .head p { font-size: 12.5px; opacity:.95; margin-top:10px; position:relative; z-index:1; }
+  .head .meta { margin-top:14px; display:flex; flex-wrap:wrap; gap:8px; position:relative; z-index:1; }
+  .head .meta span { font-size:11px; font-weight:700; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28); padding:4px 10px; border-radius:8px; }
+
+  h2 { display:flex; align-items:center; gap:9px; font-size:18.5px; font-weight:900; margin:40px 0 6px; break-after: avoid; }
+  h2::before { content:''; width:5px; height:20px; border-radius:3px; background:var(--grad-bar); flex:none; }
+  h2 .no { color:var(--primary); font-size:13px; font-weight:900; background:var(--primary-soft); border-radius:8px; padding:2px 9px; }
+  h3 { font-size:14.5px; font-weight:850; margin:18px 0 6px; color:var(--primary-deep); }
+  .lead { color:var(--sub); font-size:13px; margin-bottom:14px; }
+
+  .card { background:var(--card); border-radius:var(--r-lg); box-shadow:var(--shadow); padding:18px; margin:12px 0; break-inside: avoid; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+
+  table { width:100%; border-collapse:collapse; background:var(--card); border-radius:var(--r-lg); box-shadow:var(--shadow); overflow:hidden; margin:12px 0; font-size:12.8px; break-inside: avoid; }
+  th, td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:var(--primary-softer); font-size:12px; font-weight:800; color:var(--primary-deep); }
+  tr:last-child td { border-bottom:0; }
+  .table-scroll { overflow-x:auto; margin:12px 0; }
+  .table-scroll table { margin:0; min-width:560px; }
+  .yes { color:var(--ok); font-weight:800; } .no-x { color:var(--danger); font-weight:800; }
+
+  .callout { border-radius:var(--r-md); padding:14px 16px; margin:12px 0; font-size:13px; break-inside: avoid; }
+  .callout b { font-weight:850; }
+  .c-blue { background:var(--primary-softer); border:1px solid var(--primary-soft); }
+  .c-warn { background:#FFF7EA; border:1px solid #F6E2BC; }
+  .c-danger { background:#FDEEEE; border:1px solid #F6CFCF; }
+  .c-ok { background:#E8FBF0; border:1px solid #BDEBD2; }
+
+  ul, ol { padding-left:20px; } li { margin:5px 0; font-size:13px; }
+  .pill { display:inline-block; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:999px; }
+  .p-crit { background:#FCE6DE; color:#C6431F; } .p-ok { background:#E3F6EC; color:#0C8A55; } .p-blue { background:var(--primary-soft); color:var(--primary-deep); }
+
+  /* ノード図 */
+  .fig { background:var(--card); border-radius:var(--r-lg); box-shadow:var(--shadow); padding:20px 16px; margin:14px 0; break-inside: avoid; }
+  .noderow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .node { background:var(--primary-softer); border:1.5px solid var(--primary-soft); border-radius:var(--r-md); padding:9px 11px; text-align:center; font-size:12px; font-weight:800; line-height:1.45; }
+  .node small { display:block; font-weight:600; font-size:10px; color:var(--sub); }
+  .node.main { background:var(--grad); color:#fff; border:0; box-shadow:0 6px 16px rgba(30,111,255,.28); }
+  .node .arrow { color:var(--primary); font-weight:900; }
+
+  /* ===== ガントチャート（JS不要・印刷対応） ===== */
+  .gantt { background:var(--card); border-radius:var(--r-lg); box-shadow:var(--shadow); padding:16px 14px 18px; margin:14px 0; break-inside: avoid; }
+  .gscroll { overflow-x:auto; }
+  .ginner { min-width:660px; }
+  .grow { display:flex; align-items:center; min-height:26px; }
+  .glabel { width:210px; flex:none; font-size:11.4px; font-weight:700; padding-right:10px; line-height:1.3; }
+  .glabel small { color:var(--sub); font-weight:600; }
+  .gtrack { position:relative; flex:1; height:20px; background-image:linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size:21.875% 100%; background-position:0 0; border-radius:3px; }
+  .gaxis .gtrack { height:20px; background:none; }
+  .gaxis .tick { position:absolute; top:0; font-size:10px; font-weight:800; color:var(--sub); transform:translateX(-2px); }
+  .gsec { font-size:11px; font-weight:900; color:var(--primary-deep); background:var(--primary-softer); border-radius:6px; padding:3px 9px; margin:11px 0 4px; display:inline-block; }
+  .bar { position:absolute; top:3px; height:14px; border-radius:4px; background:var(--grad); box-shadow:0 1px 3px rgba(30,111,255,.25); }
+  .bar.crit { background:var(--crit); box-shadow:0 1px 3px rgba(240,83,42,.28); }
+  .bar.wait { background:repeating-linear-gradient(45deg,#F6C669,#F6C669 5px,#F3B84A 5px,#F3B84A 10px); }
+  .bar.soft { background:#CFE0FF; box-shadow:none; }
+  .mstone { position:absolute; top:-1px; width:22px; height:22px; background:var(--crit); transform:translateX(-11px) rotate(45deg); border-radius:4px; box-shadow:0 2px 6px rgba(240,83,42,.4); }
+  .mlabel { position:absolute; top:-2px; font-size:10.5px; font-weight:900; color:#F0532A; white-space:nowrap; }
+  .glegend { display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; font-size:10.8px; color:var(--sub); font-weight:700; }
+  .glegend i { display:inline-block; width:16px; height:9px; border-radius:3px; vertical-align:middle; margin-right:4px; }
+
+  .foot { text-align:center; color:var(--faint); font-size:11px; margin-top:34px; line-height:1.7; }
+
+  @page { size: A4; margin: 13mm; }
+  @media print {
+    body { background:#fff; font-size:11px; }
+    .wrap { max-width:100%; padding:0; }
+    .head { margin:0 0 18px; border-radius:0 0 16px 16px; }
+    h2 { margin-top:22px; font-size:15px; }
+    .ginner { min-width:0; }
+    .gscroll { overflow:visible; }
+    table, .card, .callout, .gantt, .fig { box-shadow:none; border:1px solid var(--line); }
+    .no-print { display:none; }
+  }
+  @media (max-width:560px){ .grid2,.grid3{grid-template-columns:1fr;} .glabel{width:150px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <span class="tag">実行計画書 ・ 本格運用開始</span>
+    <h1>樱聘 YingPin<br>8月18日 本格運用開始 実行計画</h1>
+    <p>現在ほぼ完成しているサイトを「本当のユーザーを受け入れて安全に動かす」状態にするための段取り。専門知識がなくてもわかる形でまとめています。</p>
+    <div class="meta"><span>📅 作成 2026-07-23</span><span>🎯 公開目標 2026-08-18</span><span>👤 制作 オーナー1名＋AI</span><span>🔎 4視点レビュー反映済</span></div>
+  </div>
+
+  <!-- 0 要点 -->
+  <h2><span class="no">0</span>まず1分で ― この計画の要点</h2>
+  <div class="grid2">
+    <div class="callout c-ok"><b>✅ 良い知らせ</b><br>サイトの「機能」はほぼ完成。登録・求人検索・応募・お気に入り・マイページ・管理画面（求人/会員/応募）まで動いて本番稼働中です。</div>
+    <div class="callout c-warn"><b>⚠️ 注意点</b><br>「機能が動く」と「本当のお客様の個人情報を預かって公開できる」は<b>別物</b>。公開前に直すべき土台・安全・法務の宿題があります。</div>
+  </div>
+  <div class="callout c-blue"><b>やること（8/18まで）</b>：①安全の土台 ②公開前セキュリティ是正 ③規約・プライバシーポリシー ④独自ドメイン ⑤有料プラン化 ⑥実求人データ投入 を、<b>お盆（8/11〜16）前に前倒し</b>で片づけます。進め方は従来通り<b>AIが実装／あなたは依頼・確認・承認</b>の3操作。</div>
+  <div class="callout c-danger"><b>正直な見通し</b>：<b>「小さく開始（少人数＋実求人数社で静かに公開）」なら8/18は達成可能</b>。宿題を"公開の合格ライン"として前倒しできるかが鍵です。間に合わない場合の最小構成も§9・リスク欄に用意しました。</div>
+
+  <!-- 1 現状 -->
+  <h2><span class="no">1</span>いま、どこまでできているか</h2>
+  <div class="table-scroll"><table>
+    <tr><th>区分</th><th>機能</th><th>状態</th></tr>
+    <tr><td>会員側</td><td>新規登録（4ステップ）・ログイン</td><td class="yes">✅</td></tr>
+    <tr><td>会員側</td><td>求人一覧＋絞り込み・求人詳細・お気に入り・応募・WeChat相談</td><td class="yes">✅</td></tr>
+    <tr><td>会員側</td><td>マイページ（登録情報・応募履歴・言語/テーマ）</td><td class="yes">✅</td></tr>
+    <tr><td>通知</td><td>応募・新規登録のスタッフ宛メール（Resend）</td><td class="yes">✅ 到達確認済</td></tr>
+    <tr><td>管理画面</td><td>求人管理・応募管理（6状態）・会員管理・本人確認フラグ</td><td class="yes">✅ 全機能マージ済</td></tr>
+  </table></div>
+  <div class="callout c-warn"><b>⚠️ でも「本番運用の準備度」はまだ低い（4視点レビュー一致）</b><br>
+  機能がそろっても、実際に公開して個人情報を預かるには次が未整備：<b>自動チェック(CI)・本番ブランチ保護・監視・バックアップ・戻す手順</b>（土台）／<b>実在のセキュリティの穴2件・bot対策なし</b>（安全）／<b>規約・プライバシーポリシーのページが無い</b>（法務）／<b>「モックです/サンプル/98%以上」の仮文言が残存</b>（表示）／<b>求人はサンプル14件</b>（要入替）／<b>Vercel/Supabase Pro化</b>（商用必須）。</div>
+
+  <!-- 2 意味 -->
+  <h2><span class="no">2</span>「本格運用開始」とは、具体的に何をすることか</h2>
+  <div class="fig"><div class="noderow">
+    <div class="node">①安全の土台<small>監視・バックアップ・戻す</small></div>
+    <div class="node">②セキュリティ是正<small>見えてはいけない情報を塞ぐ</small></div>
+    <div class="node">③規約・PP<small>個人情報の約束を公開</small></div>
+    <span class="arrow">➜</span>
+    <div class="node main">🚀 8/18<br>本格運用開始<small>実ユーザー受け入れ</small></div>
+    <span class="arrow">➜</span>
+    <div class="node">④独自ドメイン<small>正式な住所</small></div>
+    <div class="node">⑤有料プラン化<small>商用に必須</small></div>
+    <div class="node">⑥実求人データ<small>サンプルを本物に</small></div>
+  </div></div>
+
+  <!-- 3 ガント -->
+  <h2><span class="no">3</span>全体スケジュール（8/18から逆算）</h2>
+  <div class="lead">帯 = 作業期間／ひし形 = 公開日／斜線 = 待ち・お盆。<span class="pill p-crit">オレンジ</span>は遅れると公開がずれる重要作業（クリティカルパス）。</div>
+  <div class="gantt"><div class="gscroll"><div class="ginner">
+
+    <!-- 軸 -->
+    <div class="grow gaxis"><div class="glabel"></div><div class="gtrack">
+      <span class="tick" style="left:0%">7/23</span>
+      <span class="tick" style="left:21.875%">7/30</span>
+      <span class="tick" style="left:43.75%">8/6</span>
+      <span class="tick" style="left:65.625%">8/13</span>
+      <span class="tick" style="left:87.5%">8/20</span>
+    </div></div>
+
+    <div class="gsec">外部待ち・並行</div>
+    <div class="grow"><div class="glabel">規約/PP 弁護士レビュー <small>最重要</small></div><div class="gtrack"><div class="bar wait" style="left:3.1%;width:56.3%"></div></div></div>
+    <div class="grow"><div class="glabel">お盆（実働が落ちる）</div><div class="gtrack"><div class="bar wait" style="left:59.4%;width:18.8%"></div></div></div>
+
+    <div class="gsec">M0 現状固め＋前倒し（〜7/27）</div>
+    <div class="grow"><div class="glabel">通しレビュー→直す点リスト</div><div class="gtrack"><div class="bar" style="left:0%;width:9.4%"></div></div></div>
+    <div class="grow"><div class="glabel">規約・PPドラフト→弁護士送付</div><div class="gtrack"><div class="bar crit" style="left:3.1%;width:9.4%"></div></div></div>
+    <div class="grow"><div class="glabel">独自ドメイン購入＋DNS</div><div class="gtrack"><div class="bar crit" style="left:3.1%;width:9.4%"></div></div></div>
+    <div class="grow"><div class="glabel">実求人の収集開始（企業連絡）</div><div class="gtrack"><div class="bar" style="left:3.1%;width:37.5%"></div></div></div>
+    <div class="grow"><div class="glabel">CI導入＋本番ブランチ保護</div><div class="gtrack"><div class="bar" style="left:6.3%;width:9.4%"></div></div></div>
+
+    <div class="gsec">M1 磨き込み＋セキュリティ是正（〜8/3）</div>
+    <div class="grow"><div class="glabel">公開前セキュリティ是正（必須）</div><div class="gtrack"><div class="bar crit" style="left:15.6%;width:15.6%"></div></div></div>
+    <div class="grow"><div class="glabel">モック文言撤去・中国語を既定</div><div class="gtrack"><div class="bar" style="left:15.6%;width:12.5%"></div></div></div>
+    <div class="grow"><div class="glabel">メール本番化（Resend認証）</div><div class="gtrack"><div class="bar" style="left:25%;width:9.4%"></div></div></div>
+    <div class="grow"><div class="glabel">細かいUI修正（まとめて1回）</div><div class="gtrack"><div class="bar soft" style="left:28.1%;width:6.3%"></div></div></div>
+
+    <div class="gsec">M2 本番土台（〜8/8・お盆前に完了）</div>
+    <div class="grow"><div class="glabel">独自ドメイン公開</div><div class="gtrack"><div class="bar crit" style="left:37.5%;width:6.3%"></div></div></div>
+    <div class="grow"><div class="glabel">Pro化＋バックアップ復元演習</div><div class="gtrack"><div class="bar crit" style="left:37.5%;width:9.4%"></div></div></div>
+    <div class="grow"><div class="glabel">監視3点（Sentry/外形/通知先）</div><div class="gtrack"><div class="bar" style="left:40.6%;width:6.3%"></div></div></div>
+    <div class="grow"><div class="glabel">セキュリティヘッダ追加</div><div class="gtrack"><div class="bar soft" style="left:43.8%;width:3.1%"></div></div></div>
+    <div class="grow"><div class="glabel">実求人データ投入（管理画面）</div><div class="gtrack"><div class="bar crit" style="left:40.6%;width:12.5%"></div></div></div>
+
+    <div class="gsec">M3 総合QA（〜8/15）</div>
+    <div class="grow"><div class="glabel">範囲を絞った安全点検</div><div class="gtrack"><div class="bar crit" style="left:53.1%;width:9.4%"></div></div></div>
+    <div class="grow"><div class="glabel">主要10ケース手動＋RLS再検証</div><div class="gtrack"><div class="bar" style="left:53.1%;width:12.5%"></div></div></div>
+    <div class="grow"><div class="glabel">規約・PP公開（弁護士反映）</div><div class="gtrack"><div class="bar crit" style="left:59.4%;width:6.3%"></div></div></div>
+    <div class="grow"><div class="glabel">スタッフ教育</div><div class="gtrack"><div class="bar soft" style="left:65.6%;width:6.3%"></div></div></div>
+
+    <div class="gsec">公開</div>
+    <div class="grow"><div class="glabel">M4 予備（バグ修正・最終確認）</div><div class="gtrack"><div class="bar" style="left:75%;width:6.3%"></div></div></div>
+    <div class="grow"><div class="glabel">🚀 本格運用開始</div><div class="gtrack"><div class="mstone" style="left:81.25%"></div><span class="mlabel" style="left:83%">8/18 公開</span></div></div>
+    <div class="grow"><div class="glabel">公開後 初動監視・安定化</div><div class="gtrack"><div class="bar soft" style="left:84.4%;width:15.6%"></div></div></div>
+
+  </div></div>
+  <div class="glegend">
+    <span><i style="background:var(--grad)"></i>通常作業</span>
+    <span><i class="crit" style="background:linear-gradient(90deg,#FF7A3D,#F0532A)"></i>重要（クリティカルパス）</span>
+    <span><i style="background:repeating-linear-gradient(45deg,#F6C669,#F6C669 4px,#F3B84A 4px,#F3B84A 8px)"></i>待ち・お盆</span>
+    <span><i style="background:#CFE0FF"></i>軽作業</span>
+    <span>◆ 公開マイルストーン</span>
+  </div>
+  </div>
+
+  <!-- 4 順番とお盆 -->
+  <h2><span class="no">4</span>スケジュールの2大注意点 ― 「順番」と「お盆」</h2>
+  <div class="callout c-blue"><b>⛓ 順番を守る作業（直列）</b><br>
+  <b>メール本番化</b>：ドメイン購入 → DNS設定 → Resend独自ドメイン認証（信頼設定 SPF/DKIM/DMARC・反映最大48h）→ 送信元を自社に → 複数スタッフ宛。<br>
+  → <b>ドメイン購入は今週（M0）に前倒し必須</b>。今は送信元がテスト用で<b>オーナー以外のスタッフに通知が届きません</b>。<br>
+  <b>法務</b>：規約・PP下書き → 弁護士 → 反映 → 公開。<b>プライバシーポリシー公開は本格運用の前提条件</b>。</div>
+  <div class="callout c-warn"><b>🎌 お盆（8/11〜16頃）が最終盤に重なる</b><br>最終QA・予備日・弁護士の折返し・実求人企業への連絡が休みに直撃。→ <b>弁護士返却・実データ・企業連絡を「8/8まで」に前倒し</b>、8/11〜16は予備＆軽作業に。</div>
+
+  <!-- 5 エフォート -->
+  <h2><span class="no">5</span>AI・エフォート割り当て（使用量を節約しながら）</h2>
+  <div class="lead">Claude Max（賢いOpus・枠多め）＋ ChatGPT Pro（Codexが主戦力）を賢く配分。品質を保ちつつ使用量を節約します。</div>
+  <div class="grid2">
+    <div class="callout c-blue"><b>賢さ＝「間違えたときの痛さ」で選ぶ</b><br>安全・設計・最終点検は最も賢い<b>Opus</b>。それ以外は標準の<b>Sonnet</b>で十分。軽作業は<b>Haiku</b>やブラウザ版へ。</div>
+    <div class="callout c-blue"><b>使用量＝「文脈の広さ×やり直し回数」</b><br>重要度とは別軸。1行の確認はOpusでも激安、「全部点検」は高い。<b>だから作業は小さく区切る</b>。既定はSonnet、安全時だけClaudeが自分でOpusへ。</div>
+  </div>
+  <h3>使用量を節約する7つのコツ</h3>
+  <ol>
+    <li><b>依頼を具体的に書く</b>（触る範囲・参照ファイル・完了条件）→ やり直し＝使用量の倍消費を防ぐ（最大の節約）</li>
+    <li><b>Codex依頼に「完了条件チェック」を必ず付ける</b>（差し戻しを無くす）</li>
+    <li><b>自動チェック(CI)を入れる</b>→ 毎回の lint/build 確認が不要に（費用対効果が最も高い）</li>
+    <li>レビューは<b>変更点(差分)だけ</b>渡す／⑤ <b>1作業=1会話</b>で続ける（再読込コスト約1/10）</li>
+    <li>文章・翻訳・下書き・手順調べは<b>ブラウザのChatGPT/Claude</b>（コーディング枠を使わない）</li>
+    <li>決めたことは <code>docs/</code> に記録（同じ説明を繰り返さない）</li>
+  </ol>
+  <h3>作業ごとの割り当て</h3>
+  <div class="table-scroll"><table>
+    <tr><th>作業</th><th>担当／賢さ</th><th>使用量</th><th>ひとこと</th></tr>
+    <tr><td>公開前セキュリティ是正</td><td>実装=Sonnet/Codex・<b>点検=Opus</b></td><td class="yes">低</td><td>書くのは簡単、点検だけ慎重に</td></tr>
+    <tr><td>モック文言撤去・実求人差替</td><td>Codex→Claude確認</td><td class="yes">極低</td><td>辞書修正＋管理画面投入</td></tr>
+    <tr><td>細かいUI修正</td><td><b>5件まとめて1回</b></td><td class="yes">極低</td><td>1件ずつ依頼は往復のムダ</td></tr>
+    <tr><td>中国語を既定表示に</td><td>切替=極小／校正=ブラウザ</td><td class="yes">低</td><td>本格辞書移行は公開後へ</td></tr>
+    <tr><td>メール本番化・独自ドメイン</td><td>手順=ブラウザ／設定=Claude小</td><td class="yes">低</td><td>DNS操作はあなた</td></tr>
+    <tr><td>CI・監視・バックアップ導入</td><td>Claude(Sonnet)＋あなた</td><td>低〜中</td><td>一度きり・効果は継続</td></tr>
+    <tr><td><b>総合QA・最終安全点検</b></td><td>手動=0／<b>範囲を絞った点検=Opus</b>／実機=あなた</td><td class="no-x">Opus部分のみ高</td><td>「Opusで全部」を避け要所に集中（枠温存）</td></tr>
+    <tr><td>規約・PP下書き</td><td>ブラウザ下書き→Claude整形→弁護士</td><td class="yes">低〜中</td><td>最終判断は弁護士</td></tr>
+    <tr><td>実求人データ投入</td><td><b>あなたが管理画面から</b></td><td class="yes">極低</td><td>実個人情報をコードに入れない</td></tr>
+  </table></div>
+
+  <!-- 6 やること -->
+  <h2><span class="no">6</span>あなた（オーナー）がやることリスト</h2>
+  <div class="lead">コードを書く必要はありません。お願いは「依頼・確認・承認」と、いくつかの人手作業だけ。</div>
+  <div class="grid3">
+    <div class="card"><b>🔴 今週（M0）最優先</b><ul>
+      <li>独自ドメインを決めて購入</li>
+      <li>弁護士へ規約/PPレビュー依頼（8/8まで）</li>
+      <li>最初の実求人（数社）を決め収集開始</li>
+      <li>全画面をスマホで触り気になる点を共有</li></ul></div>
+    <div class="card"><b>🟡 8月前半（M1〜M2）</b><ul>
+      <li>Vercel・SupabaseをPro化</li>
+      <li>実求人を管理画面から入力</li>
+      <li>監視の通知先（メール）を登録</li></ul></div>
+    <div class="card"><b>🟢 公開直前（M3〜M4）</b><ul>
+      <li>スタッフに管理画面を実演共有</li>
+      <li>「戻す操作」を一度練習</li>
+      <li>Go/No-Go確認 → 8/18公開</li></ul></div>
+  </div>
+
+  <!-- 8 運用基盤 -->
+  <h2><span class="no">7</span>運用基盤 ― 公開後に事故らないための土台</h2>
+  <div class="lead">「サイトが動く」だけでは足りない、"落ちても・壊れても立て直せる"仕組み。1人運営だからこそ必須。</div>
+  <div class="table-scroll"><table>
+    <tr><th>土台</th><th>何のため</th><th>やること</th></tr>
+    <tr><td>本番ブランチ保護</td><td>壊れたコードが勝手に本番へ出るのを防ぐ</td><td>本番=保護された<code>main</code>。日々は別ブランチ→PR→プレビュー確認→合流。直接書き込まない</td></tr>
+    <tr><td>自動チェック(CI)</td><td>壊れたまま公開を防ぐ</td><td>GitHub Actionsで lint&build 自動。失敗したら合流不可</td></tr>
+    <tr><td>監視3点</td><td>落ちても気づく</td><td>Sentry（エラー通知）＋外形監視（5分毎・落ちたら通知）＋通知先=あなた</td></tr>
+    <tr><td>バックアップ</td><td>データを失わない</td><td><b>Supabase Pro（毎日＋時点復元）必須</b>。公開前に復元を1回試す</td></tr>
+    <tr><td>戻す手順</td><td>公開日に問題が出ても復旧</td><td>Vercelの「1クリックで直前に戻す」を練習しておく</td></tr>
+    <tr><td>適用記録(台帳)</td><td>何をDBに入れたか迷わない</td><td>本番に流したSQLを順に記録。サンプル求人の削除手順も明記</td></tr>
+  </table></div>
+
+  <!-- 9 セキュリティ -->
+  <h2><span class="no">8</span>公開前セキュリティ是正（必須）</h2>
+  <div class="lead">★＝データベース設定を直接確認して"実在"を確かめた穴。「あれば良い」ではなく<b>公開の合格ライン</b>です。</div>
+  <div class="callout c-danger">
+    <b>★ 今すぐ直す（弁護士不要）</b>
+    <ul>
+      <li>★ <b>スタッフの内部メモが会員に見える</b>（応募のスタッフメモを会員が直接読める）→ 会員から見えないよう分離</li>
+      <li>★ <b>本人確認フラグを会員が自分で書き換えられる</b>（唯一の本人確認の仕組みが無効化）→ スタッフだけ変更可に</li>
+      <li><b>仮の文言を消す</b>（「モックです／サンプル／98%以上」が残存）→ 撤去し実データに差替</li>
+      <li><b>迷惑登録(bot)対策</b>（回数制限＋ワナ。中国は画像認証が届かないためサーバー側制限を優先）</li>
+      <li>管理鍵の記載削除・パスワード強度・管理操作の二重ガード・セキュリティヘッダ・不正転送対策・退会/削除対応</li>
+    </ul>
+  </div>
+
+  <!-- 10 費用 -->
+  <h2><span class="no">9</span>費用・契約</h2>
+  <div class="table-scroll"><table>
+    <tr><th>項目</th><th>開発中</th><th>公開後（月額）</th><th>備考</th></tr>
+    <tr><td>Vercel（土地）</td><td>0円</td><td><b>約3,000円</b></td><td>Pro＝商用必須</td></tr>
+    <tr><td>Supabase（金庫）</td><td>0円</td><td><b>約3,800円</b></td><td>Pro＝必須（毎日バックアップ）</td></tr>
+    <tr><td>Resend（通知）</td><td>0円</td><td>0円〜</td><td>独自ドメイン認証で複数宛先</td></tr>
+    <tr><td>ドメイン（住所）</td><td>ー</td><td>年 約2,000円</td><td>今週購入</td></tr>
+    <tr><td>監視（Sentry等）</td><td>0円</td><td>0円〜</td><td>無料枠で開始</td></tr>
+    <tr><td><b>合計</b></td><td><b>0円</b></td><td><b>月 約7,000円＋年2,000円</b></td><td>AI利用料は別（既契約枠内）</td></tr>
+  </table></div>
+
+  <!-- 11 リスク -->
+  <h2><span class="no">10</span>リスクと対策（間に合わない場合の備えつき）</h2>
+  <div class="table-scroll"><table>
+    <tr><th>リスク</th><th>対策</th></tr>
+    <tr><td>お盆(8/11〜16)が最終盤に重なる</td><td>弁護士返却・実データ・企業連絡を8/8までに前倒し</td></tr>
+    <tr><td>順番待ち（ドメイン→DNS→メール／規約→弁護士→公開）</td><td>ドメイン購入と規約下書きを今週着手</td></tr>
+    <tr><td>落ちても気づけない／データ喪失</td><td>監視3点＋Supabase Proバックアップ＋復元演習</td></tr>
+    <tr><td>見えてはいけない情報・なりすまし</td><td>§8の是正を公開の合格ラインに</td></tr>
+    <tr><td>規約未公開のまま個人情報収集</td><td>プライバシーポリシー公開を"非交渉のGo条件"に</td></tr>
+    <tr><td>中国から表示が重い/繋がらない</td><td>Google系不使用済＋独自ドメイン＋公開後に実地測定</td></tr>
+  </table></div>
+  <div class="callout c-ok"><b>もし全部が8/18に間に合わなかったら（最小構成）</b><br>
+  <b>死守</b>：①プライバシーポリシー公開 ②重大セキュリティ是正（★2件＋モック文言撤去＋bot対策）③バックアップ有効 ④実求人が数社。<br>
+  <b>後回し可</b>：本格的な自動テスト・管理画面の作り込み(#16)・本格多言語移行・凝った監視。<br>
+  → 無理に全部詰め込んで品質を落とすより、<b>合格ラインを死守して小さく開始</b>が正解です。</div>
+
+  <!-- 12 法務 -->
+  <h2><span class="no">11</span>法務・コンプライアンス確認項目（顧問弁護士へ）</h2>
+  <div class="lead">Claudeは下書き作成まで。最終判断は弁護士に委ねます（以下は論点提示）。</div>
+  <ul>
+    <li><b>個人情報保護法</b>：利用目的の公表（法21条）／委託先（Supabase・Vercel・Resend）明記／保管期間／開示・訂正・停止・苦情の窓口を<b>プライバシーポリシー実ページ</b>に</li>
+    <li><b>越境移転（法28条）</b>：まずSupabaseの保管リージョンを確定 → 国名・制度・安全管理措置を示し同意取得が要るか確認</li>
+    <li><b>同意の取り方</b>：規約・PPへのリンク＋同意した日時・版数の記録で足りるか</li>
+    <li><b>景品表示法</b>：「98%以上」等の根拠、モック/サンプル表記の撤去</li>
+    <li><b>職業安定法</b>：労働条件明示（受動喫煙防止措置ほか）・取扱職種の範囲・手数料（求職者無償）・苦情処理体制の明示、実雇用主/就業場所の明示タイミング</li>
+    <li>中国在住者の直接募集の適法性（労働局届出・中国国内の募集方法）／退会・消去請求への対応水準</li>
+  </ul>
+
+  <!-- 13 Go/No-Go -->
+  <h2><span class="no">12</span>公開当日 Go/No-Go チェックリスト</h2>
+  <div class="card" style="font-size:12.5px">
+    ☐ プライバシーポリシーが公開URLで見られ、登録の同意チェックからリンク<br>
+    ☐ 会員からスタッフメモが読めない／会員が本人確認フラグを書き換えられない（会員2人で検証）<br>
+    ☐ サイトに「モック/サンプル」表記が無く、掲載求人は実データ（サンプル14件削除）<br>
+    ☐ 本番に管理鍵が無い／公開してはいけない秘密が無い<br>
+    ☐ 自動チェック(CI)が緑・本番ブランチが保護されている<br>
+    ☐ 監視が動き、テスト通知があなたに届いた<br>
+    ☐ Supabase Proでバックアップ有効・復元の予行演習を1回完了<br>
+    ☐ 登録フォームにbot対策・通知の連打で受信箱が溢れない<br>
+    ☐ セキュリティヘッダあり・ログインの不正転送対策あり<br>
+    ☐ メール：独自ドメインの信頼設定（SPF/DKIM/DMARC）済み・複数宛先で到達確認<br>
+    ☐ Vercelの「直前に戻す」操作を一度試した・正常デプロイのID記録<br>
+    ☐ スタッフが管理画面を使えると実演で確認<br>
+    ☐ 実求人が数社ぶん公開・中国からトップ〜応募まで到達確認<br>
+    ☐ 登録→応募→通知メール到達→管理で状態更新、が実機で通る
+  </div>
+
+  <!-- 14 初動 -->
+  <h2><span class="no">13</span>公開後の初動監視・ロールバック</h2>
+  <div class="grid3">
+    <div class="callout c-blue"><b>配信の固定</b><br>公開当日の正常な状態(ID)を記録。異常時はVercelで即・直前に戻す。</div>
+    <div class="callout c-blue"><b>初動チェック(30分/24時間)</b><br>①登録→応募→通知メール ②管理で状態更新 ③他人のデータが見えない を実アカウントで確認。</div>
+    <div class="callout c-danger"><b>止める基準</b><br>情報漏えいの兆候・ログインの破れ・応募が保存されない、のいずれかで受付を一旦停止（限定公開へ）。</div>
+  </div>
+
+  <!-- 15 公開後 -->
+  <h2><span class="no">14</span>公開後ロードマップ</h2>
+  <div class="callout c-blue">#16 管理画面のPC最適化・機能拡充／本格的な多言語対応(T-11)／自動E2Eテスト整備／SMS認証・CDN・監査ログ・2要素認証 など、安定後に順次。</div>
+
+  <div class="foot">
+    この計画書は progress.md（現状の真実）とGitHubの実態、および4名のAI専門レビュー（PM・セキュリティ/法務・技術/DevOps・AI活用）に基づいて作成。<br>日付・スコープは状況に応じて調整可能です。 ― 樱聘 YingPin / 株式会社パートナー
+  </div>
+
+</div>
+</body>
+</html>
