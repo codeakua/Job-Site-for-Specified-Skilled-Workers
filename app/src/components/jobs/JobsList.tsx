@@ -77,6 +77,14 @@ function formatRange(min: number | null, max: number | null) {
   return `${min ?? max ?? "-"}`;
 }
 
+function HeartFill() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 21s-7.5-4.7-10-9.3C.6 8.6 2.6 4.5 6.7 4.5c2.2 0 3.9 1.2 5.3 3 1.4-1.8 3.1-3 5.3-3 4.1 0 6.1 4.1 4.7 7.2C19.5 16.3 12 21 12 21Z" />
+    </svg>
+  );
+}
+
 function salaryLabel(job: UiJob, t: (key: string) => string) {
   return (
     <div className="salary">
@@ -134,7 +142,7 @@ export function JobCard({ job, isFavorite, onFavorite }: { job: UiJob; isFavorit
             <IconHeart />
           </span>
           <span className="ic-on">
-            <IconHeart />
+            <HeartFill />
           </span>
         </button>
     </article>
