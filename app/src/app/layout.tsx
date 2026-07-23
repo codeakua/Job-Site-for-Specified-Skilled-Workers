@@ -23,7 +23,7 @@ const themeInit = `(function () {
   try {
     var d = document.documentElement;
     d.dataset.theme = localStorage.getItem('yp_theme') === 'red' ? 'red' : 'blue';
-    var l = localStorage.getItem('yp_lang') === 'zh' ? 'zh' : 'ja';
+    var l = localStorage.getItem('yp_lang') === 'ja' ? 'ja' : 'zh';
     d.dataset.lang = l; d.lang = l === 'zh' ? 'zh-CN' : 'ja';
   } catch (e) {}
 })();`;
@@ -34,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" data-theme="blue" data-lang="ja">
+    <html lang="zh-CN" data-theme="blue" data-lang="zh">
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>

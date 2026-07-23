@@ -183,6 +183,14 @@ const I18N = {
     'login.demoNote': '※ モックのため、任意の入力でログインできます',
     'login.success': 'ログインしました',
 
+    // 認証エラー（ログイン/登録の失敗。{detail}はSupabase等の詳細。表示時に t() で翻訳）
+    'auth.err.exists': 'この電話番号は既に登録されています。ログインしてください。',
+    'auth.err.invalidCredentials': '電話番号またはパスワードが違います。',
+    'auth.err.emailConfirm': 'メール確認の設定が有効になっています。管理者にお問い合わせください。',
+    'auth.err.noSession': 'アカウント作成後に自動ログインできませんでした。お手数ですが管理者にお問い合わせください。',
+    'auth.err.saveFailed': '登録情報の保存に失敗しました：{detail}',
+    'auth.err.generic': 'エラーが発生しました：{detail}',
+
     // 求人一覧
     'jobs.title': '求人をさがす',
     'jobs.search.ph': '職種・キーワードで検索',
@@ -456,6 +464,13 @@ const I18N = {
     'login.toRegister': '新用户？免费注册',
     'login.demoNote': '※ 演示版：任意输入即可登录',
     'login.success': '登录成功',
+
+    'auth.err.exists': '该手机号已注册，请直接登录。',
+    'auth.err.invalidCredentials': '手机号或密码有误。',
+    'auth.err.emailConfirm': '邮箱确认功能已开启，请联系管理员。',
+    'auth.err.noSession': '注册后无法自动登录，请联系管理员。',
+    'auth.err.saveFailed': '保存注册信息失败：{detail}',
+    'auth.err.generic': '发生错误：{detail}',
 
     'jobs.title': '找工作',
     'jobs.search.ph': '搜索职位·关键词',

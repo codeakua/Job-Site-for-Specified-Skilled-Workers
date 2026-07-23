@@ -26,7 +26,7 @@ export function LoginForm() {
     setBusy(true);
     const res = await login(code, phone, password);
     if (!res.ok) {
-      setError(res.error);
+      setError(t(res.errorKey, res.errorDetail ? { detail: res.errorDetail } : undefined));
       setBusy(false);
       return;
     }

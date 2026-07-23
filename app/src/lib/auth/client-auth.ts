@@ -20,7 +20,10 @@ export type RegisterInput = {
   password: string;
 };
 
-export type AuthResult = { ok: true; memberNo: string } | { ok: false; error: string };
+// エラーは翻訳キー（＋任意の詳細）で返し、表示はUI側で t(errorKey, {detail}) により日中翻訳する。
+export type AuthResult =
+  | { ok: true; memberNo: string }
+  | { ok: false; errorKey: string; errorDetail?: string };
 
 function genMemberNo(): string {
   const d = new Date();
@@ -29,16 +32,15 @@ function genMemberNo(): string {
   return `YP-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${rand}`;
 }
 
-/** Supabaseの英語エラーを分かりやすい日本語に変換。 */
-function mapAuthError(msg: string): string {
+/** Supabaseの英語エラーを辞書キーに対応づける（文言は辞書 auth.err.* / reg.err.* にある）。 */
+function mapAuthError(msg: string): { errorKey: string; errorDetail?: string } {
   const m = msg.toLowerCase();
   if (m.includes("already registered") || m.includes("already exists") || m.includes("user already"))
-    return "この電話番号は既に登録されています。ログインしてください。";
-  if (m.includes("invalid login credentials")) return "電話番号またはパスワードが違います。";
-  if (m.includes("password")) return "パスワードは8文字以上で入力してください。";
-  if (m.includes("email") && m.includes("confirm"))
-    return "メール確認の設定が有効になっています。管理者にお問い合わせください。";
-  return "エラーが発生しました：" + msg;
+    return { errorKey: "auth.err.exists" };
+  if (m.includes("invalid login credentials")) return { errorKey: "auth.err.invalidCredentials" };
+  if (m.includes("password")) return { errorKey: "reg.err.password" };
+  if (m.includes("email") && m.includes("confirm")) return { errorKey: "auth.err.emailConfirm" };
+  return { errorKey: "auth.err.generic", errorDetail: msg };
 }
 
 /** 新規会員登録: 認証ユーザー作成＋membersプロフィール保存（ブラウザ側・SMS不要）。 */
@@ -50,13 +52,9 @@ export async function registerMember(input: RegisterInput): Promise<AuthResult> 
     email,
     password: input.password,
   });
-  if (signUpError) return { ok: false, error: mapAuthError(signUpError.message) };
+  if (signUpError) return { ok: false, ...mapAuthError(signUpError.message) };
   if (!signUp.user || !signUp.session) {
-    return {
-      ok: false,
-      error:
-        "アカウント作成後にログインできませんでした。Supabaseの「メール確認」をオフにする必要があります。",
-    };
+    return { ok: false, errorKey: "auth.err.noSession" };
   }
 
   const memberNo = genMemberNo();
@@ -79,7 +77,7 @@ export async function registerMember(input: RegisterInput): Promise<AuthResult> 
     ssw_fields: input.ssw ?? [],
     other_qual: input.otherQual || null,
   });
-  if (insertError) return { ok: false, error: "登録情報の保存に失敗しました：" + insertError.message };
+  if (insertError) return { ok: false, errorKey: "auth.err.saveFailed", errorDetail: insertError.message };
 
   // スタッフへ新規登録を通知（サーバー側でResend送信。失敗しても登録は成功扱いにする）。
   try {
@@ -100,7 +98,7 @@ export async function login(
   const supabase = createClient();
   const email = phoneToEmail(phoneCode, phone);
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { ok: false, error: mapAuthError(error.message) };
+  if (error) return { ok: false, ...mapAuthError(error.message) };
   return { ok: true, memberNo: "" };
 }
 

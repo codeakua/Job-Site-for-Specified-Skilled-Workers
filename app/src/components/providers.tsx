@@ -25,7 +25,7 @@ const LS_LANG = "yp_lang";
  * モックの app.js と同じキー・同じ挙動を踏襲している。
  */
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("ja");
+  const [lang, setLangState] = useState<Lang>("zh");
   const [theme, setThemeState] = useState<Theme>("blue");
   const [ready, setReady] = useState(false);
 
@@ -33,7 +33,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   // 既定値でレンダーした直後にクライアント側で一度だけ同期する（意図的なパターン）。
   useEffect(() => {
     const savedTheme = localStorage.getItem(LS_THEME) === "red" ? "red" : "blue";
-    const savedLang = localStorage.getItem(LS_LANG) === "zh" ? "zh" : "ja";
+    const savedLang = localStorage.getItem(LS_LANG) === "ja" ? "ja" : "zh";
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 外部ストア(localStorage)からの初回同期
     setThemeState(savedTheme);
     setLangState(savedLang);

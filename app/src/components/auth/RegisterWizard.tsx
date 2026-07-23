@@ -66,7 +66,7 @@ export function RegisterWizard() {
     setBusy(true);
     const res = await registerMember(form);
     if (!res.ok) {
-      setError(res.error);
+      setError(t(res.errorKey, res.errorDetail ? { detail: res.errorDetail } : undefined));
       setBusy(false);
       return;
     }

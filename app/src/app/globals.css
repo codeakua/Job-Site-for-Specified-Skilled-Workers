@@ -93,6 +93,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 [data-lang="zh"] body { font-family: var(--font-zh); }
+/* 管理画面は日本語固定のため、会員側がzhでも管理画面だけは日本語フォントを維持する。 */
+[data-lang="zh"] .admin-shell { font-family: var(--font-base); }
 body.no-scroll { overflow: hidden; }
 
 /* PCでは中央にアプリ枠を表示 */
