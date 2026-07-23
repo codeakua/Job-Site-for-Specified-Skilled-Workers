@@ -81,8 +81,8 @@ const I18N = {
     'how.s3.desc': 'WeChatで気軽に相談してから応募できます',
     'preview.title': '新着求人',
     'preview.more': '登録して全ての求人を見る',
-    'landing.note': '※ 本サイトはデザイン確認用のモックです。掲載されている求人・数値はすべてサンプルです。',
-    'footer.copy': '© 2026 樱聘 YingPin（モック版）',
+    'landing.note': '',
+    'footer.copy': '© 2026 樱聘 YingPin',
 
     // 安心のお約束（完全無料・保証金なし）
     'trust.title': '求職者は完全無料',
@@ -101,6 +101,7 @@ const I18N = {
     'support.s2.org': 'パートナー協同組合（登録支援機関）',
     'support.s2.desc': '住まい探し、役所・銀行手続きの同行、日本語学習の支援、仕事や生活の相談（中国語OK）',
     'support.stat': 'サポートした外国人材の定着率',
+    // TODO(景表法): 実績の裏付け確認 or 削除 — オーナー確認待ち
     'support.statVal': '98%以上',
 
     // 運営会社情報
@@ -180,7 +181,7 @@ const I18N = {
     'login.btn': 'ログイン',
     'login.forgot': 'パスワードをお忘れですか？',
     'login.toRegister': 'はじめての方はこちら（無料登録）',
-    'login.demoNote': '※ モックのため、任意の入力でログインできます',
+    'login.demoNote': '',
     'login.success': 'ログインしました',
 
     // 認証エラー（ログイン/登録の失敗。{detail}はSupabase等の詳細。表示時に t() で翻訳）
@@ -368,8 +369,8 @@ const I18N = {
     'how.s3.desc': '可先通过微信轻松咨询，再正式申请',
     'preview.title': '最新职位',
     'preview.more': '注册后查看全部职位',
-    'landing.note': '※ 本网站为设计确认用演示版，所有职位和数据均为示例。',
-    'footer.copy': '© 2026 樱聘 YingPin（演示版）',
+    'landing.note': '',
+    'footer.copy': '© 2026 樱聘 YingPin',
 
     'trust.title': '求职者完全免费',
     'trust.i1': '介绍费·注册费 0日元',
@@ -386,6 +387,7 @@ const I18N = {
     'support.s2.org': 'Partner协同组合（注册支援机构）',
     'support.s2.desc': '协助找房、陪同办理政府·银行手续、日语学习支持、工作生活咨询（可用中文）',
     'support.stat': '所支持外国人才的留职率',
+    // TODO(景表法): 実績の裏付け確認 or 削除 — オーナー確認待ち
     'support.statVal': '98%以上',
 
     'op.title': '运营公司',
@@ -462,7 +464,7 @@ const I18N = {
     'login.btn': '登录',
     'login.forgot': '忘记密码？',
     'login.toRegister': '新用户？免费注册',
-    'login.demoNote': '※ 演示版：任意输入即可登录',
+    'login.demoNote': '',
     'login.success': '登录成功',
 
     'auth.err.exists': '该手机号已注册，请直接登录。',
