@@ -1,6 +1,6 @@
 # 進捗・引き継ぎメモ（新しいチャットはまずこれを読む）
 
-最終更新: 2026-07-23（#11 i18n・会員側を中国語デフォルト化 完了／#9 会員管理 完了）／ 最新コミット時点の状態。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。**
+最終更新: 2026-07-24（**M0-A土台づくり**: CI導入＋本番ブランチ保護／公開前セキュリティ是正の起票 #25〜#35／法務ドラフト作成）。前回: 2026-07-23（#11 中国語デフォルト化・#9 会員管理 完了）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
 
 ## 0. 一言サマリー
 中国人向け特定技能求人サイトの**β版**を、モック（リポジトリ直下HTML）→ Next.js実装へ移行中。
@@ -12,6 +12,7 @@
 - **Supabase**: プロジェクトURL `https://jqevswrbdbmxifauqhfi.supabase.co`（公開値）。DBスキーマ・RLS・シード投入済み。**メール確認(Confirm email)はOFF**に設定済み（電話番号＋パスワード認証のため必須）。
 - **Vercel環境変数**: `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`（公開値）に加え、通知用 `RESEND_API_KEY`・`STAFF_NOTIFY_EMAILS` も**登録済み（2026-07-22・本番で応募通知メール到達を確認）**。宛先は当面オーナー（`yazawa-y@partner-japan.biz`）。**秘密のservice_role/DBパスワードはチャットに出さない。** 送信元は既定の `onboarding@resend.dev`（Resendテストモード＝**当面はResendアカウント所有アドレス宛のみ到達**。他スタッフ宛にも送るには独自ドメイン認証＋`NOTIFY_FROM_EMAIL`設定が必要）。キー名は `app/.env.example` 参照。
 - **スタッフアカウント**: オーナー（会員番号 YP-20260722-9443）は `staff_users` 登録済み＝`/admin` にアクセス可能。
+- **CI／本番ブランチ保護（M0-Aで導入）**: `.github/workflows/ci.yml` がPR/pushで `npm ci && lint && build`（Node 22）を自動実行。本番ブランチ `claude/skilled-worker-job-site-mock-lk07i6` を**保護方式A（現ブランチ保護・Vercel変更なし）**で保護し、PR必須・直push禁止・CI `build` 緑必須に（オーナー操作の手順は §13）。**保護後は本番へ直pushせず必ずPR経由**（§4-6 更新）。
 
 ## 2. 重要な制約（テスト方法）
 - **このセッションのサンドボックスからSupabase等の外部へは通信できない**（組織のegressポリシー。回避しない）。よって**ログイン必須ページの実データ描画はサンドボックスで確認できない**。
@@ -36,7 +37,7 @@
 3. Codexが**PR**を作成 → オーナーが番号をClaudeに伝える。
 4. **Claude**が: PRブランチをfetch → **自環境でlint/build** → コードレビュー →（認証必須UIなら）**部品の単独描画テスト** → PRにレビューコメント（承認可否＋軽微点）。※GitHub上は自分のPR扱いでAPPROVE不可のため`COMMENT`で記録。
 5. **オーナー**がGitHubで**Merge** → Vercel自動デプロイ → 実機確認。
-6. 軽微な修正やClaude担当分は、Claudeが作業ブランチへ直接コミット＆プッシュ。
+6. 軽微な修正やClaude担当分も、**本番ブランチ保護の導入後（M0-A・§13）は本番へ直pushせず必ずPR経由**（`feature/…` または `claude/…` ブランチ→PR→オーナーMerge）。※保護前の従来運用は「作業ブランチへ直接コミット＆プッシュ」だったが、保護によりRequire PRで直pushはブロックされる。
 
 依頼テンプレは `docs/beta-plan.md` §7 参照。
 
@@ -50,6 +51,9 @@
 - ✅ **#11 i18n本実装移行・中国語デフォルト化** … Claude・**完了（2026-07-23・本流へ直接反映）**。会員側の初期表示を簡体中文に（日本語切替は保持）。管理画面は日本語固定を維持。翻訳漏れ（年収単位・認証エラー）も辞書化。日中とも252キー・欠落なし。詳細は §12。
 - ⏸ **#12 E2E・総合QA・独自ドメイン** … Claude担当・最終フェーズ
 - 🅿 **#16 管理画面のPC最適化・機能拡充** … オーナー方針で**後回し（モデル優先）**。現管理画面はPC前提の使いやすさ・機能とも将来大幅改修予定。
+- ✅ **#21 モック表記撤去**（PR#23）／ ✅ **#22 会員側punch-list**（PR#24）… Codex・**マージ済**。→ **Issueをclose**（棚卸し）。残る景表法「98%以上」(`support.statVal`)のみオーナー確認待ち。
+- 🆕 **M0-A（2026-07-24・Claude担当）**: CI導入＋本番保護＋法務ドラフト＋公開前セキュリティ是正の起票。詳細は §13。
+  - 起票済セキュリティ是正（実装は後続）: **#25 ①staff_note分離** / **#26 ②verified・member_noロック** / **#27 ③service_role** / **#28 ④管理is_staff明示** / **#29 ⑤セキュリティヘッダ** / **#30 ⑥登録bot/レート制限** / **#31 ⑦PWポリシー** / **#32 ⑧オープンリダイレクト** / **#33 ⑨退会/削除運用** / **#34 ⑩member_no DB生成** / **#35 ⑪アカウント列挙**（すべて🧠Claude担当・`docs/tasks.md` T-15）。
 
 ## 6. 既知の軽微な点 / TODOメモ
 - 求人詳細（#5）: 詳細ページのトップバーに言語切替ピルが無い（他画面にはある）。
@@ -135,3 +139,29 @@
   - 未使用の `Placeholder.tsx`（現在どの画面でも未使用）内の日本語一文。
   - `layout.tsx` の SEO metadata（title/description）は静的な日本語（クライアントlangに追従しないNextの仕様）。将来 zh 向けSEOが要るなら別途。
   - 求人詳細トップバーに言語切替ピルが無い（§6）。ただし言語設定は全画面で永続化されるため、他画面で切替えれば詳細にも反映＝機能上は切替可能。
+
+## 13. M0-A 土台づくり 実装メモ（2026-07-24 追記・Claude担当）
+**状態: 起票・ドラフト・CI導入まで完了（本番保護はオーナー操作待ち）。** 4名の専門サブエージェント採点で全領域95点以上（合成≈97/100）まで磨いた計画に基づく。3ゴール＝CI＋本番保護／公開前セキュリティ是正のチケット化／法務ドラフト。
+
+### 成果物
+- **CI**: `.github/workflows/ci.yml`（PR/pushで `npm ci && lint && build`・Node 22・`permissions:contents:read`・`concurrency`・`timeout`）＋ `app/package.json` に `engines.node="22.x"`（Vercel整合）。ローカルで `npm ci && lint && build` 緑を実証済。
+- **法務ドラフト**（弁護士レビュー用・日本語）: `docs/legal/terms-draft.md`・`privacy-draft.md`・`lawyer-checklist.md`。個情法(21/28/32/26/25条)・職安法(国外紹介/5条の4/5条の6/帳簿保存)を網羅。中国語版・弁護士FB反映は後続（ブラウザで可）。
+- **セキュリティ是正Issue 11件**（#25〜#35・すべて🧠Claude担当・実装は後続）。実装単位＝PR-1a(Go死守①②＋apps insert固定＋③a)／PR-1b(④⑩)／PR-2(⑤⑧)／PR-3(⑥⑪)／文書(⑦⑨)。RLS系DoDは会員/スタッフ2者のローカルPostgreSQL検証。
+- **SQL適用台帳の器**: `docs/ops/db-ledger.md`（0001/0002適用済・0003_security pending・サンプル求人14件の削除手順）。
+
+### オーナー操作：本番ブランチ保護の手順（方式A・約5分・Vercel変更不要）
+対象＝**本番ブランチ `claude/skilled-worker-job-site-mock-lk07i6`（完全一致。`claude/**` グロブは厳禁**＝作業ブランチまで直push禁止になる）。
+1. （Claude）このPRをpushしCIを走らせ `build` が緑になるのを確認（＝チェック名が登録される）。
+2. Settings → Rules → Rulesets → New branch ruleset。Target＝上記本番ブランチ。**Enforcement status = Active**（Evaluate/Disabledは無効）。
+3. トグル: **Require a pull request before merging**（直push禁止）／**Require status checks to pass → `build` をドロップダウンから選択**（手入力せず選ぶ・名前ズレは全merge恒久ブロック）／**Require approvals = 0**（自分のPRを自分でMerge可）。
+4. **Bypass list → Add bypass → Role「Repository admin」**（緊急時の逃し弁。空だと自分もロックアウト。Rulesetsに"Do not allow bypassing"チェックボックスは無い＝Classic専用）。
+5. 有効化後、このPRがゲートを通過してmergeできるか1回検証。**CI緑はmergeゲートでありデプロイは止めない**（Vercelは別系統）。
+- 方式B（main昇格＋Vercelの本番ブランチ切替）は公開後の任意整理（今回不採用）。
+
+### オーナー着手ボックス（今日着手・期限8/8＝お盆前）
+(a) 独自ドメイン購入（DNS/メール認証は最大48h。DNSはClaudeが案内）／(b) 顧問弁護士へ `docs/legal/` の3ファイルを送付し返却期限8/8を依頼／(c) 実求人の収集開始／(d) Issue⑥恒久レート制限用の外部ストア（Upstash/Vercel KV 無料枠）はClaudeが選定案を出すので選ぶだけ。
+
+### 次にやること
+- セキュリティ是正の**実装**（#25〜#35。PR-1aのGo死守から。Opusは①②の設計と最終点検、他はSonnet）。
+- M2: 監視3点・Supabase/Vercel Pro化・バックアップ復元予行・実求人投入・独自ドメイン公開（`docs/launch-plan.md` §M2）。
+- 参考: #11 中国語デフォルト化は §12 の通り完了済（`providers.tsx`=`useState("zh")`）。
