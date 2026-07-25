@@ -154,6 +154,8 @@ export function RegisterWizard() {
         })}
       </div>
 
+      <p className="free-note">💴 {t("reg.freeNote")}</p>
+
       {/* STEP 1 基本情報 */}
       {step === 1 && (
         <section className="step-panel">

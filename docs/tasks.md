@@ -102,7 +102,7 @@
 - **完了条件**: 各IssueのDoD達成（RLS系はローカルPostgreSQLで会員/スタッフ2者検証）。適用は `docs/ops/db-ledger.md` に記録
 - **状態**: 起票済（M0-A・#25〜#35）。実装は後続
 
-> ✅ **#21/#22 は PR#23/#24 でマージ済** → Issueをclose。残る景表法「98%以上」(`support.statVal`)はオーナー確認待ち（`lawyer-checklist.md` C-1 と相互参照）。
+> ✅ **#21/#22 は PR#23/#24 でマージ済** → Issueをclose済。景表法「98%以上」(`support.statVal`)は**M0-Bのトップ改修で撤去済み**（数値アピール→「求職者0円・特定技能2号」のメリット訴求へ全面置換。`lawyer-checklist.md` C-1 参照）。
 
 ---
 

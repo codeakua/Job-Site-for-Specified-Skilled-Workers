@@ -45,6 +45,10 @@ export function Landing() {
         <span className="hero-sticker" style={{ right: 26, top: 196, fontSize: 22, animationDelay: ".6s" }}>🌸</span>
         <div className="hero-badge">⛩️ {t("landing.badge")}</div>
         <h1 style={{ whiteSpace: "pre-line" }}>{t("app.tagline")}</h1>
+        <div className="hero-free">
+          <b>{t("landing.free")}</b>
+          <span>{t("landing.freeSub")}</span>
+        </div>
         <p className="hero-sub">{t("landing.heroSub")}</p>
         <div className="hero-cta">
           {user ? (
@@ -69,12 +73,12 @@ export function Landing() {
 
       <div className="stats">
         <div className="stat">
-          <b>{t("landing.stats.jobsVal")}</b>
-          <span>{t("landing.stats.jobs")}</span>
+          <b>{t("landing.stats.feeVal")}</b>
+          <span>{t("landing.stats.fee")}</span>
         </div>
         <div className="stat">
-          <b>{t("landing.stats.fieldsVal")}</b>
-          <span>{t("landing.stats.fields")}</span>
+          <b>{t("landing.stats.ssw2Val")}</b>
+          <span>{t("landing.stats.ssw2")}</span>
         </div>
         <div className="stat">
           <b>{t("landing.stats.supportVal")}</b>
