@@ -1,0 +1,14 @@
+{
+  "name": "yingpin-docgen",
+  "private": true,
+  "version": "1.0.0",
+  "description": "docs/ 配下のMarkdownを社外提出用のWord/PDFへ変換するツール群",
+  "scripts": {
+    "legal": "node build-legal.js",
+    "manual": "node build-manual.js"
+  },
+  "dependencies": {
+    "docx": "^9.7.1",
+    "playwright-core": "^1.62.0"
+  }
+}

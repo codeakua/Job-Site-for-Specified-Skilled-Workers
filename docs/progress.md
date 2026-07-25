@@ -1,6 +1,6 @@
 # 進捗・引き継ぎメモ（新しいチャットはまずこれを読む）
 
-最終更新: 2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。詳細 §14）。前回: 2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
+最終更新: 2026-07-25（**M0-B マージ済み＋本番ブランチ保護 有効化済み**。加えて**提出用ドキュメント生成基盤**＝法務3文書のWord/PDF化・管理者マニュアル新設。詳細 §15）。前回: 2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。§14）／2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
 
 ## 0. 一言サマリー
 中国人向け特定技能求人サイトの**β版**を、モック（リポジトリ直下HTML）→ Next.js実装へ移行中。
@@ -151,6 +151,7 @@
 - **SQL適用台帳の器**: `docs/ops/db-ledger.md`（0001/0002適用済・0003_security pending・サンプル求人14件の削除手順）。
 
 ### オーナー操作：本番ブランチ保護の手順（方式A・約5分・Vercel変更不要）
+> ✅ **2026-07-25 実施済み。** Ruleset `protect-production` が **Active**（Target=本番ブランチ／Require a pull request（Approvals=0）／Require status checks=`build`／Restrict deletions／Bypass=Repository admin）。以後、本番への直push は不可・CI緑でないとMergeできない。**本番ブランチ名を変更する場合はRulesetのTargetも同時に直すこと**（名前がズレると保護が無効化される）。
 > 🔰 **専門知識のない方向けの詳しい手順書（直リンク・画面の英語↔日本語対訳・トラブル対処つき）: `docs/ops/github-settings-guide.md`**
 
 対象＝**本番ブランチ `claude/skilled-worker-job-site-mock-lk07i6`（完全一致。`claude/**` グロブは厳禁**＝作業ブランチまで直push禁止になる）。
@@ -162,7 +163,7 @@
 - 方式B（main昇格＋Vercelの本番ブランチ切替）は公開後の任意整理（今回不採用）。
 
 ### オーナー着手ボックス（今日着手・期限8/8＝お盆前）
-(a) 独自ドメイン購入（DNS/メール認証は最大48h。DNSはClaudeが案内）／(b) 顧問弁護士へ `docs/legal/` の3ファイルを送付し返却期限8/8を依頼／(c) 実求人の収集開始／(d) Issue⑥恒久レート制限用の外部ストア（Upstash/Vercel KV 無料枠）はClaudeが選定案を出すので選ぶだけ。
+(a) 独自ドメイン購入（DNS/メール認証は最大48h。DNSはClaudeが案内）／(b) 顧問弁護士へ**送付用のWord/PDF＝`docs/legal/export/` の6ファイル**（表紙・凡例つき。§15）を送付し返却期限8/8を依頼／(c) 実求人の収集開始／(d) Issue⑥恒久レート制限用の外部ストア（Upstash/Vercel KV 無料枠）はClaudeが選定案を出すので選ぶだけ。
 
 ### 次にやること
 - セキュリティ是正の**実装**（#25〜#35。PR-1aのGo死守から。Opusは①②の設計と最終点検、他はSonnet）。
@@ -187,3 +188,30 @@
 - `lint`/`build` 緑。Playwright（`/opt/pw-browsers/chromium`・1280×800/1024×768/390×844）で、一時ルート `/adminpreview`＋フィクスチャによりダッシュボード/求人一覧/求人フォーム/会員・応募（行展開）を確認 → **ルートは検証後に削除済み**。会員側 390×844（`/`・`/login`・`/register`）と admin→会員のクライアント遷移でCSS汚染なしを確認。
 - ⚠️ ノウハウ: 本番ビルドで検証する場合、`NEXT_PUBLIC_*` を**ビルド時に**ダミー値で与えること（ビルド時にクライアントへインライン化されるため、無しでビルドするとブラウザ側でSupabaseクライアント生成が落ちる）。また Server Component へのフィクスチャは "use client" ファイルから import しない（client reference になり実体が渡らない）。
 - **実データの最終確認はマージ後にオーナーが本番で**: ①ダッシュボード数値が実件数と一致 ②求人 新規作成→公開→会員側 `/jobs` に表示 ③応募ステータス変更→会員マイページ反映 ④会員 verified トグル ⑤通知メールのリンクが応募/会員ページに直行。
+
+---
+
+## 15. 提出用ドキュメント生成基盤（2026-07-25 追記・Claude担当）
+
+**状態: 完了。** オーナー要望＝①弁護士へ送る法務3文書はmdでは提出できないのでWord/PDFが要る ②社員をスタッフ登録する手順を素人向けに画面図つきで残したい。
+
+### 生成の仕組み（`tools/docgen/`）
+- **原本は常にMarkdown**（`docs/legal/*.md`・`docs/ops/staff-registration-guide.md`）。**Word/PDFは生成物なので直接編集しないこと**（次回生成で上書きされる）。原本を直して再生成する。
+- `md2docx.js`＝Markdown→Word変換ライブラリ。見出し／引用ボックス／箇条書き（番号はブロックごとに振り直し）／表／コードブロック／画像＋キャプション／`**強調**`／`` `コード` `` に対応。体裁は**本文=MS明朝・見出し=MSゴシック・A4・表紙つき・2ページ目以降にヘッダーとページ番号**。法務文書では **〔　〕＝記入欄を薄グレー地**、**【要確認】＝黄色マーカー**で可視化（表紙に凡例）。
+- `build-legal.js` … 法務3文書を `docs/legal/export/` へ（`01_利用規約_下書き` / `02_プライバシーポリシー_下書き` / `03_確認論点リスト` の .docx と .pdf）。社外向けなので**md内のファイルパス相互参照を日本語の文書名へ自動置換**する（`DOC_NAMES`）。
+- `build-manual.js` … 管理者マニュアルを `docs/ops/export/` へ。
+- `render-figures.js` + `figures/supabase-figures.html` … 画面図6点を Chromium で `docs/ops/figures/*.png` に書き出す（deviceScaleFactor=2）。Supabase実画面のスクリーンショットではなく**操作箇所を示す説明用の図解**。
+- 実行: `cd tools/docgen && npm install` の後、リポジトリ直下で `node tools/docgen/build-legal.js` / `render-figures.js` / `build-manual.js`。
+
+### 環境の前提（サンドボックスで詰まった点）
+- **`libreoffice-writer` が未導入だとdocx→PDF変換が `source file could not be loaded` で失敗する**（`libreoffice-core` だけでは不可）。`apt-get install -y --no-install-recommends libreoffice-writer`。PDF検証用に `poppler-utils`（pdftoppm/pdftotext/pdfinfo）も入れる。
+- 日本語PDFのフォント: `fonts-ipafont-mincho` を入れ、`/root/.config/fontconfig/fonts.conf` で **MS明朝→IPAPMincho・MSゴシック→IPAGothic** に解決させる。簡体字（**樱**など）はIPAに無いため **WenQuanYi Zen Hei** へフォールバックさせる（未設定だと表紙のサービス名が豆腐になる）。
+- ⚠️ **`w:lineRule` を省くとLibreOfficeが行高を固定と解釈し、埋め込み画像が細い帯に潰れる。** `spacing` に `line` を指定する箇所は必ず `lineRule: "auto"` を併記すること（md2docx.js 内で徹底済み）。
+
+### 管理者マニュアル（`docs/ops/staff-registration-guide.md`・全8ページ）
+- 3ステップ＝①社員本人が `/register` で会員登録 → ②Supabase **Authentication → Users** でUIDをコピー（**Created atが最新の行**で探すのが確実）→ ③**SQL Editor** で `insert into staff_users (id, email, name) values (...)` を1回実行。
+- 退職時の解除（`delete from staff_users where name = '…'`）、症状別トラブル対処、安全上の注意（スタッフは全会員の個人情報を閲覧できる／`drop`・`truncate` 厳禁）を収録。
+- 付録A＝会員一覧に社員を出したくない場合の代替手順。**内部メールアドレスは `p` ＋国番号＋電話番号＋`@phone.yingpin.app`**（`lib/auth/phone-email.ts`）。**本人が入力したとおりの数字が使われる**ため先頭0の有無で変わる点、Supabaseで直接作る場合は **Auto Confirm User に必ずチェック**（外れているとログイン不可）を明記。
+
+### 次にやること
+- 弁護士FBが返ったら原本mdへ反映 → 再生成 → 中国語（簡体字）版の作成（会員側UIは中国語デフォルトのため公開時は両言語の掲出が必要）。

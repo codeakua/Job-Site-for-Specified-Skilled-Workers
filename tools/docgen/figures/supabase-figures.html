@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>スタッフ登録マニュアル用 画面図</title>
+<style>
+  /* 管理者マニュアルに載せる「操作画面の図解」。
+     Supabaseの実画面を模した説明用イラストで、build-manual.js が要素ごとにPNG化する。 */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; font-family: "IPAPGothic", "Noto Sans JP", sans-serif; }
+  .fig { background: #fff; padding: 18px; width: max-content; }
+
+  /* ---- Supabase風のシェル ---- */
+  .app { display: flex; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; overflow: hidden; color: #ededed; }
+  .rail { width: 54px; background: #191919; border-right: 1px solid #2e2e2e; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .logo { width: 26px; height: 26px; border-radius: 6px; background: #3ecf8e; }
+  .rail i { width: 22px; height: 22px; border-radius: 5px; background: #333; display: block; }
+  .side { width: 230px; background: #1f1f1f; border-right: 1px solid #2e2e2e; padding: 14px 10px; }
+  .side h4 { font-size: 12px; color: #8a8a8a; font-weight: 600; padding: 4px 8px 10px; letter-spacing: .04em; }
+  .side a { display: flex; align-items: center; gap: 9px; padding: 7px 9px; border-radius: 6px; font-size: 13px; color: #cfcfcf; margin-bottom: 2px; position: relative; }
+  .side a .ic { width: 15px; height: 15px; border-radius: 4px; background: #3a3a3a; flex: 0 0 auto; }
+  .side a.mark { background: #2c2c2c; color: #fff; outline: 2px solid #e5484d; outline-offset: 1px; }
+  .side a.mark .ic { background: #3ecf8e; }
+  .main { flex: 1; padding: 16px 18px; min-width: 0; }
+  .crumb { font-size: 12px; color: #8a8a8a; margin-bottom: 12px; }
+  .h { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+
+  /* ---- 表 ---- */
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  th { text-align: left; background: #242424; color: #9a9a9a; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid #333; white-space: nowrap; }
+  td { padding: 9px 10px; border-bottom: 1px solid #2a2a2a; color: #dcdcdc; white-space: nowrap; }
+  tr.hit td { background: #23302a; }
+  .uid { font-family: "DejaVu Sans Mono", monospace; font-size: 11.5px; color: #eaeaea; }
+  .copy { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; padding: 2px 7px; border: 1px solid #3ecf8e; border-radius: 4px; color: #3ecf8e; font-size: 10.5px; }
+
+  /* ---- エディタ ---- */
+  .editor { background: #171717; border: 1px solid #2e2e2e; border-radius: 6px; }
+  .etop { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid #2e2e2e; }
+  .tab { font-size: 12px; color: #cfcfcf; }
+  .run { background: #3ecf8e; color: #0d2d1e; font-size: 12px; font-weight: 700; padding: 5px 16px; border-radius: 5px; position: relative; }
+  pre { padding: 12px; font-family: "DejaVu Sans Mono", monospace; font-size: 12.5px; line-height: 1.75; color: #e6e6e6; white-space: pre; }
+  .kw { color: #ff8fa3; } .str { color: #a5e3a5; } .cm { color: #7d7d7d; }
+  .result { margin-top: 10px; border: 1px solid #2e2e2e; border-radius: 6px; overflow: hidden; }
+  .rhead { padding: 7px 10px; font-size: 11.5px; color: #9a9a9a; background: #202020; border-bottom: 1px solid #2e2e2e; }
+  .ok { padding: 14px 12px; font-size: 13px; color: #3ecf8e; background: #16211b; display: flex; align-items: center; gap: 8px; }
+  .ok b { color: #8ef0c0; }
+
+  /* ---- 吹き出し・番号 ---- */
+  .badge { position: absolute; width: 21px; height: 21px; border-radius: 50%; background: #e5484d; color: #fff; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #fff; }
+  .note { position: absolute; background: #e5484d; color: #fff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 5px; white-space: nowrap; }
+  .note::after { content: ""; position: absolute; border: 6px solid transparent; }
+  .note.l::after { left: -11px; top: 7px; border-right-color: #e5484d; }
+  .note.d::after { left: 12px; top: -11px; border-bottom-color: #e5484d; }
+  .rel { position: relative; }
+
+  /* ---- ブラウザ枠（サイト側） ---- */
+  .brs { display: flex; gap: 16px; }
+  .br { width: 480px; border: 1px solid #d3d3d3; border-radius: 8px; overflow: hidden; background: #fff; }
+  .bbar { background: #ececec; padding: 7px 10px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #dcdcdc; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #c9c9c9; }
+  .url { flex: 1; background: #fff; border: 1px solid #dcdcdc; border-radius: 11px; font-size: 11px; padding: 3px 9px; color: #555; }
+  .bbody { padding: 16px; min-height: 210px; }
+  .verdict { font-size: 13px; font-weight: 700; padding: 6px 10px; border-radius: 5px; display: inline-block; margin-bottom: 12px; }
+  .good { background: #e4f7ed; color: #10693f; border: 1px solid #9dd9bb; }
+  .bad { background: #fdeaea; color: #a32126; border: 1px solid #eeb4b6; }
+  .adminbar { display: flex; gap: 8px; margin-bottom: 12px; }
+  .adminbar span { font-size: 11px; padding: 4px 9px; border-radius: 5px; background: #f1f1f1; color: #444; }
+  .adminbar span.on { background: #c0392b; color: #fff; }
+  .cards { display: flex; gap: 8px; }
+  .card { flex: 1; border: 1px solid #e3e3e3; border-radius: 6px; padding: 9px; }
+  .card small { font-size: 10px; color: #777; display: block; margin-bottom: 3px; }
+  .card b { font-size: 19px; color: #222; }
+  .denied { text-align: center; padding: 34px 10px; color: #777; }
+  .denied .lock { font-size: 30px; }
+  .denied p { font-size: 13px; margin-top: 8px; }
+
+  /* ---- 仕組み図 ---- */
+  .flow { display: flex; align-items: center; gap: 14px; font-size: 13px; }
+  .box { border: 2px solid #333; border-radius: 8px; padding: 12px 14px; text-align: center; background: #fff; min-width: 132px; }
+  .box.person { border-color: #888; }
+  .box.gate { border-color: #c0392b; background: #fdf2f1; }
+  .box.goal { border-color: #10693f; background: #e9f8f0; }
+  .box b { display: block; font-size: 13.5px; margin-bottom: 3px; }
+  .box small { font-size: 11px; color: #666; }
+  .arrow { font-size: 20px; color: #999; }
+  .verd { font-size: 12px; font-weight: 700; }
+  .verd.y { color: #10693f; } .verd.n { color: #c0392b; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+</style>
+</head>
+<body>
+
+<!-- 図1: 仕組み（誰が管理画面に入れるか） -->
+<section class="fig" id="fig-concept">
+  <div class="flow">
+    <div class="stack">
+      <div class="box person"><b>一般の会員</b><small>サイトに登録した求職者</small></div>
+      <div class="box person"><b>社員（スタッフ）</b><small>職員名簿に載っている人</small></div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="box gate"><b>職員名簿</b><small>staff_users<br>（Supabase内のリスト）</small></div>
+    <div class="arrow">→</div>
+    <div class="stack">
+      <div class="box"><span class="verd n">✕ 開けない</span><br><small>「権限がありません」</small></div>
+      <div class="box goal"><span class="verd y">○ 開ける</span><br><small>管理画面 /admin</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- 図2: 左メニュー -->
+<section class="fig" id="fig-menu">
+  <div class="app" style="width:720px">
+    <div class="rail"><div class="logo"></div><i></i><i></i><i></i><i></i></div>
+    <div class="side rel">
+      <h4>YINGPIN（プロジェクト名）</h4>
+      <a><span class="ic"></span>Table Editor</a>
+      <a class="mark" style="margin-bottom:8px"><span class="ic"></span>SQL Editor
+        <span class="badge" style="left:-32px; top:6px">2</span></a>
+      <a><span class="ic"></span>Database</a>
+      <a class="mark"><span class="ic"></span>Authentication
+        <span class="badge" style="left:-32px; top:6px">1</span></a>
+      <a><span class="ic"></span>Storage</a>
+      <a><span class="ic"></span>Edge Functions</a>
+      <a><span class="ic"></span>Reports</a>
+      <a><span class="ic"></span>Logs</a>
+      <a><span class="ic"></span>Project Settings</a>
+    </div>
+    <div class="main" style="display:flex;align-items:center;justify-content:center">
+      <div style="text-align:center;color:#6f6f6f;font-size:12.5px;line-height:1.9">
+        使うのはこの2つだけです<br>
+        <span style="color:#3ecf8e">① Authentication</span>＝ユーザーのUIDを調べる<br>
+        <span style="color:#3ecf8e">② SQL Editor</span>＝職員名簿に追加する
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 図3: Authentication > Users -->
+<section class="fig" id="fig-users">
+  <div class="app" style="width:900px">
+    <div class="rail"><div class="logo"></div><i></i><i></i><i></i><i></i></div>
+    <div class="main rel">
+      <div class="crumb">Authentication &nbsp;›&nbsp; Users</div>
+      <div class="h">Users</div>
+      <table>
+        <tr><th style="width:340px">UID</th><th>Email</th><th>Created at</th><th>Last sign in</th></tr>
+        <tr><td class="uid">3f1c9a20-7e44-4b8e-9d21-0c5a7e6b1d33</td><td>p8613800138000@phone.yingpin.app</td><td>2026-07-20 10:12</td><td>2026-07-24 09:03</td></tr>
+        <tr class="hit"><td class="uid">a7d3e5f1-2b90-4c6a-8e17-5f2b9c4d0a88<span class="copy">⧉ Copy</span></td><td>p819012345678@phone.yingpin.app</td><td>2026-07-25 09:40</td><td>—</td></tr>
+        <tr><td class="uid">c2b8f4d6-1a37-4e59-b0c8-9d6e3a1f7b52</td><td>p8615900159000@phone.yingpin.app</td><td>2026-07-22 14:55</td><td>2026-07-25 08:11</td></tr>
+      </table>
+      <span class="note d" style="left:196px; top:232px">この行の UID をコピー（社員本人の行）</span>
+      <span class="badge" style="left:-2px; top:148px">1</span>
+      <div style="height:34px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 図4: SQL Editor に貼って実行 -->
+<section class="fig" id="fig-sql">
+  <div class="app" style="width:900px">
+    <div class="rail"><div class="logo"></div><i></i><i></i><i></i><i></i></div>
+    <div class="main rel">
+      <div class="crumb">SQL Editor &nbsp;›&nbsp; New query</div>
+      <div class="editor">
+        <div class="etop"><span class="tab">New query</span><span class="run">Run<span class="badge" style="right:-30px; top:1px">2</span></span></div>
+<pre><span class="cm">-- 社員をスタッフ（管理画面を使える人）として登録する</span>
+<span class="kw">insert into</span> staff_users (id, email, name)
+<span class="kw">values</span> (<span class="str">'a7d3e5f1-2b90-4c6a-8e17-5f2b9c4d0a88'</span>,
+        <span class="str">'tanaka@example.co.jp'</span>,
+        <span class="str">'田中 太郎'</span>);</pre>
+      </div>
+      <span class="note d" style="left:40px; top:250px">ここに貼り付けて、UID・メール・名前を自分たちの内容に書き換える</span>
+      <span class="badge" style="left:-2px; top:96px">1</span>
+      <div style="height:72px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 図5: 実行結果 -->
+<section class="fig" id="fig-result">
+  <div class="app" style="width:900px">
+    <div class="rail"><div class="logo"></div><i></i><i></i><i></i><i></i></div>
+    <div class="main">
+      <div class="crumb">SQL Editor &nbsp;›&nbsp; Results</div>
+      <div class="result">
+        <div class="rhead">Results</div>
+        <div class="ok">✔ <b>Success. No rows returned</b> &nbsp;<span style="color:#7d9a8b">← この表示が出れば登録できています</span></div>
+      </div>
+      <div class="result" style="margin-top:16px">
+        <div class="rhead">確認用（select）を実行したときの表示</div>
+        <table>
+          <tr><th>name</th><th>email</th><th>created_at</th></tr>
+          <tr><td>山田 花子</td><td>yamada@example.co.jp</td><td>2026-07-01 11:20</td></tr>
+          <tr><td>田中 太郎</td><td>tanaka@example.co.jp</td><td>2026-07-25 09:47</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 図6: サイト側の見え方 -->
+<section class="fig" id="fig-admin">
+  <div class="brs">
+    <div class="br">
+      <div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">…vercel.app/admin</span></div>
+      <div class="bbody">
+        <span class="verdict good">○ 登録できている場合</span>
+        <div class="adminbar"><span class="on">ダッシュボード</span><span>求人管理</span><span>会員管理</span><span>応募管理</span></div>
+        <div class="cards">
+          <div class="card"><small>会員数</small><b>128</b></div>
+          <div class="card"><small>公開中の求人</small><b>24</b></div>
+          <div class="card"><small>新着応募</small><b>7</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="br">
+      <div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">…vercel.app/admin</span></div>
+      <div class="bbody">
+        <span class="verdict bad">✕ 登録できていない場合</span>
+        <div class="denied">
+          <div class="lock">🔒</div>
+          <p><b>権限がありません</b></p>
+          <p style="font-size:11.5px">この画面はスタッフ専用です。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
