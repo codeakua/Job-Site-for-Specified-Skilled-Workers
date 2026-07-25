@@ -56,11 +56,13 @@ const I18N = {
     // ランディング
     'landing.badge': '特定技能に特化した中国人向け求人サービス',
     'landing.heroSub': '特定技能2号を目指せる11分野の求人だけを掲載。中国語サポート付きで、日本での仕事探しを応援します。',
+    'landing.free': '求職にかかる費用は、一切かかりません。',
+    'landing.freeSub': '紹介料・仲介料・登録料 すべて0円',
     'landing.haveAccount': 'アカウントをお持ちの方は',
-    'landing.stats.jobs': '掲載求人',
-    'landing.stats.jobsVal': '120+',
-    'landing.stats.fields': '対応分野',
-    'landing.stats.fieldsVal': '11分野',
+    'landing.stats.fee': '求職者の費用',
+    'landing.stats.feeVal': '0円',
+    'landing.stats.ssw2': '特定技能2号を目指せる',
+    'landing.stats.ssw2Val': '2号',
     'landing.stats.support': '中国語対応',
     'landing.stats.supportVal': '100%',
     'features.title': '樱聘が選ばれる理由',
@@ -89,7 +91,7 @@ const I18N = {
     'trust.i1': '紹介料・登録料 0円',
     'trust.i2': '保証金・違約金 一切なし',
     'trust.i3': '登録・退会はいつでも自由',
-    'trust.note': '日本の法律により、求職者のみなさまから手数料をいただくことはありません。安心してご利用ください。',
+    'trust.note': '中国では、特定技能の就職・転職の際に仲介費用がかかるのが一般的です。しかし日本の法律（職業安定法）では、求職者から手数料を受け取ることは原則として禁止されています。当サイトはこの法律に基づいて運営し、費用はすべて日本の企業側が負担します。安心してご利用ください。',
 
     // 入社後サポート体制
     'support.title': '入社後も、ずっと中国語でサポート',
@@ -100,9 +102,8 @@ const I18N = {
     'support.s2.title': '入社後の生活サポート',
     'support.s2.org': 'パートナー協同組合（登録支援機関）',
     'support.s2.desc': '住まい探し、役所・銀行手続きの同行、日本語学習の支援、仕事や生活の相談（中国語OK）',
-    'support.stat': 'サポートした外国人材の定着率',
-    // TODO(景表法): 実績の裏付け確認 or 削除 — オーナー確認待ち
-    'support.statVal': '98%以上',
+    'support.stat': '入社後も、特定技能2号を目指す学習・試験を中国語で応援します（対象分野・要件あり）',
+    'support.statVal': '2号へ',
 
     // 運営会社情報
     'op.title': '運営会社',
@@ -112,6 +113,7 @@ const I18N = {
 
     // 登録
     'reg.title': '新規登録',
+    'reg.freeNote': '登録から紹介まで、費用は一切かかりません',
     'reg.step1': '基本情報',
     'reg.step2': '連絡先',
     'reg.step3': '資格',
@@ -344,11 +346,13 @@ const I18N = {
 
     'landing.badge': '专为中国人打造的特定技能求职平台',
     'landing.heroSub': '只刊登可升级特定技能2号的11个行业的职位。全程中文支持，助您在日本安心求职。',
+    'landing.free': '求职全程 0 费用。',
+    'landing.freeSub': '不收取任何中介费·介绍费·注册费',
     'landing.haveAccount': '已有账号？',
-    'landing.stats.jobs': '在招职位',
-    'landing.stats.jobsVal': '120+',
-    'landing.stats.fields': '覆盖行业',
-    'landing.stats.fieldsVal': '11个',
+    'landing.stats.fee': '求职者费用',
+    'landing.stats.feeVal': '0元',
+    'landing.stats.ssw2': '可冲刺特定技能2号',
+    'landing.stats.ssw2Val': '2号',
     'landing.stats.support': '中文支持',
     'landing.stats.supportVal': '100%',
     'features.title': '为什么选择樱聘',
@@ -376,7 +380,7 @@ const I18N = {
     'trust.i1': '介绍费·注册费 0日元',
     'trust.i2': '绝不收取保证金·违约金',
     'trust.i3': '注册·退会随时自由',
-    'trust.note': '根据日本法律，我们不会向求职者收取任何费用，请放心使用。',
+    'trust.note': '在中国，办理特定技能赴日或转职时向中介付费是普遍现象。但根据日本法律（职业安定法），原则上禁止向求职者收取任何费用。本网站依法运营，全部费用由日本企业承担，请放心使用。',
 
     'support.title': '入职后，中文支持也不间断',
     'support.desc': '樱聘不是“介绍完就结束”。从找工作到入职后的日常生活，集团一体化为您保驾护航。',
@@ -386,9 +390,8 @@ const I18N = {
     'support.s2.title': '入职后的生活支持',
     'support.s2.org': 'Partner协同组合（注册支援机构）',
     'support.s2.desc': '协助找房、陪同办理政府·银行手续、日语学习支持、工作生活咨询（可用中文）',
-    'support.stat': '所支持外国人才的留职率',
-    // TODO(景表法): 実績の裏付け確認 or 削除 — オーナー確認待ち
-    'support.statVal': '98%以上',
+    'support.stat': '入职后持续用中文支持您学习备考，冲刺特定技能2号（视行业与条件而定）',
+    'support.statVal': '冲刺2号',
 
     'op.title': '运营公司',
     'op.name': '株式会社パートナー（Partner）',
@@ -396,6 +399,7 @@ const I18N = {
     'op.support': '注册支援机构：Partner协同组合',
 
     'reg.title': '新用户注册',
+    'reg.freeNote': '从注册到介绍，全程免费',
     'reg.step1': '基本信息',
     'reg.step2': '联系方式',
     'reg.step3': '资格证书',

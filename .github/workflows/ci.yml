@@ -1,0 +1,42 @@
+name: CI
+
+# PRとpushで lint / build を自動実行し、失敗したら本番へマージできないようにする（公開前の土台）。
+on:
+  push:
+    # 本番ブランチのみ＝Merge後の「緑履歴」を残す。main は現在不在でも無害（将来のmain昇格に前方互換）。
+    branches: [ "main", "claude/skilled-worker-job-site-mock-lk07i6" ]
+  pull_request:            # 作業ブランチ→本番へのPRを全てゲート。新規 ci.yml でも「このPR」で走る（merge ref評価）。
+  workflow_dispatch:       # 手動実行も可。
+
+permissions:
+  contents: read           # 最小権限（checkout と build 以外に書き込み不要）。
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # PRでは古い実行を打ち切る。本番pushのmerge履歴ビルドは打ち切らない。
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: build            # 必須ステータスチェック名を固定（保護設定で "build" を選択する。以後変えない）。
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Nodeバージョンは app/package.json の engines.node を唯一の真実とする（Vercelも同じ値を読む）。
+          node-version-file: app/package.json
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+        env:
+          # ビルドの安全網。Supabaseへ実接続はしない（クライアント生成は遅延・クエリは実行時のみ・
+          # 動的ルートはビルド時に未実行）。未設定でも緑になるが、将来の静的化に備えたダミー値。
+          NEXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key

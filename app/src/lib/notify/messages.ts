@@ -71,8 +71,9 @@ function wrapHtml(title: string, bodyRows: string, footerHtml: string): string {
 </div>`;
 }
 
-function adminLink(origin?: string): string {
-  return origin ? `${origin}/admin` : "/admin";
+// 通知の用途ごとに管理画面の該当ページへ直接誘導する（/admin はダッシュボード）。
+function adminLink(path: string, origin?: string): string {
+  return origin ? `${origin}${path}` : path;
 }
 
 /** 新規応募の通知メール。 */
@@ -87,7 +88,7 @@ export function applicationEmail(member: MemberInfo, job: JobInfo, origin?: stri
     ["WeChat ID", member.wechat_id ?? "—"],
     ["応募求人", `${jobTitle}（${job.area_ja ?? "—"}）`],
   ]);
-  const url = adminLink(origin);
+  const url = adminLink("/admin/applications", origin);
   return {
     subject,
     html: wrapHtml(
@@ -110,7 +111,7 @@ export function registrationEmail(member: MemberInfo, origin?: string): MailCont
     ["WeChat ID", member.wechat_id ?? "—"],
     ["JLPT", member.jlpt ?? "—"],
   ]);
-  const url = adminLink(origin);
+  const url = adminLink("/admin/members", origin);
   const guide = `WeChatで本人確認のうえ、管理画面で「本人確認済み」にしてください`;
   return {
     subject,
