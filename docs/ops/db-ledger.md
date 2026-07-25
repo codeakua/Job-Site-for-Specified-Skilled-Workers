@@ -9,9 +9,48 @@
 |---|---|---|---|---|
 | `app/supabase/migrations/0001_schema.sql` | テーブル定義＋RLS＋is_staff() | ✅ 適用済 | 〔既存〕 | 〔オーナー〕 |
 | `app/supabase/migrations/0002_seed.sql` | 分野マスタ11件＋サンプル求人14件（ダミー） | ✅ 適用済 | 〔既存〕 | 〔オーナー〕 |
-| `app/supabase/migrations/0003_security.sql` | 公開前セキュリティ是正（Issue ①②④⑩：staff_note分離・verified/member_noロック・apps自己insert列固定・member_no DB生成） | ⏳ pending（後続チケットで作成→本番適用） | — | — |
+| `app/supabase/migrations/0003_security.sql` | 公開前セキュリティ是正 PR-1a（Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定） | ⏳ **未適用（オーナーがSupabaseで実行する）** | — | — |
 
-> `0003_security.sql` は PR-1a/PR-1b（`docs/tasks.md` / 対応Issue参照）で作成する。**本番適用時にこの台帳へ追記すること**（各IssueのDoDにフック済み）。
+> `0003_security.sql` は PR-1a で作成済み。**本番へ流したら、上の行を `✅ 適用済` にして日付・実行者を記入すること。**
+> Issue #34（member_no のDB生成）は PR-1b で別ファイル `0004_*.sql` として追加する。
+
+### 0003_security.sql の適用手順（オーナー操作）
+
+> ⚠️ **順序が重要**: このPRをマージ（＝Vercelのデプロイ完了）**してから** SQLを実行する。
+> 逆順にすると、デプロイが終わるまでの数分間、管理画面の応募一覧が表示できなくなる。
+> （会員側の画面には影響しない）
+
+1. このPRをマージし、Vercelのデプロイが「Ready」になるのを待つ
+2. Supabase のプロジェクト画面 → 左メニュー **「SQL Editor」** → **「+ New query」**
+3. `app/supabase/migrations/0003_security.sql` の中身を**すべてコピー**して貼り付け、**「Run」**
+4. 下部に `Success` と表示されればOK（`NOTICE: ① applications.staff_note を …` のお知らせが出る）
+5. 管理画面 `/admin/applications` を開き、**メモが今までどおり読み書きできる**ことを確認
+6. **下の「本人確認フラグの棚卸し」を必ず実施する**
+7. 上の表の状態を `✅ 適用済` に更新し、この台帳をコミットする
+
+**何度実行しても安全**（2回目以降は「既に削除済みです」と表示されて何も起きない）。
+
+### 適用後に必ずやること: 本人確認フラグ（verified）の棚卸し
+
+> ⚠️ **0003 は「これから先の書き換え」を止めるものであり、過去に会員が自分で `verified` を `true` にしていた場合、その値は残ったままになる。**
+> 修正前は会員が自分でこのフラグを立てられたため、**適用直後に一度だけ、確認済みになっている会員が本当にスタッフのWeChat確認を通った人かを目視で確認する。**
+
+```sql
+-- 本人確認済みになっている会員の一覧（スタッフが確認した覚えのない人がいないか）
+select member_no, last_name, first_name, phone_code, phone, wechat_id, created_at
+  from members
+ where verified = true
+ order by created_at;
+```
+
+心当たりのない会員がいたら、管理画面 `/admin/members` の切替ボタンで未確認に戻すか、下記で戻す:
+
+```sql
+-- 例: 特定の会員番号の確認済みフラグを取り消す
+update members set verified = false where member_no = 'YP-XXXXXXXX-XXXX';
+```
+
+> 会員数がまだ少ないうちに実施するのが簡単。以後は会員が自分で立てることはできない。
 
 ---
 

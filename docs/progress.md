@@ -1,6 +1,6 @@
 # 進捗・引き継ぎメモ（新しいチャットはまずこれを読む）
 
-最終更新: 2026-07-25（**M0-B マージ済み＋本番ブランチ保護 有効化済み**。加えて**提出用ドキュメント生成基盤**＝法務3文書のWord/PDF化・管理者マニュアル新設。詳細 §15）。前回: 2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。§14）／2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
+最終更新: 2026-07-25（**PR-1a 公開前セキュリティ是正の第1弾**＝Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。詳細 §16。**`0003_security.sql` はオーナーがSupabaseで手動実行が必要**）。前回: 2026-07-25（**提出用ドキュメント生成基盤**＝法務3文書のWord/PDF化・管理者マニュアル新設。§15）／2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。§14）／2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
 
 ## 0. 一言サマリー
 中国人向け特定技能求人サイトの**β版**を、モック（リポジトリ直下HTML）→ Next.js実装へ移行中。
@@ -26,7 +26,7 @@
 - **スタック**: Next.js 16（App Router, `src/`）＋ React 19 ＋ TypeScript ＋ Supabase(@supabase/ssr) ＋ Vercel ＋（予定）Resend。**app/ 配下がβ本体**。リポジトリ直下HTMLは「見た目の正（モック）」。
 - **Next.js 16の注意**: middlewareは`proxy.ts`に改称（`app/src/proxy.ts`でセッション更新＋ログインガード）。`cookies()`・動的ルートの`params`は**async**。`next/font/google`等Google系は使用禁止（中国アクセス配慮）。
 - **認証**: 電話番号＋パスワード（SMS無し）。電話番号を内部メール `p<digits>@phone.yingpin.app` に変換してSupabase Email認証を利用（`app/src/lib/auth/phone-email.ts`, `client-auth.ts`）。ログイン状態は `app/src/components/auth-provider.tsx` の `useAuth()`。
-- **DB/セキュリティ**: `app/supabase/migrations/0001_schema.sql`（テーブル＋RLS）・`0002_seed.sql`（求人14件・自動生成）。RLS = 会員は自分のデータのみ／求人閲覧はログイン必須／管理操作はスタッフのみ（`is_staff()`）。会員A/B/スタッフの3者でRLS検証済み。
+- **DB/セキュリティ**: `app/supabase/migrations/0001_schema.sql`（テーブル＋RLS）・`0002_seed.sql`（求人14件・自動生成）・`0003_security.sql`（公開前セキュリティ是正 PR-1a・§16）。RLS = 会員は自分のデータのみ／求人閲覧はログイン必須／管理操作はスタッフのみ（`is_staff()`）。会員A/B/スタッフの3者でRLS検証済み。**RLSは「行」単位でしか効かず、PostgREST は「列」を制限しない**——秘匿列は必ず別テーブルへ分離する（§16 ①）。
 - **共通の状態**: `app/src/components/providers.tsx`（テーマblue/red・言語ja/zh・localStorage・`useAppState().t()`）。辞書は `app/src/lib/i18n/dictionaries.ts`（モック`assets/js/i18n.js`由来）。
 - **スクロール演出**: `.reveal` クラスは `app/src/components/RevealObserver.tsx`（layoutに常設）が全画面で自動的に表示化する。**要素に`reveal`を付けるだけでよい**（各所でObserverを自作しない。付け忘れると要素が透明のまま＝過去バグ）。
 - **デザイン**: モックの `assets/css/style.css` を `app/src/app/globals.css` に移植。独自の色・角丸を発明せずCSS変数を使う。会員側=中国語デフォルト＋日本語切替、管理画面=日本語。**管理画面はPC前提**（`app/src/app/admin/admin.css`・全セレクタ`.admin-root`配下スコープ＝会員側へ漏れない。§14）。**トップの訴求文言と管理画面は `app/` が正**（モックは会員側既存画面レイアウトの参照資料として凍結・M0-Bで方針化）。
@@ -54,7 +54,8 @@
 - ✅ **#21 モック表記撤去**（PR#23）／ ✅ **#22 会員側punch-list**（PR#24）… Codex・**マージ済・Issueもclose済**。残っていた景表法「98%以上」(`support.statVal`)は**M0-Bのトップ改修で撤去済み**（`lawyer-checklist.md` C-1 更新）。
 - 🆕 **M0-A（2026-07-24・Claude担当）**: CI導入＋本番保護＋法務ドラフト＋公開前セキュリティ是正の起票。詳細は §13。
 - 🆕 **M0-B（2026-07-25・Claude担当）**: トップ無料訴求＋管理画面PC化・ダッシュボード（#16実施）。詳細は §14。
-  - 起票済セキュリティ是正（実装は後続）: **#25 ①staff_note分離** / **#26 ②verified・member_noロック** / **#27 ③service_role** / **#28 ④管理is_staff明示** / **#29 ⑤セキュリティヘッダ** / **#30 ⑥登録bot/レート制限** / **#31 ⑦PWポリシー** / **#32 ⑧オープンリダイレクト** / **#33 ⑨退会/削除運用** / **#34 ⑩member_no DB生成** / **#35 ⑪アカウント列挙**（すべて🧠Claude担当・`docs/tasks.md` T-15）。
+  - 起票済セキュリティ是正: **#25 ①staff_note分離** / **#26 ②verified・member_noロック** / **#27 ③service_role** / **#28 ④管理is_staff明示** / **#29 ⑤セキュリティヘッダ** / **#30 ⑥登録bot/レート制限** / **#31 ⑦PWポリシー** / **#32 ⑧オープンリダイレクト** / **#33 ⑨退会/削除運用** / **#34 ⑩member_no DB生成** / **#35 ⑪アカウント列挙**（すべて🧠Claude担当・`docs/tasks.md` T-15）。
+- 🆕 **PR-1a（2026-07-25・Claude担当）**: セキュリティ是正の第1弾を実装。**#25・#26・#27(a)・#28 と applications自己insert列固定**。詳細は §16。**`0003_security.sql` の本番適用はオーナー操作**（手順は `docs/ops/db-ledger.md`）。
 
 ## 6. 既知の軽微な点 / TODOメモ
 - 求人詳細（#5）: 詳細ページのトップバーに言語切替ピルが無い（他画面にはある）。
@@ -68,7 +69,7 @@
 2. ~~管理画面の残る大きな改修は #16 にまとめる方針。会員側の生表示（性別 male 等）の日本語化も #16 で拾える。~~ → **#16 は M0-B で実施済み（生表示の日本語化含む・§14）**。
 3. **メール通知の宛先拡張（任意）**: 現状は送信元がResendテスト用のため所有アドレス宛のみ到達。スタッフを複数宛先にする／差出人を自社ドメインにするには、Resendで独自ドメインを認証し `NOTIFY_FROM_EMAIL` を設定（#12の独自ドメイン作業と同時が効率的）。
 4. 独自ドメイン・利用規約/プライバシーポリシー（Claudeがドラフト→顧問弁護士レビュー）はβ公開前に。
-5. **セキュリティ是正の実装（#25〜#35）**: 管理系サーバーアクションの明示チェックは #28（M0-B後は `lib/admin/guard.ts` の `requireStaff()` を各 `actions.ts` 冒頭に1行足すだけ）。`staff_note` の会員読み取り問題は #25（M0-BでUI側は `note` プロップ化・`saveApplicationNote` 分離済み＝実装差し替えだけで移行可能）。
+5. **セキュリティ是正の実装（#25〜#35）**: **#25・#26・#27(a)・#28 と応募insert列固定は PR-1a で実装済み（§16）。** 残りは #34（member_no DB生成＝PR-1b）／#29 ⑤セキュリティヘッダ・#32 ⑧オープンリダイレクト（PR-2）／#30 ⑥登録bot・#35 ⑪アカウント列挙（PR-3）／#31 ⑦PWポリシー・#33 ⑨退会運用（文書）。
 
 ## 8. 法務・事業メモ（背景）
 - 運営: 株式会社パートナー（有料職業紹介 許可番号 11-ユ-301340）＋ パートナー協同組合（登録支援機関）。許認可はクリア済み。
@@ -217,3 +218,59 @@
 
 ### 次にやること
 - 弁護士FBが返ったら原本mdへ反映 → 再生成 → 中国語（簡体字）版の作成（会員側UIは中国語デフォルトのため公開時は両言語の掲出が必要）。
+
+---
+
+## 16. PR-1a 公開前セキュリティ是正・第1弾 実装メモ（2026-07-25 追記・Claude担当）
+
+**状態: 実装・検証完了（PRでオーナーMerge待ち）。マージ後に `0003_security.sql` の本番適用（オーナー操作）が必要。**
+対象＝**#25 ①staff_note分離** / **#26 ②verified・member_noロック** / **③applications自己insert列固定** / **#27(a) service_role記載削除** / **#28 ④管理アクションのstaff明示**。
+
+### 何が危険だったか（ローカルPostgreSQLで実際に再現した）
+
+`0001_schema.sql` のRLSだけでは次の5つが**すべて成立した**（会員A/会員B/スタッフの3者で実証）:
+
+| # | 攻撃 | 結果（修正前） |
+|---|---|---|
+| 1 | 会員が自分の応募行から `staff_note` を直接 `select` | **社内メモが読めた** |
+| 2 | 会員が自分の `verified` を `true` に `update` | **成功** |
+| 3 | 会員が自分の `member_no` を `update` | **成功** |
+| 4 | 新規登録時に `verified:true` を自己設定 | **成功** |
+| 5 | 会員が `status='hired'`・任意`id`・過去日付で応募を `insert` | **成功** |
+
+**根本原因**: **RLSは「行」単位でしか効かず、PostgREST（Supabase）は「列」を制限しない。** UIで隠しても、会員は anon公開鍵＋自分のJWTでブラウザから直接クエリできる。
+また `members_self_update` は `id = auth.uid()` を許すだけで **NEW/OLD を比較しない**ため、自分の行なら**どの列でも**書き換えられた。
+
+### どう直したか（`0003_security.sql`）
+
+- **① スタッフ内部メモの分離**: `application_staff_notes(application_id pk, note, updated_at)` を新設し、既存の `staff_note` を移送 → **`applications.staff_note` 列を削除**。RLSは `is_staff()` のみ（全操作）。
+  - 列単位のRLSは不可。**view単独は所有者権限でRLSを迂回し得るため不採用**（Issueの方針どおり）。
+- **② verified・member_no のロック**: `members` に `BEFORE INSERT OR UPDATE` トリガ `trg_members_guard`。非staffは INSERT時に `verified := false` へ矯正、UPDATE時に `verified`/`member_no` の変更を `raise exception`（`errcode 42501`）。
+  - **列権限 `REVOKE UPDATE(verified) FROM authenticated` は不採用**: 会員もスタッフも同じ `authenticated` ロールのため、スタッフの `toggleVerified` まで止まる。
+- **③ applications の自己insert列固定**: `BEFORE INSERT` トリガで非staffの `status`/`created_at`/`updated_at` を初期値へ矯正＋ポリシー `apps_self_insert` を `member_id = auth.uid() and status = 'new'` に強化（宣言的な二重防御）＋ `id` を `generated always` にして自己採番を封じた。
+  - ⚠️ **`generated always` にする際は採番シーケンスの同期が必須**（`setval(..., max(id)+1, false)` を同梱）。ズレたままだと以後の応募が全件 主キー重複で失敗する（検証中に実際に踏んだ）。
+
+### アプリ側の変更
+
+- `admin/applications/page.tsx` … `staff_note` を `select` から外し、`application_staff_notes` を**別クエリ**で取得してJSでマージ。**埋め込み(join)にしなかったのは、メモ側の取得に失敗しても応募一覧そのものは表示できるようにするため**（0003適用前のデプロイでも一覧が壊れない）。
+- `admin/applications/actions.ts` … メモ保存を新テーブルへの `upsert`／空なら `delete` に差し替え。`updateApplication` 冒頭に `requireStaff()`（#28）。フォーム項目名も `staff_note` → `note` に統一。
+- `admin/jobs/actions.ts` … `saveJob`/`toggleStatus` 冒頭に `requireStaff()`（#28）。※`admin/members/actions.ts` は既に明示チェック済みのため変更なし。
+- `app/.env.example` … `SUPABASE_SERVICE_ROLE_KEY` の2行を削除し、「使用しない・将来も `NEXT_PUBLIC_` を付けない」旨のコメントへ（#27a）。
+- `app/supabase/setup.sql` … 0003 を結合（**新規プロジェクトを作った時に脆弱な状態にならないように**）。README も更新。
+
+### 検証（サンドボックス・確立手順）
+
+- ローカルPostgreSQL 16 に `auth.uid()`・`anon`/`authenticated`/`service_role` ロールを再現し、**修正前に5攻撃が成立すること**→**0003適用後に全て塞がれ、スタッフ操作は従来どおり動くこと**を計21項目で確認。
+- **0003 を3回連続実行して冪等**であること、`setup.sql` をまっさらなDBで通しで実行できることも確認。
+- `npm run lint` / `npm run build` とも緑。
+
+### ⚠️ 適用後に必ずやる運用作業（検証中に判明）
+
+**0003 は「これから先の書き換え」を止めるだけで、修正前に会員が自分で立てた `verified=true` は残る。**
+適用直後に一度だけ、確認済み会員の棚卸し（`select ... from members where verified = true`）を行い、スタッフのWeChat確認を通っていない会員がいないか目視する。手順とSQLは `docs/ops/db-ledger.md`。
+
+### 残課題（PR-1aの対象外・後続）
+
+- **登録時の `member_no` は会員側で生成した値がそのまま入る**（`client-auth.ts` の `genMemberNo()`）。登録後は変更不可にしたが、**登録時の自己設定は Issue #34（member_no のDB生成・PR-1b）で解消する**。`member_no` は表示用の識別子で権限判定には一切使っていないため、実害は限定的。
+- `applications` 以外のテーブル（`favorites` 等）の identity列は `by default` のまま（明示idを入れるコードが無く、実害なし）。
+- #29〜#33・#35 は PR-2 / PR-3 / 文書で対応。

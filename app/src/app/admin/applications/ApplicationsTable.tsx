@@ -15,7 +15,7 @@ import {
 export type AdminApplication = {
   id: number | string;
   status: ApplicationStatus;
-  /** スタッフ内部メモ。列名依存をUIから外すため props 名は note（是正① #25 準備）。 */
+  /** スタッフ内部メモ。実体は staff限定の application_staff_notes（是正① #25）。 */
   note: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -162,7 +162,7 @@ export function ApplicationsTable({ applications, updateApplication, initialStat
                           </label>
                           <label className="field">
                             <span>スタッフメモ（会員には表示されません）</span>
-                            <textarea className="input" name="staff_note" defaultValue={app.note ?? ""} rows={4} placeholder="連絡履歴・面接日程・確認事項など" />
+                            <textarea className="input" name="note" defaultValue={app.note ?? ""} rows={4} placeholder="連絡履歴・面接日程・確認事項など" />
                           </label>
                           <div className="admin-row-actions span-2">
                             <button className="btn btn-primary" type="submit">更新する</button>
