@@ -85,7 +85,7 @@
 
 ### T-13 🤖 CI導入＋本番ブランチ保護
 - **触る範囲**: `.github/workflows/ci.yml`（新規）、`app/package.json`（engines.node）
-- **内容**: PR/pushで `npm ci && lint && build` を自動実行（Node 22）。本番ブランチ `claude/skilled-worker-job-site-mock-lk07i6` を保護（PR必須・直push禁止・CI緑必須）。保護設定はオーナー操作（手順書は `docs/progress.md` §13 / PR説明）。
+- **内容**: PR/pushで `npm ci && lint && build` を自動実行（Node 22）。本番ブランチ `claude/skilled-worker-job-site-mock-lk07i6` を保護（PR必須・直push禁止・CI緑必須）。保護設定はオーナー操作（🔰詳細手順書 `docs/ops/github-settings-guide.md` / `docs/progress.md` §13 / PR説明）。
 - **完了条件**: PRでCI `build` が緑・本番が保護され直push不可
 - **状態**: 本PRで導入（M0-A）
 
@@ -101,6 +101,12 @@
   - #25 ① staff_note分離｜#26 ② verified/member_noロック｜#27 ③ service_role｜#28 ④ 管理is_staff明示｜#29 ⑤ セキュリティヘッダ｜#30 ⑥ 登録bot/レート制限｜#31 ⑦ PWポリシー｜#32 ⑧ オープンリダイレクト｜#33 ⑨ 退会/削除運用｜#34 ⑩ member_no DB生成｜#35 ⑪ アカウント列挙
 - **完了条件**: 各IssueのDoD達成（RLS系はローカルPostgreSQLで会員/スタッフ2者検証）。適用は `docs/ops/db-ledger.md` に記録
 - **状態**: 起票済（M0-A・#25〜#35）。実装は後続
+
+### T-16 🤖 M0-B: 無料訴求トップ＋管理画面PC化・ダッシュボード（Issue #16）
+- **触る範囲**: `app/src/components/Landing.tsx`・`auth/RegisterWizard.tsx`・`lib/i18n/dictionaries.ts`・`app/src/app/admin/`（全面）・`lib/admin/`（新設）・`lib/notify/messages.ts`・`globals.css`（最小）
+- **内容**: トップを「求職者0円・特定技能2号」のメリット訴求へ全面置換（120+/98%撤去・日中両言語）。管理画面をPCサイドバー型に刷新し、`/admin` ダッシュボード新設・求人は `/admin/jobs`（編集は `new`/`[id]` 専用ページ・日中左右ペアフォーム）・会員/応募はテーブル＋行展開。
+- **完了条件**: lint/build緑・Playwright検証済み・会員側デザイン無影響（`.admin-root` スコープ）
+- **状態**: ✅ 実装済み（M0-B・2026-07-25・詳細 `docs/progress.md` §14）。マージ後 #16 をclose
 
 > ✅ **#21/#22 は PR#23/#24 でマージ済** → Issueをclose済。景表法「98%以上」(`support.statVal`)は**M0-Bのトップ改修で撤去済み**（数値アピール→「求職者0円・特定技能2号」のメリット訴求へ全面置換。`lawyer-checklist.md` C-1 参照）。
 
