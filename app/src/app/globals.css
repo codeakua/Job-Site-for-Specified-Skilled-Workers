@@ -93,8 +93,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 [data-lang="zh"] body { font-family: var(--font-zh); }
-/* 管理画面は日本語固定のため、会員側がzhでも管理画面だけは日本語フォントを維持する。 */
-[data-lang="zh"] .admin-shell { font-family: var(--font-base); }
+/* 管理画面の日本語フォント固定は admin.css（[data-lang="zh"] .admin-root）へ移設。 */
 body.no-scroll { overflow: hidden; }
 
 /* PCでは中央にアプリ枠を表示 */
@@ -434,7 +433,7 @@ body.no-scroll { overflow: hidden; }
   background: var(--grad); border-radius: var(--r-lg); box-shadow: var(--shadow-cta);
   color: var(--on-primary); display: flex; align-items: baseline; gap: 12px;
 }
-.support-stat b { font-size: 30px; font-weight: 900; letter-spacing: -.01em; }
+.support-stat b { font-size: 30px; font-weight: 900; letter-spacing: -.01em; white-space: nowrap; }
 .support-stat span { font-size: 12px; font-weight: 700; opacity: .94; }
 
 /* 運営会社情報 */
