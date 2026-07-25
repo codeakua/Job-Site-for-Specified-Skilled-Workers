@@ -101,7 +101,7 @@
   - #25 ① staff_note分離｜#26 ② verified/member_noロック｜#27 ③ service_role｜#28 ④ 管理is_staff明示｜#29 ⑤ セキュリティヘッダ｜#30 ⑥ 登録bot/レート制限｜#31 ⑦ PWポリシー｜#32 ⑧ オープンリダイレクト｜#33 ⑨ 退会/削除運用｜#34 ⑩ member_no DB生成｜#35 ⑪ アカウント列挙
 - **完了条件**: 各IssueのDoD達成（RLS系はローカルPostgreSQLで会員/スタッフ2者検証）。適用は `docs/ops/db-ledger.md` に記録
 - **状態**: 起票済（M0-A・#25〜#35）。
-  - ✅ **PR-1a 実装済（2026-07-25）**: #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。`0003_security.sql` 新規。会員A/会員B/スタッフの3者・全21項目で検証。詳細 `docs/progress.md` §16。**本番SQL適用はオーナー操作（未実施）**
+  - ✅ **PR-1a 完了（2026-07-25・PR #39 マージ＋本番SQL適用済み）**: #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。`0003_security.sql` 新規。会員A/会員B/スタッフの3者・全21項目で検証。詳細 `docs/progress.md` §16。**本番適用・確認クエリ・verified棚卸しまで完了（`docs/ops/db-ledger.md` に記録）**
   - ⏳ 残り: #34（PR-1b）／#29・#32（PR-2）／#30・#35（PR-3）／#31・#33（文書）
 
 ### T-16 🤖 M0-B: 無料訴求トップ＋管理画面PC化・ダッシュボード（Issue #16）

@@ -9,14 +9,35 @@
 |---|---|---|---|---|
 | `app/supabase/migrations/0001_schema.sql` | テーブル定義＋RLS＋is_staff() | ✅ 適用済 | 〔既存〕 | 〔オーナー〕 |
 | `app/supabase/migrations/0002_seed.sql` | 分野マスタ11件＋サンプル求人14件（ダミー） | ✅ 適用済 | 〔既存〕 | 〔オーナー〕 |
-| `app/supabase/migrations/0003_security.sql` | 公開前セキュリティ是正 PR-1a（Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定） | ⏳ **未適用（オーナーがSupabaseで実行する）** | — | — |
+| `app/supabase/migrations/0003_security.sql` | 公開前セキュリティ是正 PR-1a（Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定） | ✅ 適用済 | 2026-07-25 | オーナー |
 
-> `0003_security.sql` は PR-1a で作成済み。**本番へ流したら、上の行を `✅ 適用済` にして日付・実行者を記入すること。**
 > Issue #34（member_no のDB生成）は PR-1b で別ファイル `0004_*.sql` として追加する。
 
-### 0003_security.sql の適用手順（オーナー操作）
+### 0003 適用後の確認結果（2026-07-25・本番で実行）
 
-> ⚠️ **順序が重要**: このPRをマージ（＝Vercelのデプロイ完了）**してから** SQLを実行する。
+適用直後に下記の確認クエリを本番で実行し、**5項目すべて期待値どおり**であることを確認済み。
+
+```sql
+select
+  (select count(*) from information_schema.tables
+     where table_schema = 'public' and table_name = 'application_staff_notes')     as "① メモ用テーブル(期待値 1)",
+  (select count(*) from information_schema.columns
+     where table_schema = 'public' and table_name = 'applications'
+       and column_name = 'staff_note')                                            as "① 応募表のメモ列(期待値 0)",
+  (select count(*) from pg_trigger where tgname = 'trg_members_guard')            as "② 会員の見張り役(期待値 1)",
+  (select count(*) from pg_trigger where tgname = 'trg_applications_member_guard')as "③ 応募の見張り役(期待値 1)",
+  (select identity_generation from information_schema.columns
+     where table_schema = 'public' and table_name = 'applications'
+       and column_name = 'id')                                                    as "③ 応募番号(期待値 ALWAYS)";
+```
+
+結果: `1 / 0 / 1 / 1 / ALWAYS` ✅
+
+**本人確認フラグの棚卸しも実施済み（2026-07-25）**: `verified = true` は2件で、いずれもオーナーが把握している会員。不審な自己verifiedは無し。
+
+### 0003_security.sql の適用手順（実施済み・記録用）
+
+> ⚠️ **順序が重要**: PRをマージ（＝Vercelのデプロイ完了）**してから** SQLを実行する。
 > 逆順にすると、デプロイが終わるまでの数分間、管理画面の応募一覧が表示できなくなる。
 > （会員側の画面には影響しない）
 
@@ -30,10 +51,11 @@
 
 **何度実行しても安全**（2回目以降は「既に削除済みです」と表示されて何も起きない）。
 
-### 適用後に必ずやること: 本人確認フラグ（verified）の棚卸し
+### 適用後に必ずやること: 本人確認フラグ（verified）の棚卸し（✅ 2026-07-25 実施済み）
 
 > ⚠️ **0003 は「これから先の書き換え」を止めるものであり、過去に会員が自分で `verified` を `true` にしていた場合、その値は残ったままになる。**
 > 修正前は会員が自分でこのフラグを立てられたため、**適用直後に一度だけ、確認済みになっている会員が本当にスタッフのWeChat確認を通った人かを目視で確認する。**
+> **今後 0003 相当の保護が入っていない環境（新しいSupabaseプロジェクト等）を立てた場合は、同じ棚卸しを再度行うこと。**
 
 ```sql
 -- 本人確認済みになっている会員の一覧（スタッフが確認した覚えのない人がいないか）
