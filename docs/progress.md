@@ -149,7 +149,7 @@
 - **CI**: `.github/workflows/ci.yml`（PR/pushで `npm ci && lint && build`・Node 22・`permissions:contents:read`・`concurrency`・`timeout`）＋ `app/package.json` に `engines.node="22.x"`（Vercel整合）。ローカルで `npm ci && lint && build` 緑を実証済。
 - **法務ドラフト**（弁護士レビュー用・日本語）: `docs/legal/terms-draft.md`・`privacy-draft.md`・`lawyer-checklist.md`。個情法(21/28/32/26/25条)・職安法(国外紹介/5条の4/5条の6/帳簿保存)を網羅。中国語版・弁護士FB反映は後続（ブラウザで可）。
 - **セキュリティ是正Issue 11件**（#25〜#35・すべて🧠Claude担当・実装は後続）。実装単位＝PR-1a(Go死守①②＋apps insert固定＋③a)／PR-1b(④⑩)／PR-2(⑤⑧)／PR-3(⑥⑪)／文書(⑦⑨)。RLS系DoDは会員/スタッフ2者のローカルPostgreSQL検証。
-- **SQL適用台帳の器**: `docs/ops/db-ledger.md`（0001/0002適用済・0003_security pending・サンプル求人14件の削除手順）。
+- **SQL適用台帳の器**: `docs/ops/db-ledger.md`（0001/0002適用済・0003_security は当時pending・サンプル求人14件の削除手順）。→ **0003_security は 2026-07-25 に本番適用済み（§16）。**
 
 ### オーナー操作：本番ブランチ保護の手順（方式A・約5分・Vercel変更不要）
 > ✅ **2026-07-25 実施済み。** Ruleset `protect-production` が **Active**（Target=本番ブランチ／Require a pull request（Approvals=0）／Require status checks=`build`／Restrict deletions／Bypass=Repository admin）。以後、本番への直push は不可・CI緑でないとMergeできない。**本番ブランチ名を変更する場合はRulesetのTargetも同時に直すこと**（名前がズレると保護が無効化される）。
@@ -166,8 +166,8 @@
 ### オーナー着手ボックス（今日着手・期限8/8＝お盆前）
 (a) 独自ドメイン購入（DNS/メール認証は最大48h。DNSはClaudeが案内）／(b) 顧問弁護士へ**送付用のWord/PDF＝`docs/legal/export/` の6ファイル**（表紙・凡例つき。§15）を送付し返却期限8/8を依頼／(c) 実求人の収集開始／(d) Issue⑥恒久レート制限用の外部ストア（Upstash/Vercel KV 無料枠）はClaudeが選定案を出すので選ぶだけ。
 
-### 次にやること
-- セキュリティ是正の**実装**（#25〜#35。PR-1aのGo死守から。Opusは①②の設計と最終点検、他はSonnet）。
+### 次にやること（⚠️ **M0-A 時点＝2026-07-24 のスナップショット。最新の「次の一手」は §16 末尾を見ること**）
+- ~~セキュリティ是正の**実装**（#25〜#35。PR-1aのGo死守から）~~ → **PR-1a（#25・#26・#27a・#28＋応募insert列固定）は 2026-07-25 に完了・本番適用済み（§16）。残りは #34/PR-1b ほか。**
 - M2: 監視3点・Supabase/Vercel Pro化・バックアップ復元予行・実求人投入・独自ドメイン公開（`docs/launch-plan.md` §M2）。
 - 参考: #11 中国語デフォルト化は §12 の通り完了済（`providers.tsx`=`useState("zh")`）。
 
@@ -276,3 +276,14 @@
 - **登録時の `member_no` は会員側で生成した値がそのまま入る**（`client-auth.ts` の `genMemberNo()`）。登録後は変更不可にしたが、**登録時の自己設定は Issue #34（member_no のDB生成・PR-1b）で解消する**。`member_no` は表示用の識別子で権限判定には一切使っていないため、実害は限定的。
 - `applications` 以外のテーブル（`favorites` 等）の identity列は `by default` のまま（明示idを入れるコードが無く、実害なし）。
 - #29〜#33・#35 は PR-2 / PR-3 / 文書で対応。
+
+---
+
+## 🧭 いま着手すべきこと（このファイル内で最新・新セッションはここを見る）
+
+> 各節の「次にやること」は**その節を書いた時点のスナップショット**。現在地はここが正。
+
+1. **オーナー操作の残り1件**: **#27(b)** ＝ Vercel の Environment Variables に `SUPABASE_SERVICE_ROLE_KEY` が無いことの確認（あれば削除）。確認できたら Issue #27 をclose。
+2. **次の実装**: **PR-1b ＝ Issue #34（member_no のDB生成）**。`0004_*.sql` を新規作成し、`client-auth.ts` の `genMemberNo()` によるクライアント採番をDB採番へ移す（採番衝突時のリトライも設計する）。登録完了画面が会員番号を表示するため、**insert後に `.select("member_no")` でDBの実値を読み戻す**必要がある点に注意（§16 残課題）。
+3. その後: **PR-2**（#29 セキュリティヘッダ・#32 オープンリダイレクト）→ **PR-3**（#30 登録bot/レート制限・#35 アカウント列挙）→ **文書**（#31 PWポリシー・#33 退会/削除運用）。
+4. 並行: M2（監視3点・Supabase/Vercel Pro化・バックアップ復元予行・実求人投入・独自ドメイン公開＝`docs/launch-plan.md` §M2）、弁護士FBの反映（§15）。
