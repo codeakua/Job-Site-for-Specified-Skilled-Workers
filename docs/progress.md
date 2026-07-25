@@ -209,8 +209,10 @@
 - ⚠️ **`w:lineRule` を省くとLibreOfficeが行高を固定と解釈し、埋め込み画像が細い帯に潰れる。** `spacing` に `line` を指定する箇所は必ず `lineRule: "auto"` を併記すること（md2docx.js 内で徹底済み）。
 
 ### 管理者マニュアル（`docs/ops/staff-registration-guide.md`・全8ページ）
-- 3ステップ＝①社員本人が `/register` で会員登録 → ②Supabase **Authentication → Users** でUIDをコピー（**Created atが最新の行**で探すのが確実）→ ③**SQL Editor** で `insert into staff_users (id, email, name) values (...)` を1回実行。
-- 退職時の解除（`delete from staff_users where name = '…'`）、症状別トラブル対処、安全上の注意（スタッフは全会員の個人情報を閲覧できる／`drop`・`truncate` 厳禁）を収録。
+- 3ステップ＝①社員本人が `/register` で会員登録 → ②Supabase **Authentication → Users** でUIDをコピー → ③**SQL Editor** で `insert into staff_users (id, email, name) values (...)` を1回実行。
+- ⚠️ **本人特定は必ず Email列の電話番号一致で行う（「Created atが最新の行」で選ばせてはいけない）。** 一般求職者も同じ利用者一覧に並ぶため、社員の登録直後に別の求職者が登録すると最新行はその求職者になり、**赤の他人へ全会員の個人情報を渡すことになる**（Codexレビュー P1 指摘・PR #37 マージ後に是正）。登録後は毎回 `staff_users` と `auth.users` を join した確認クエリで、権限を持つ全員の電話番号を目視確認させる。
+- ⚠️ **解除は氏名ではなくUIDで**（`name` に一意制約が無く、同姓同名だと在籍者の権限まで消える）。
+- 退職時の解除、症状別トラブル対処、安全上の注意（スタッフは全会員の個人情報を閲覧できる／`drop`・`truncate` 厳禁）を収録。
 - 付録A＝会員一覧に社員を出したくない場合の代替手順。**内部メールアドレスは `p` ＋国番号＋電話番号＋`@phone.yingpin.app`**（`lib/auth/phone-email.ts`）。**本人が入力したとおりの数字が使われる**ため先頭0の有無で変わる点、Supabaseで直接作る場合は **Auto Confirm User に必ずチェック**（外れているとログイン不可）を明記。
 
 ### 次にやること

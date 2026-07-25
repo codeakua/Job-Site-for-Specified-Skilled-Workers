@@ -186,13 +186,15 @@
         <div class="rhead">Results</div>
         <div class="ok">✔ <b>Success. No rows returned</b> &nbsp;<span style="color:#7d9a8b">← この表示が出れば登録できています</span></div>
       </div>
-      <div class="result" style="margin-top:16px">
+      <div class="result rel" style="margin-top:16px">
         <div class="rhead">確認用（select）を実行したときの表示</div>
         <table>
-          <tr><th>name</th><th>email</th><th>created_at</th></tr>
-          <tr><td>山田 花子</td><td>yamada@example.co.jp</td><td>2026-07-01 11:20</td></tr>
-          <tr><td>田中 太郎</td><td>tanaka@example.co.jp</td><td>2026-07-25 09:47</td></tr>
+          <tr><th>UID</th><th>氏名</th><th>ログイン用の内部アドレス（電話番号）</th><th>登録日時</th></tr>
+          <tr><td class="uid">3f1c9a20-7e44-…</td><td>山田 花子</td><td>p8613800138000@phone.yingpin.app</td><td>2026-07-01 11:20</td></tr>
+          <tr><td class="uid">a7d3e5f1-2b90-…</td><td>田中 太郎</td><td>p819012345678@phone.yingpin.app</td><td>2026-07-25 09:47</td></tr>
         </table>
+        <span class="note d" style="left:300px; top:140px">この電話番号が本人のものか毎回確認する</span>
+        <div style="height:52px"></div>
       </div>
     </div>
   </div>
