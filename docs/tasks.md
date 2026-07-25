@@ -100,7 +100,9 @@
 - **内容**: 下記11 Issueで是正。実装単位＝PR-1a（①②④相当のGo死守）/PR-1b（④⑩）/PR-2（⑤⑧）/PR-3（⑥⑪）/文書（⑦⑨）。
   - #25 ① staff_note分離｜#26 ② verified/member_noロック｜#27 ③ service_role｜#28 ④ 管理is_staff明示｜#29 ⑤ セキュリティヘッダ｜#30 ⑥ 登録bot/レート制限｜#31 ⑦ PWポリシー｜#32 ⑧ オープンリダイレクト｜#33 ⑨ 退会/削除運用｜#34 ⑩ member_no DB生成｜#35 ⑪ アカウント列挙
 - **完了条件**: 各IssueのDoD達成（RLS系はローカルPostgreSQLで会員/スタッフ2者検証）。適用は `docs/ops/db-ledger.md` に記録
-- **状態**: 起票済（M0-A・#25〜#35）。実装は後続
+- **状態**: 起票済（M0-A・#25〜#35）。
+  - ✅ **PR-1a 実装済（2026-07-25）**: #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。`0003_security.sql` 新規。会員A/会員B/スタッフの3者・全21項目で検証。詳細 `docs/progress.md` §16。**本番SQL適用はオーナー操作（未実施）**
+  - ⏳ 残り: #34（PR-1b）／#29・#32（PR-2）／#30・#35（PR-3）／#31・#33（文書）
 
 ### T-16 🤖 M0-B: 無料訴求トップ＋管理画面PC化・ダッシュボード（Issue #16）
 - **触る範囲**: `app/src/components/Landing.tsx`・`auth/RegisterWizard.tsx`・`lib/i18n/dictionaries.ts`・`app/src/app/admin/`（全面）・`lib/admin/`（新設）・`lib/notify/messages.ts`・`globals.css`（最小）

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireStaff } from "@/lib/admin/guard";
 
 type JobStatus = "draft" | "published";
 
@@ -69,6 +70,8 @@ function jobPayload(formData: FormData) {
 
 /** 求人の作成/更新（/admin/jobs/new・/admin/jobs/[id] の両方から使う）。保存後は一覧へ戻る。 */
 export async function saveJob(formData: FormData) {
+  // 是正④ #28: RLS任せにせずアクション単体でも fail-closed にする。
+  if (!(await requireStaff())) return;
   const supabase = await createClient();
   const id = String(formData.get("id") ?? "").trim();
   const payload = jobPayload(formData);
@@ -82,6 +85,8 @@ export async function saveJob(formData: FormData) {
 
 /** 一覧からの公開/停止切替。 */
 export async function toggleStatus(formData: FormData) {
+  // 是正④ #28: RLS任せにせずアクション単体でも fail-closed にする。
+  if (!(await requireStaff())) return;
   const supabase = await createClient();
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("next_status") ?? "draft") as JobStatus;
