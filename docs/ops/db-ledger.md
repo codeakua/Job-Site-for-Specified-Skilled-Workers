@@ -10,7 +10,7 @@
 | `app/supabase/migrations/0001_schema.sql` | テーブル定義＋RLS＋is_staff() | ✅ 適用済 | 〔既存〕 | 〔オーナー〕 |
 | `app/supabase/migrations/0002_seed.sql` | 分野マスタ11件＋サンプル求人14件（ダミー） | ✅ 適用済 | 〔既存〕 | 〔オーナー〕 |
 | `app/supabase/migrations/0003_security.sql` | 公開前セキュリティ是正 PR-1a（Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定） | ✅ 適用済 | 2026-07-25 | オーナー |
-| `app/supabase/migrations/0004_member_no.sql` | 会員番号(member_no)のDB採番 PR-1b（Issue #34 ⑩。番号衝突による登録失敗＝ロックアウトの解消） | ⏳ 未適用 | 〔　　〕 | 〔　　〕 |
+| `app/supabase/migrations/0004_member_no.sql` | 会員番号(member_no)のDB採番 PR-1b（Issue #34 ⑩。番号衝突による登録失敗＝ロックアウトの解消） | ✅ 適用済 | 2026-07-26 | オーナー |
 
 ### 0003 適用後の確認結果（2026-07-25・本番で実行）
 
@@ -75,7 +75,17 @@ update members set verified = false where member_no = 'YP-XXXXXXXX-XXXX';
 
 ---
 
-## 0004_member_no.sql の適用手順（PR-1b・Issue #34）
+### 0004 適用後の確認結果（2026-07-26・本番で実行）
+
+適用直後に下記の確認クエリを本番で実行し、**5項目すべて期待値どおり**であることを確認済み。
+
+結果: `1 / 1 / 1 / 0 / 0` ✅（採番カウンタ表・採番関数・会員の見張り役がそれぞれ1件、番号が空の会員0件、会員番号の重複0件）
+
+> ⚠️ **適用時点ではPR #41 が未マージ＝本番はまだ旧コード**だったため、この間に登録した会員は
+> 「完了画面に出た番号（旧コードが作った乱数）」と「DBに入った番号（DB採番値）」がズレる。
+> DB側の値が正しく、管理画面 `/admin/members` で確認できる。マージ後は一致する。
+
+## 0004_member_no.sql の適用手順（✅ 2026-07-26 実施済み・記録用）
 
 > ⚠️ **順序が重要（0003 とは逆）**: **先にこのSQLを実行してから、PRをマージ（＝Vercelへデプロイ）する。**
 > 新しいアプリは会員番号を自分で作らず「DBが付けた番号」を読み取る作りに変わるため、
