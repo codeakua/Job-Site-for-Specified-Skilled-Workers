@@ -10,8 +10,7 @@
 | `app/supabase/migrations/0001_schema.sql` | テーブル定義＋RLS＋is_staff() | ✅ 適用済 | 〔既存〕 | 〔オーナー〕 |
 | `app/supabase/migrations/0002_seed.sql` | 分野マスタ11件＋サンプル求人14件（ダミー） | ✅ 適用済 | 〔既存〕 | 〔オーナー〕 |
 | `app/supabase/migrations/0003_security.sql` | 公開前セキュリティ是正 PR-1a（Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定） | ✅ 適用済 | 2026-07-25 | オーナー |
-
-> Issue #34（member_no のDB生成）は PR-1b で別ファイル `0004_*.sql` として追加する。
+| `app/supabase/migrations/0004_member_no.sql` | 会員番号(member_no)のDB採番 PR-1b（Issue #34 ⑩。番号衝突による登録失敗＝ロックアウトの解消） | ⏳ 未適用 | 〔　　〕 | 〔　　〕 |
 
 ### 0003 適用後の確認結果（2026-07-25・本番で実行）
 
@@ -73,6 +72,52 @@ update members set verified = false where member_no = 'YP-XXXXXXXX-XXXX';
 ```
 
 > 会員数がまだ少ないうちに実施するのが簡単。以後は会員が自分で立てることはできない。
+
+---
+
+## 0004_member_no.sql の適用手順（PR-1b・Issue #34）
+
+> ⚠️ **順序が重要（0003 とは逆）**: **先にこのSQLを実行してから、PRをマージ（＝Vercelへデプロイ）する。**
+> 新しいアプリは会員番号を自分で作らず「DBが付けた番号」を読み取る作りに変わるため、
+> SQLを当てる前に新アプリが動くと、その間に登録した人の会員番号が空のままになる。
+> 逆にSQLを先に当てておけば、旧アプリが送ってくる番号はDB側が黙って正しい番号に置き換えるので、
+> **どの瞬間でもデータは壊れない**（旧アプリの完了画面に出る番号だけが実際の番号とズレるが、
+> 正しい番号は管理画面 `/admin/members` で確認できる。数分間・登録の少ない時間帯に行えば実質影響なし）。
+
+1. Supabase のプロジェクト画面 → 左メニュー **「SQL Editor」** → **「+ New query」**
+2. `app/supabase/migrations/0004_member_no.sql` の中身を**すべてコピー**して貼り付け、**「Run」**
+3. 下部に `Success` と表示されればOK（`NOTICE: ④ 会員番号が空の会員はいません（スキップ）。` が出る）
+4. 下の**確認クエリ**を実行し、期待値どおりか確認する
+5. GitHubでPRを**マージ**し、Vercelのデプロイが「Ready」になるのを待つ
+6. 実機でテスト登録を1件行い、**完了画面に出た会員番号と、管理画面 `/admin/members` の会員番号が一致する**ことを確認
+7. 上の表の状態を `✅ 適用済` に更新し、この台帳をコミットする
+
+**何度実行しても安全**（2回目以降も同じ結果になる。既存会員の番号は変わらない）。
+
+### 0004 適用後の確認クエリ
+
+```sql
+select
+  (select count(*) from information_schema.tables
+     where table_schema = 'public' and table_name = 'member_no_counters')      as "① 採番カウンタ表(期待値 1)",
+  (select count(*) from pg_proc where proname = 'generate_member_no')          as "② 採番関数(期待値 1)",
+  (select count(*) from pg_trigger where tgname = 'trg_members_guard')         as "③ 会員の見張り役(期待値 1)",
+  (select count(*) from members where member_no is null or btrim(member_no) = '')
+                                                                              as "④ 番号が空の会員(期待値 0)",
+  (select count(*) - count(distinct member_no) from members)                   as "⑤ 会員番号の重複(期待値 0)";
+```
+
+結果が `1 / 1 / 1 / 0 / 0` になっていれば成功。
+
+> 万一「④ 番号が空の会員」が0でない場合（＝手順を逆にしてしまった場合）は、
+> **`0004_member_no.sql` をもう一度実行すれば埋まる**（登録日から番号を付け直すので日付も正しくなる）。
+
+### 会員番号がどう変わるか（参考）
+
+- 形式は今までどおり `YP-<日付8桁>-<4桁>`（例: `YP-20260726-1001`）。**既存会員の番号は変わらない。**
+- 4桁部分は「その日の連番」で、**1001から始まる**。乱数をやめたので**同じ番号が2人に付くことは構造上ありえない**。
+- 日付は**日本時間**で決まる（Supabaseの標準時刻はUTCのため、明示的に日本時間へ換算している）。
+- 1日に8999人を超えて登録があった場合は5桁になるが、番号が重複しないことは変わらない。
 
 ---
 

@@ -25,13 +25,6 @@ export type AuthResult =
   | { ok: true; memberNo: string }
   | { ok: false; errorKey: string; errorDetail?: string };
 
-function genMemberNo(): string {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const rand = Math.floor(1000 + Math.random() * 9000);
-  return `YP-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${rand}`;
-}
-
 /** Supabaseの英語エラーを辞書キーに対応づける（文言は辞書 auth.err.* / reg.err.* にある）。 */
 function mapAuthError(msg: string): { errorKey: string; errorDetail?: string } {
   const m = msg.toLowerCase();
@@ -57,26 +50,30 @@ export async function registerMember(input: RegisterInput): Promise<AuthResult> 
     return { ok: false, errorKey: "auth.err.noSession" };
   }
 
-  const memberNo = genMemberNo();
-  const { error: insertError } = await supabase.from("members").insert({
-    id: signUp.user.id,
-    member_no: memberNo,
-    last_name: input.lastName,
-    first_name: input.firstName,
-    pinyin: input.pinyin,
-    birth: input.birth || null,
-    gender: input.gender || null,
-    nationality: input.nationality || "cn",
-    residence: input.residence || "jp",
-    address: input.address,
-    phone_code: input.phoneCode,
-    phone: input.phone,
-    wechat_id: input.wechat,
-    email: input.email || null,
-    jlpt: input.jlpt || "none",
-    ssw_fields: input.ssw ?? [],
-    other_qual: input.otherQual || null,
-  });
+  // 会員番号(member_no)はDB側のトリガが採番する（0004_member_no.sql / Issue #34）。
+  // ここで送っても無視されるため送らない。登録完了画面に表示する実値は insert の返り値から受け取る。
+  const { data: inserted, error: insertError } = await supabase
+    .from("members")
+    .insert({
+      id: signUp.user.id,
+      last_name: input.lastName,
+      first_name: input.firstName,
+      pinyin: input.pinyin,
+      birth: input.birth || null,
+      gender: input.gender || null,
+      nationality: input.nationality || "cn",
+      residence: input.residence || "jp",
+      address: input.address,
+      phone_code: input.phoneCode,
+      phone: input.phone,
+      wechat_id: input.wechat,
+      email: input.email || null,
+      jlpt: input.jlpt || "none",
+      ssw_fields: input.ssw ?? [],
+      other_qual: input.otherQual || null,
+    })
+    .select("member_no")
+    .maybeSingle();
   if (insertError) return { ok: false, errorKey: "auth.err.saveFailed", errorDetail: insertError.message };
 
   // スタッフへ新規登録を通知（サーバー側でResend送信。失敗しても登録は成功扱いにする）。
@@ -86,7 +83,9 @@ export async function registerMember(input: RegisterInput): Promise<AuthResult> 
     // 通知の失敗は登録結果に影響させない
   }
 
-  return { ok: true, memberNo };
+  // 万一 member_no を読み戻せなくても、登録そのものは成功している。
+  // ここで失敗扱いにすると会員が登録し直そうとして「登録済み」で弾かれるため、番号なしで完了とする。
+  return { ok: true, memberNo: inserted?.member_no ?? "" };
 }
 
 /** ログイン: 電話番号＋パスワード。 */
