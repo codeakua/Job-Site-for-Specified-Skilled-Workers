@@ -7,6 +7,35 @@ import { useAppState } from "@/components/providers";
 import { IconBack, IconGlobe } from "@/components/icons";
 import { login } from "@/lib/auth/client-auth";
 
+/** `?redirect=` が無い／危険なときの既定の行き先。 */
+const REDIRECT_FALLBACK = "/jobs";
+
+/**
+ * ログイン後の戻り先（`?redirect=`）を「同じサイト内の相対パス」だけに制限する（Issue #32）。
+ *
+ * 検証せずに使うと、攻撃者が `/login?redirect=https://evil.com` のようなリンクを送るだけで
+ * ログイン直後に外部サイトへ飛ばせてしまう（本物のドメインから始まるのでフィッシングに使われる）。
+ *
+ * 判定の考え方:
+ * - `useSearchParams()` が返す値は **すでに1回URLデコード済み**なので、
+ *   ここで `decodeURIComponent()` は通さない。通すと `%252f%252fevil.com`（二重エンコード）を
+ *   自分の手で `//evil.com` に復元してしまい、かえって穴になる。
+ *   （不正な `%` 混じりの入力で例外が飛ぶ問題も避けられる）
+ * - タブや改行などの制御文字は **ブラウザがURLを解釈する際に取り除かれる**ため、
+ *   `/<TAB>/evil.com` が `//evil.com` に化ける。含まれていたら弾く。
+ * - 残りは「`/` で始まり、その次が `/` でも `\` でもない」ものだけ許可する。
+ *   `//evil.com`（プロトコル相対URL）と `/\evil.com`（ブラウザが `//` と同じに扱う）を除外できる。
+ */
+export function safeRedirect(raw: string | null): string {
+  if (!raw) return REDIRECT_FALLBACK;
+  const hasControlChar = [...raw].some((ch) => {
+    const code = ch.charCodeAt(0);
+    return code <= 0x1f || code === 0x7f;
+  });
+  if (hasControlChar) return REDIRECT_FALLBACK;
+  return /^\/(?![/\\])/.test(raw) ? raw : REDIRECT_FALLBACK;
+}
+
 export function LoginForm() {
   const { t, lang, toggleLang } = useAppState();
   const router = useRouter();
@@ -30,7 +59,7 @@ export function LoginForm() {
       setBusy(false);
       return;
     }
-    const target = params.get("redirect") || "/jobs";
+    const target = safeRedirect(params.get("redirect"));
     router.push(target);
     router.refresh();
   }

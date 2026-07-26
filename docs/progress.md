@@ -1,6 +1,6 @@
 # 進捗・引き継ぎメモ（新しいチャットはまずこれを読む）
 
-最終更新: 2026-07-26（**PR-1b 会員番号のDB採番＝Issue #34 完了。`0004_member_no.sql` 本番適用済み**（確認クエリ `1/1/1/0/0`）**＋ PR #41 マージ済み**。詳細 §17。**#27 もclose（Vercelに service_role キー無しを確認）。完了済みだったIssue #1〜#9・#11 もコメントを添えてclose＝open Issueはセキュリティ是正の残り＋#12 のみ**。**次は PR-2＝#29 セキュリティヘッダ・#32 オープンリダイレクト**）。前回: 2026-07-25（**PR-1a 公開前セキュリティ是正の第1弾＝マージ＋本番SQL適用まで完了**＝Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。詳細 §16。**`0003_security.sql` は 2026-07-25 に本番適用済み**）。前回: 2026-07-25（**提出用ドキュメント生成基盤**＝法務3文書のWord/PDF化・管理者マニュアル新設。§15）／2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。§14）／2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
+最終更新: 2026-07-26（**PR-2 公開前セキュリティ是正の第3弾＝Issue #29 セキュリティヘッダ・#32 オープンリダイレクト を実装・検証完了（Merge待ち）**。軽量4ヘッダ＋`frame-ancestors 'none'` を全ルートに付与、strict CSP は **Report-Only に留めた**（React の `style={{...}}` が25か所あり強制すると崩れるため）。ログインの `?redirect=` は相対パスのみ許可。⚠️ **今回はSQL実行不要・マージ＝デプロイで完結**。詳細 §18）。前回: 2026-07-26（**PR-1b 会員番号のDB採番＝Issue #34 完了。`0004_member_no.sql` 本番適用済み**（確認クエリ `1/1/1/0/0`）**＋ PR #41 マージ済み**。詳細 §17。**#27 もclose（Vercelに service_role キー無しを確認）。完了済みだったIssue #1〜#9・#11 もコメントを添えてclose＝open Issueはセキュリティ是正の残り＋#12 のみ**）。前回: 2026-07-25（**PR-1a 公開前セキュリティ是正の第1弾＝マージ＋本番SQL適用まで完了**＝Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。詳細 §16。**`0003_security.sql` は 2026-07-25 に本番適用済み**）。前回: 2026-07-25（**提出用ドキュメント生成基盤**＝法務3文書のWord/PDF化・管理者マニュアル新設。§15）／2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。§14）／2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
 
 ## 0. 一言サマリー
 中国人向け特定技能求人サイトの**β版**を、モック（リポジトリ直下HTML）→ Next.js実装へ移行中。
@@ -57,6 +57,7 @@
   - 起票済セキュリティ是正: **#25 ①staff_note分離** / **#26 ②verified・member_noロック** / **#27 ③service_role** / **#28 ④管理is_staff明示** / **#29 ⑤セキュリティヘッダ** / **#30 ⑥登録bot/レート制限** / **#31 ⑦PWポリシー** / **#32 ⑧オープンリダイレクト** / **#33 ⑨退会/削除運用** / **#34 ⑩member_no DB生成** / **#35 ⑪アカウント列挙**（すべて🧠Claude担当・`docs/tasks.md` T-15）。
 - ✅ **PR-1a（2026-07-25・Claude担当・PR #39 マージ済み）**: セキュリティ是正の第1弾。**#25・#26・#27(a)・#28 と applications自己insert列固定**。**`0003_security.sql` は 2026-07-25 に本番適用＋確認クエリ・verified棚卸しまで完了**（記録は `docs/ops/db-ledger.md`）。詳細は §16。残るオーナー操作は **#27(b)＝Vercelに `SUPABASE_SERVICE_ROLE_KEY` が無いことの確認**のみ。
 - ✅ **PR-1b（2026-07-26・Claude担当・PR #41 マージ済み＋本番SQL適用済み）**: セキュリティ是正の第2弾。**#34 ⑩ member_no のDB採番**。乱数によるクライアント採番をやめ、DB側で「その日の連番」を払い出す（`0004_member_no.sql`）。**番号衝突→登録失敗→電話番号ロックアウトという可用性バグの解消が主目的。** 詳細は §17。
+- 🆕 **PR-2（2026-07-26・Claude担当・Merge待ち）**: セキュリティ是正の第3弾。**#29 ⑤ セキュリティヘッダ**＋**#32 ⑧ オープンリダイレクト**。`next.config.ts` の `headers()` で軽量4ヘッダ＋`frame-ancestors 'none'` を全ルートに付与し、strict CSP は **Report-Only（監視のみ）に留めた**。ログインの `?redirect=` は相対パスのみ許可に。**DBスキーマ変更なし＝SQL実行不要、マージ＝デプロイで完結。** 詳細は §18。
 - 🧹 **Issue棚卸し（2026-07-26）**: 完了済みなのにopenのままだった **#1〜#9・#11** に「何がどこまで完了したか＋その後の変更」のコメントを添えて**close**。**#27 もclose**（Vercelの環境変数に `SUPABASE_SERVICE_ROLE_KEY` が無いことを確認）。
   - **これで open Issue は #12（E2E・総合QA・独自ドメイン）＋ セキュリティ是正の残り #29・#30・#31・#32・#33・#34・#35 のみ**（#34 はマージ・適用とも完了しており、実機のテスト登録確認後にcloseで可）。
 
@@ -351,16 +352,125 @@ Supabase環境（`auth.uid()`・anon/authenticated/service_role ロール）を�
 
 ---
 
+## 18. PR-2 セキュリティヘッダ＋オープンリダイレクト対策 実装メモ（2026-07-26 追記・Claude担当）
+
+**状態: 実装・検証完了（オーナーMerge待ち）。** 対象＝**Issue #29 ⑤ セキュリティヘッダ**／**Issue #32 ⑧ オープンリダイレクト**。
+⚠️ **今回はDBスキーマ変更なし＝SQL実行は不要。マージ（＝デプロイ）だけで完結する。**
+
+### 何が危険だったか
+
+| # | 危険 | 修正前の状態 |
+|---|---|---|
+| #29 | **クリックジャッキング** … 攻撃者が自分のページに本サイトを透明な `iframe` で重ね、利用者が「別のボタン」を押したつもりで本サイトを操作させる | `next.config.ts` が空でヘッダ未設定＝**埋め込み放題** |
+| #29 | **MIMEスニッフィング** … ブラウザが `Content-Type` を無視して中身を推測し、画像として置かれたファイルをスクリプトとして実行してしまう | 同上 |
+| #29 | **リファラ漏れ** … 外部サイトへ遷移する際に「どのページから来たか」（パス・クエリ）を相手に渡す | 同上 |
+| #29 | 使わないブラウザ機能（カメラ・マイク・位置情報など）が有効なまま | 同上 |
+| **#32** | **オープンリダイレクト** … `/login?redirect=https://evil.com` というリンクを送るだけで、**正規ドメインのログイン画面**を経由して外部サイトへ誘導できる。利用者から見ると本物のURLから始まるためフィッシングに使われやすい | `LoginForm.tsx` L33 が `params.get("redirect")` を**未検証のまま** `router.push()` していた |
+
+### どう直したか
+
+#### #29 セキュリティヘッダ（`app/next.config.ts` のみ）
+
+`headers()` を追加し、**全ルート（`/:path*`）**に付与。静的アセット・404・middleware の307リダイレクトにも乗ることを `curl -I` で確認済み。
+
+- **強制するもの（今回のGo条件）**
+  - `X-Frame-Options: DENY` ＋ `Content-Security-Policy: frame-ancestors 'none'`（後者は前者の現代版。**読み込み先を一切制限しないので既存機能を壊さない**）
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()`
+- **strict CSP は `Content-Security-Policy-Report-Only`（監視のみ）に留めた。** ＝ 違反しても読み込みは止まらず、ブラウザのコンソールに報告が出るだけ。**理由は次項**。
+- **HSTS は入れていない**（独自ドメイン未確定。`includeSubDomains`/`preload` はいったん入れると後戻りできないため、ドメイン確定後に `max-age` 小から段階導入する）。
+
+**⚠️ なぜ strict CSP を今回“強制”しなかったか（重要な設計判断）**
+
+1. **React の `style={{...}}` が 11ファイル・25か所**あり（`grep -rohE 'style=\{' app/src/ | wc -l` で25）、CSPの `style-src` は**インラインstyle属性も対象**。`style-src 'self'` だけにすると**全部無効化されてレイアウトが崩れる**。
+   → Report-Only 側では `style-src 'self'` と **`style-src-attr 'unsafe-inline'` を分離**して、要素は厳しく・属性だけ許可する形にしてある（この構成で違反0件を実測済み）。
+2. **`layout.tsx` の `themeInit`（pre-hydration script）と Next.js 自身のブートストラップ script がインライン**なので、`script-src` から `'unsafe-inline'` を外すには **nonce方式**が要る。Next.js の nonce は **ページが動的レンダリングに切り替わる**副作用があるため、静的配信されている会員側トップ等への影響を別途測ってから入れる。
+   → 今回の Report-Only は `script-src 'self' 'unsafe-inline'` のまま。**ここだけが「まだ緩い」部分**で、それ以外（`base-uri` / `object-src` / `form-action` / `connect-src` / `img-src` / `font-src` / `style-src`）は**すでに強制できる水準**まで絞ってある。
+3. 中途半端に強制して**本番を白画面にしない**ことを最優先にした。
+
+**Report-Only の中身と意図**
+
+```
+default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none';
+form-action 'self'; connect-src 'self' <Supabase>; img-src 'self' data: <Supabase>;
+font-src 'self' data:; style-src 'self'; style-src-attr 'unsafe-inline';
+script-src 'self' 'unsafe-inline'
+```
+
+- `<Supabase>` は **ビルド時**に `NEXT_PUBLIC_SUPABASE_URL` から組み立てる（未設定なら `https://*.supabase.co` へフォールバック）。**`headers()` はビルド時に評価される**ので、Vercel の環境変数がそのまま焼き込まれる。
+- **Resend は `connect-src` に入れない**（サーバー側からの `fetch` なのでブラウザのCSPの対象外）。
+- **Realtime（`wss://`）は現在未使用なので入れていない**。`.channel()` を使い始めたら `wss://<host>` の追加が必要。
+- `img-src` に `data:` が要るのは `globals.css` L604 の **select の下向き矢印がインラインSVG（data: URI）**のため。
+
+#### #32 オープンリダイレクト（`app/src/components/auth/LoginForm.tsx` のみ）
+
+`safeRedirect()` を追加し、`?redirect=` を**同一サイト内の相対パスのみ**に制限（それ以外は `/jobs`）。判定は3段:
+
+1. 空／未指定 → `/jobs`
+2. **制御文字（タブ・改行など）を含むものを弾く** ← ⚠️ **ここが肝**
+3. `/^\/(?![/\\])/` に一致するものだけ許可（`/` 始まりで、次が `/` でも `\` でもない）
+
+**⚠️ 実地検証で判明した落とし穴2つ（次に触る人は必ず読むこと）**
+
+- **`decodeURIComponent()` は通してはいけない。** `useSearchParams().get()` が返す値は**すでに1回URLデコード済み**。ここでもう一度デコードすると、**二重エンコードされた `%252f%252fevil.com` を自分の手で `//evil.com` に復元してしまい、かえって穴になる**（不正な `%` で `URIError` が飛ぶ問題も避けられる）。
+- **正規表現だけでは不十分だった。** `?redirect=/%09/evil.com`（タブ）は `get()` で `/<TAB>/evil.com` になり、**`/^\/(?![/\\])/` を通過してしまう**。ところが **ブラウザのURLパーサは tab/LF/CR を取り除く**ため、`new URL("/\t/evil.com", base)` は **`https://evil.com/` に解決される**（Nodeで実測）。＝ 正規表現だけだと**素通りする実在の抜け道**。制御文字チェックはこれを塞ぐためのもの。
+
+**なお `LoginForm.tsx` が唯一の危険箇所であることも再確認した**: `router.push(`/`replace(`/`redirect(` の全呼び出しを grep したところ、他はすべて `"/jobs"`・`"/"`・`"/admin/jobs"` のような**ハードコードされた文字列**。`middleware.ts` L46 が作る `redirect` は `request.nextUrl.pathname` 由来で常に `/` 始まり。admin各ページの `searchParams`（`status`・`verified`）は**絞り込み値**でリダイレクト先ではない。
+
+### 検証（サンドボックス・確立手順）
+
+`npm run lint` / `npm run build` とも緑。本番ビルド（`next build && next start -p 3113`＋ダミーの `NEXT_PUBLIC_*`）に対して:
+
+| # | 検証項目 | 結果 |
+|---|---|---|
+| H1 | `/`・`/login`・`/register`・`/jobs`・`/mypage`・`/favs`・`/admin`・静的アセット・404 の**全レスポンス**に6ヘッダが乗る（`curl -I`） | ✅（middlewareの307にも乗る） |
+| H2 | 390×844（Playwright・Chromium）で `/`・`/login`・`/register` と保護ページのログイン誘導が**従来どおり描画**。テーマ/言語の初期化・`.reveal` のスクロール演出・言語切替も動作 | ✅ 横スクロール0px |
+| **H3** | **CSP違反を `securitypolicyviolation` イベントで収集 → 全ページ・言語切替・スクロール操作を通して違反 0件** | ✅ |
+| **H4** | **陰性対照**: わざと外部img・インライン`<style>`・外部script・`<object>`・`<base>` を注入し、**検知器が実際に5件拾うこと**を確認（＝H3の「0件」が検知漏れではない証拠） | ✅ 全て `disposition: "report"` |
+| R1〜R19 | `?redirect=` の**19パターン**を実ブラウザで検証（下表） | ✅ 全件期待どおり |
+
+**R: オープンリダイレクトの検証（一時ルート `/redirectcheck` を作って `safeRedirect` を実クエリ経由で呼び、`router.push` まで走らせて着地オリジンも確認 → ルートは検証後に削除済み）**
+
+| 入力 `?redirect=` | `get()` の値 | 行き先 |
+|---|---|---|
+| `/mypage`・`/`・`/jobs?a=1`・`/jobs#sec`・`/admin/members` | そのまま | **許可**（従来どおり） |
+| （空） | `""` | `/jobs` |
+| `//evil.com` | `//evil.com` | `/jobs` |
+| `/%5Cevil.com` | `/\evil.com` | `/jobs` |
+| `https://evil.com`・`evil.com`・`javascript:alert(1)` | そのまま | `/jobs` |
+| `%2f%2fevil.com`・`/%2fevil.com` | `//evil.com` | `/jobs` |
+| `%252f%252fevil.com`（二重エンコード） | `%2f%2fevil.com` | `/jobs` |
+| **`/%09/evil.com`（タブ）**・`/%0a/…`・`/%0d%0a/…` | `/<TAB>/evil.com` 等 | `/jobs`（**制御文字チェックで阻止**） |
+| `+//evil.com`（先頭スペース） | `" //evil.com"` | `/jobs` |
+| `%5C%5Cevil.com` | `\\evil.com` | `/jobs` |
+
+- ⚠️ ノウハウ（前回に続き再確認）: `next dev` はこのサンドボックスでHMRのWebSocketが張れずハイドレーションが完走しないため、**必ず `next build && next start`** で検証すること。
+- ⚠️ ノウハウ（新規）: Playwrightで **`form.submit()` を陰性対照に混ぜてはいけない**。`form-action` は Report-Only では**実際にブロックされず遷移してしまい**、`window` ごと違反ログが消えて「違反0件」に見える。
+
+### 残課題（PR-2の対象外・後続）
+
+- **strict CSP の強制化（#29 の後続・M1後半）**: ①`proxy.ts` でリクエストごとの nonce を発行 → `layout.tsx` の `themeInit` と Next のブートストラップに付与 → `script-src` から `'unsafe-inline'` を外す ②**nonce導入で静的ページが動的レンダリングになる影響を測る** ③`Content-Security-Policy-Report-Only` → `Content-Security-Policy` へ昇格。
+  - 代替案として `themeInit` の **sha256 ハッシュ許可**もあるが、**Next.js自身のインラインscriptはビルドごとに中身が変わるためハッシュでは賄えない**。nonce方式が本命。
+- **HSTS**: 独自ドメイン確定後（`docs/launch-plan.md` §M2）に `max-age` 小 → `includeSubDomains` → `preload` の順で段階導入。
+- **CSP違反の収集口**: いまはブラウザのコンソールに出るだけ（`report-uri`/`report-to` 無し）。M2の監視整備と合わせて検討。
+- ⚠️ **Vercelのプレビュー環境では、Vercel Toolbar（`vercel.live`）が Report-Only の `script-src`/`frame-src` に引っかかってコンソールに報告が出ることがある。** 本番ドメインでは出ないもので、**強制していないので動作に影響はない**。本番URLで確認すること。
+
+---
+
 ## 🧭 いま着手すべきこと（このファイル内で最新・新セッションはここを見る）
 
 > 各節の「次にやること」は**その節を書いた時点のスナップショット**。現在地はここが正。
 
-1. **次の実装＝PR-2（#29 セキュリティヘッダ・#32 オープンリダイレクト）**。⚠️ 着手前に下記「PR-2 に入る前の申し送り」を必ず読むこと（Issue本文に**古い記述と壊れた正規表現**がある）。
-2. その後: **PR-3**（#30 登録bot/レート制限＝server-mediated signUp・#35 アカウント列挙）→ **文書**（#31 PWポリシー・#33 退会/削除運用）。
+1. ✅ **PR-2（#29 セキュリティヘッダ・#32 オープンリダイレクト）は実装・検証完了＝オーナーMerge待ち**（詳細 §18）。**SQL実行は不要**で、マージ＝デプロイだけで完結する。マージ後に本番URLで、①ログイン→従来どおり `/jobs`（または元のページ）へ戻る ②`/login?redirect=https://evil.com` を開いてログインしても **`/jobs` に留まり外部へ飛ばない** ③ブラウザのコンソールに CSP 違反が出ていないか、を確認 → 問題なければ **Issue #29・#32 をclose**。
+2. **次の実装＝PR-3**（#30 登録bot/レート制限＝server-mediated signUp・#35 アカウント列挙）→ その後 **文書**（#31 PWポリシー・#33 退会/削除運用）。
 3. **オーナーの小さな残作業**: 本番で**テスト登録を1件**行い、完了画面の会員番号と `/admin/members` の会員番号が一致することを確認 → 確認できたら **Issue #34 をclose**。
 4. 並行: M2（監視3点・Supabase/Vercel Pro化・バックアップ復元予行・実求人投入・独自ドメイン公開＝`docs/launch-plan.md` §M2）、弁護士FBの反映（§15）。
 
-### ⚠️ PR-2 に入る前の申し送り（2026-07-26 時点でコードを実地確認した結果）
+### ✅ PR-2 に入る前の申し送り（2026-07-26 時点でコードを実地確認した結果）＝**対応済み**
+
+> **この節は PR-2 で対応済み。** 実装・検証の結果は §18 に集約した。以下は「Issue本文を信じてはいけない」ことの記録として残す。
+> なお **#32 は正規表現だけでは塞ぎきれなかった**（タブ混入 `/%09/evil.com` が素通りする）。§18 の「実地検証で判明した落とし穴2つ」を参照。
 
 **Issue #29・#32 の本文は起票時（2026-07-24）のもので、以下2点が現状と食い違う。Issueの記述をそのまま信じないこと。**
 
