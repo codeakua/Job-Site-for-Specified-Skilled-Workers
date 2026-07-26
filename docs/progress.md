@@ -1,6 +1,6 @@
 # 進捗・引き継ぎメモ（新しいチャットはまずこれを読む）
 
-最終更新: 2026-07-26（**PR-1b 会員番号のDB採番＝Issue #34 実装・検証完了。`0004_member_no.sql` は 2026-07-26 に本番適用済み**（確認クエリ `1/1/1/0/0`）**。残るは PR #41 のマージのみ**。詳細 §17。⚠️ **適用順序は「SQL先→マージ後」で0003とは逆**）。前回: 2026-07-25（**PR-1a 公開前セキュリティ是正の第1弾＝マージ＋本番SQL適用まで完了**＝Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。詳細 §16。**`0003_security.sql` は 2026-07-25 に本番適用済み**）。前回: 2026-07-25（**提出用ドキュメント生成基盤**＝法務3文書のWord/PDF化・管理者マニュアル新設。§15）／2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。§14）／2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
+最終更新: 2026-07-26（**PR-1b 会員番号のDB採番＝Issue #34 完了。`0004_member_no.sql` 本番適用済み**（確認クエリ `1/1/1/0/0`）**＋ PR #41 マージ済み**。詳細 §17。**#27 もclose（Vercelに service_role キー無しを確認）。完了済みだったIssue #1〜#9・#11 もコメントを添えてclose＝open Issueはセキュリティ是正の残り＋#12 のみ**。**次は PR-2＝#29 セキュリティヘッダ・#32 オープンリダイレクト**）。前回: 2026-07-25（**PR-1a 公開前セキュリティ是正の第1弾＝マージ＋本番SQL適用まで完了**＝Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。詳細 §16。**`0003_security.sql` は 2026-07-25 に本番適用済み**）。前回: 2026-07-25（**提出用ドキュメント生成基盤**＝法務3文書のWord/PDF化・管理者マニュアル新設。§15）／2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。§14）／2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
 
 ## 0. 一言サマリー
 中国人向け特定技能求人サイトの**β版**を、モック（リポジトリ直下HTML）→ Next.js実装へ移行中。
@@ -56,7 +56,9 @@
 - 🆕 **M0-B（2026-07-25・Claude担当）**: トップ無料訴求＋管理画面PC化・ダッシュボード（#16実施）。詳細は §14。
   - 起票済セキュリティ是正: **#25 ①staff_note分離** / **#26 ②verified・member_noロック** / **#27 ③service_role** / **#28 ④管理is_staff明示** / **#29 ⑤セキュリティヘッダ** / **#30 ⑥登録bot/レート制限** / **#31 ⑦PWポリシー** / **#32 ⑧オープンリダイレクト** / **#33 ⑨退会/削除運用** / **#34 ⑩member_no DB生成** / **#35 ⑪アカウント列挙**（すべて🧠Claude担当・`docs/tasks.md` T-15）。
 - ✅ **PR-1a（2026-07-25・Claude担当・PR #39 マージ済み）**: セキュリティ是正の第1弾。**#25・#26・#27(a)・#28 と applications自己insert列固定**。**`0003_security.sql` は 2026-07-25 に本番適用＋確認クエリ・verified棚卸しまで完了**（記録は `docs/ops/db-ledger.md`）。詳細は §16。残るオーナー操作は **#27(b)＝Vercelに `SUPABASE_SERVICE_ROLE_KEY` が無いことの確認**のみ。
-- 🆕 **PR-1b（2026-07-26・Claude担当・Merge待ち）**: セキュリティ是正の第2弾。**#34 ⑩ member_no のDB採番**。乱数によるクライアント採番をやめ、DB側で「その日の連番」を払い出す（`0004_member_no.sql` 新規）。**番号衝突→登録失敗→電話番号ロックアウトという可用性バグの解消が主目的。** ⚠️ **適用順序は「SQLを先に実行 → そのあとマージ」で 0003 とは逆**。詳細は §17。
+- ✅ **PR-1b（2026-07-26・Claude担当・PR #41 マージ済み＋本番SQL適用済み）**: セキュリティ是正の第2弾。**#34 ⑩ member_no のDB採番**。乱数によるクライアント採番をやめ、DB側で「その日の連番」を払い出す（`0004_member_no.sql`）。**番号衝突→登録失敗→電話番号ロックアウトという可用性バグの解消が主目的。** 詳細は §17。
+- 🧹 **Issue棚卸し（2026-07-26）**: 完了済みなのにopenのままだった **#1〜#9・#11** に「何がどこまで完了したか＋その後の変更」のコメントを添えて**close**。**#27 もclose**（Vercelの環境変数に `SUPABASE_SERVICE_ROLE_KEY` が無いことを確認）。
+  - **これで open Issue は #12（E2E・総合QA・独自ドメイン）＋ セキュリティ是正の残り #29・#30・#31・#32・#33・#34・#35 のみ**（#34 はマージ・適用とも完了しており、実機のテスト登録確認後にcloseで可）。
 
 ## 6. 既知の軽微な点 / TODOメモ
 - 求人詳細（#5）: 詳細ページのトップバーに言語切替ピルが無い（他画面にはある）。
@@ -282,7 +284,8 @@
 
 ## 17. PR-1b 会員番号(member_no)のDB採番 実装メモ（2026-07-26 追記・Claude担当）
 
-**状態: 実装・検証完了。`0004_member_no.sql` は 2026-07-26 に本番適用済み（確認クエリ `1 / 1 / 1 / 0 / 0` で全項目パス）。PR #41 はオーナーMerge待ち。** 対象＝**Issue #34 ⑩ member_no をDB側生成に移管**。
+**状態: ✅ 完了（`0004_member_no.sql` を 2026-07-26 に本番適用＝確認クエリ `1 / 1 / 1 / 0 / 0` で全項目パス → PR #41 マージ済み）。** 対象＝**Issue #34 ⑩ member_no をDB側生成に移管**。
+> 残作業は「実機でテスト登録を1件行い、完了画面の会員番号と `/admin/members` の会員番号が一致することの確認」のみ。確認できたら Issue #34 をclose。
 
 ### 何が危険だったか
 
@@ -352,8 +355,23 @@ Supabase環境（`auth.uid()`・anon/authenticated/service_role ロール）を�
 
 > 各節の「次にやること」は**その節を書いた時点のスナップショット**。現在地はここが正。
 
-1. **オーナー操作**:
-   - **#34 / PR-1b**: ✅ **`0004_member_no.sql` は 2026-07-26 に本番適用済み**（確認クエリ `1/1/1/0/0`）。**残るは PR #41 のマージのみ**。マージするまで本番は旧コードのままで、その間に登録した会員は完了画面の番号とDBの番号がズレる（DB側が正・`/admin/members` で確認可）ため、早めにマージする。
-   - **#27(b)**: Vercel の**環境変数**に `SUPABASE_SERVICE_ROLE_KEY` が無いことの確認（あれば削除）。⚠️ **`Settings → Environments`（環境の一覧）ではなく `Settings → Environment Variables`（変数の一覧）を見ること**。新しいVercel UIでは Environments 一覧の各行（Production / Preview / Development）をクリックした先に変数が並ぶ。3環境すべてを確認する。確認できたら Issue #27 をclose。
-2. **次の実装**: **PR-2**（#29 セキュリティヘッダ・#32 オープンリダイレクト）→ **PR-3**（#30 登録bot/レート制限＝server-mediated signUp・#35 アカウント列挙）→ **文書**（#31 PWポリシー・#33 退会/削除運用）。
-3. 並行: M2（監視3点・Supabase/Vercel Pro化・バックアップ復元予行・実求人投入・独自ドメイン公開＝`docs/launch-plan.md` §M2）、弁護士FBの反映（§15）。
+1. **次の実装＝PR-2（#29 セキュリティヘッダ・#32 オープンリダイレクト）**。⚠️ 着手前に下記「PR-2 に入る前の申し送り」を必ず読むこと（Issue本文に**古い記述と壊れた正規表現**がある）。
+2. その後: **PR-3**（#30 登録bot/レート制限＝server-mediated signUp・#35 アカウント列挙）→ **文書**（#31 PWポリシー・#33 退会/削除運用）。
+3. **オーナーの小さな残作業**: 本番で**テスト登録を1件**行い、完了画面の会員番号と `/admin/members` の会員番号が一致することを確認 → 確認できたら **Issue #34 をclose**。
+4. 並行: M2（監視3点・Supabase/Vercel Pro化・バックアップ復元予行・実求人投入・独自ドメイン公開＝`docs/launch-plan.md` §M2）、弁護士FBの反映（§15）。
+
+### ⚠️ PR-2 に入る前の申し送り（2026-07-26 時点でコードを実地確認した結果）
+
+**Issue #29・#32 の本文は起票時（2026-07-24）のもので、以下2点が現状と食い違う。Issueの記述をそのまま信じないこと。**
+
+1. **#29 の「インライン `<style>` がCSPで壊れる」は既に古い。**
+   Issueは `ApplicationsManager`/`MembersManager`/`AdminJobsManager` のインライン `<style>` を警告しているが、**M0-B（§14）でこれらは全廃済み**。`grep -rn "<style" app/src/` は**0件**。
+   - 現存するインライン資産は **`app/src/app/layout.tsx` の `themeInit`（`dangerouslySetInnerHTML` による pre-hydration script）1箇所のみ** → `script-src` は nonce か sha256 ハッシュ1つで対応できる。
+   - ⚠️ **代わりに見落としやすいのが React の `style={{...}}` 属性で、11ファイル・25箇所ある**（`Landing.tsx`・`RegisterWizard.tsx`・`JobDetail.tsx`・`JobsList.tsx`・`MypageClient.tsx`・admin の各Table/Form 等）。CSPの `style-src` は**インラインstyle属性も対象**なので、`style-src 'self'` だけにすると**これらが全部無効化されてレイアウトが崩れる**。`style-src-attr 'unsafe-inline'` を別途許可するか、strict CSP は Report-Only に留めること。
+2. **#32 のヒントに書かれている正規表現 `/^\/(?[\/\\])/` は構文エラーでコンパイルできない**（`Invalid group`＝否定先読みの `!` が抜けている）。正しくは **`/^\/(?![\/\\])/`**。実地検証済みの挙動:
+   `/mypage`→許可 ／ `/jobs?a=1`→許可 ／ `//evil.com`→拒否 ／ `/\evil.com`→拒否 ／ `https://evil.com`→拒否 ／ `""`→拒否。
+
+**その他の確認済み事実**
+- `app/next.config.ts` は**中身が空**（`const nextConfig: NextConfig = {}`）＝ヘッダ未設定。`headers()` を足すだけでよい。
+- 危険な `redirect` の読み取りは **`app/src/components/auth/LoginForm.tsx` L33 の1箇所のみ**（`const target = params.get("redirect") || "/jobs";` → L34 `router.push(target)`）。
+- サーバー側が生成する `redirect` は `app/src/lib/supabase/middleware.ts` L46 の `url.searchParams.set("redirect", path)` で、`path` は `request.nextUrl.pathname`＝常に `/` 始まりで安全。**危険なのは攻撃者が送るリンク経由のみ。**
