@@ -23,7 +23,9 @@ export function RegisterWizard() {
   const [error, setError] = useState("");
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<string | null>(null); // 完了後の会員番号
+  // 完了画面の表示フラグ＋DBが採番した会員番号。
+  // 番号は空文字になり得る（DB採番を読み戻せなかった場合）ため、文字列ではなくオブジェクトで持つ。
+  const [done, setDone] = useState<{ memberNo: string } | null>(null);
 
   const set = <K extends keyof RegisterInput>(k: K, v: RegisterInput[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -70,7 +72,7 @@ export function RegisterWizard() {
       setBusy(false);
       return;
     }
-    setDone(res.memberNo);
+    setDone({ memberNo: res.memberNo });
     window.scrollTo({ top: 0, behavior: "auto" });
   }
 
@@ -89,10 +91,12 @@ export function RegisterWizard() {
           </div>
           <h1>{t("reg.done.title")}</h1>
           <p className="done-sub">{t("reg.done.sub")}</p>
-          <div className="member-card">
-            <span>{t("reg.done.accountId")}</span>
-            <b>{done}</b>
-          </div>
+          {done.memberNo && (
+            <div className="member-card">
+              <span>{t("reg.done.accountId")}</span>
+              <b>{done.memberNo}</b>
+            </div>
+          )}
           <button
             type="button"
             className="btn btn-primary btn-block"
