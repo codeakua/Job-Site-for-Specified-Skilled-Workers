@@ -102,8 +102,9 @@
 - **完了条件**: 各IssueのDoD達成（RLS系はローカルPostgreSQLで会員/スタッフ2者検証）。適用は `docs/ops/db-ledger.md` に記録
 - **状態**: 起票済（M0-A・#25〜#35）。
   - ✅ **PR-1a 完了（2026-07-25・PR #39 マージ＋本番SQL適用済み）**: #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。`0003_security.sql` 新規。会員A/会員B/スタッフの3者・全21項目で検証。詳細 `docs/progress.md` §16。**本番適用・確認クエリ・verified棚卸しまで完了（`docs/ops/db-ledger.md` に記録）**
-  - ✅ **PR-1b 実装完了（2026-07-26・Merge待ち）**: #34 ⑩ member_no のDB採番。`0004_member_no.sql` 新規（日別連番の採番カウンタ＋採番関数を 0003 の `trg_members_guard` に統合）／`client-auth.ts` の `genMemberNo()` 撤去＋`.select("member_no").maybeSingle()` で読み戻し／`RegisterWizard.tsx` の完了画面を番号なしでも壊れないように修正。ローカルPostgreSQLで15項目（1万件連続・1.6万件同時投入とも重複0件）検証。詳細 `docs/progress.md` §17。⚠️ **適用順序は「SQL先→マージ後」で0003とは逆**
-  - ⏳ 残り: #29・#32（PR-2）／#30・#35（PR-3）／#31・#33（文書）
+  - ✅ **PR-1b 完了（2026-07-26・PR #41 マージ＋本番SQL適用済み）**: #34 ⑩ member_no のDB採番。`0004_member_no.sql` 新規（日別連番の採番カウンタ＋採番関数を 0003 の `trg_members_guard` に統合）／`client-auth.ts` の `genMemberNo()` 撤去＋`.select("member_no").maybeSingle()` で読み戻し／`RegisterWizard.tsx` の完了画面を番号なしでも壊れないように修正。ローカルPostgreSQLで15項目（1万件連続・1.6万件同時投入とも重複0件）検証。詳細 `docs/progress.md` §17。⚠️ **適用順序は「SQL先→マージ後」で0003とは逆**
+  - ⏳ 残り: **#29・#32（PR-2＝次の作業）**／#30・#35（PR-3）／#31・#33（文書）
+    - ⚠️ **PR-2 着手前に `docs/progress.md` 末尾の「PR-2 に入る前の申し送り」を読むこと。** Issue #29 の「インライン `<style>` がCSPで壊れる」は M0-B で解消済み＝**現存するインラインscriptは `layout.tsx` の `themeInit` 1箇所のみ**。代わりに **React の `style={{...}}` 属性が11ファイル・25箇所**あり `style-src` で壊れる。また **Issue #32 のヒントの正規表現はコンパイルできない**（正しくは `/^\/(?![\/\\])/`）。
 
 ### T-16 🤖 M0-B: 無料訴求トップ＋管理画面PC化・ダッシュボード（Issue #16）
 - **触る範囲**: `app/src/components/Landing.tsx`・`auth/RegisterWizard.tsx`・`lib/i18n/dictionaries.ts`・`app/src/app/admin/`（全面）・`lib/admin/`（新設）・`lib/notify/messages.ts`・`globals.css`（最小）
