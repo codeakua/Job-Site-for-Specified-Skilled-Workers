@@ -730,6 +730,9 @@ declare
 begin
   if exists (select 1 from members where member_no is null or btrim(member_no) = '') then
     -- 上のガードは「会員番号の変更」を拒否するため、埋める間だけトリガを外す。
+    -- ※ セキュリティ上の穴にはならない: disable trigger は members に強いロックを取るため、
+    --    このブロックが終わる（＝トリガが戻る）までサイトからの登録・更新は待たされる。
+    --    つまり「ガードが外れている間に会員が verified を立てる」ような隙間は生じない。
     alter table members disable trigger trg_members_guard;
 
     update members m
