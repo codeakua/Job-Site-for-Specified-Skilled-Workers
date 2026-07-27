@@ -401,8 +401,8 @@ function coverParagraphs(meta) {
   // 凡例
   P.push(new Paragraph({ spacing: { before: 500, after: 100 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: "本書の読み方（凡例）", bold: true, font: HEAD_FONT, size: SIZE_SMALL, color: COLOR_MUTED })] }));
   const legend = [
-    ["〔記入①〕", "事業者が確定・記入する6項目です（薄いグレーの網掛け）。法的な論点ではありません。"],
     ["★", "事業の可否・公開時期に関わるため、特に優先してご確認いただきたい項目です。"],
+    ["☐", "ご回答の記入欄です（資料④「確認論点リスト」の各論点の末尾にあります）。"],
   ];
   P.push(new Table({
     columnWidths: [1800, 6200],
