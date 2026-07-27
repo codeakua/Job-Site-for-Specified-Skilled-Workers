@@ -150,9 +150,16 @@ const I18N = {
     'reg.email': 'メールアドレス（任意）',
     'reg.email.ph': '例：xiaomei@example.com',
     'reg.password': 'ログイン用パスワード',
-    'reg.password.ph': '8文字以上（英数字）',
-    'reg.password.note': 'この「電話番号＋パスワード」でログインします',
-    'reg.err.password': 'パスワードは8文字以上で入力してください',
+    'reg.password.ph': '8文字以上（英字と数字）',
+    'reg.password.rule': '8文字以上・英字と数字の両方を含めてください',
+    'reg.password.note': '💬 この「電話番号＋パスワード」でログインします',
+    // パスワード規則の内訳（lib/auth/password-policy.ts の PasswordIssue に対応）
+    'reg.err.pw.short': 'パスワードは8文字以上で入力してください',
+    'reg.err.pw.long': 'パスワードが長すぎます（英数字なら72文字まで。漢字を含む場合はもっと短くしてください）',
+    'reg.err.pw.letter': 'パスワードに英字（a〜z）を1文字以上入れてください',
+    'reg.err.pw.digit': 'パスワードに数字（0〜9）を1文字以上入れてください',
+    'reg.err.pw.common': 'よく使われるパスワードです。推測されにくいものに変えてください',
+    'reg.err.pw.phone': '電話番号を含むパスワードは使えません',
     'reg.step3.title': 'お持ちの資格を教えてください',
     'reg.step3.sub': 'あなたに合った求人のご案内に使用します。',
     'reg.jlpt': '日本語能力（JLPT）',
@@ -167,12 +174,16 @@ const I18N = {
     'reg.agree': '利用規約とプライバシーポリシーに同意する',
     'reg.submit': 'この内容で登録する',
     'reg.err.required': '未入力の必須項目があります',
+    'reg.err.invalid': '入力内容に誤りがあります。もう一度ご確認ください。',
     'reg.err.agree': '規約への同意が必要です',
+    'reg.toLogin': 'ログイン画面へ進む',
     'reg.done.badge': '登録完了',
     'reg.done.title': '登録が完了しました！',
     'reg.done.sub': 'あなたのアカウントが発行されました。\nさっそく求人を見てみましょう。',
     'reg.done.accountId': '会員ID',
     'reg.done.cta': '求人を見る',
+    'reg.done.ctaLogin': 'ログイン画面へ進む',
+    'reg.done.loginNeeded': '登録は完了しましたが、自動ログインができませんでした。登録した電話番号とパスワードでログインしてください。',
 
     // ログイン
     'login.title': 'おかえりなさい',
@@ -187,11 +198,17 @@ const I18N = {
     'login.success': 'ログインしました',
 
     // 認証エラー（ログイン/登録の失敗。{detail}はSupabase等の詳細。表示時に t() で翻訳）
-    'auth.err.exists': 'この電話番号は既に登録されています。ログインしてください。',
+    // ⚠️ 登録の失敗は auth.err.registerFailed 1つに畳む（アカウント列挙対策・Issue #35）。
+    //    「既に登録済み」専用の文言を出すと、電話番号の登録有無を外部から確かめられてしまう。
+    'auth.err.registerFailed':
+      '登録できませんでした。入力内容をご確認のうえ、もう一度お試しください。すでにこの電話番号で登録済みの場合は、ログイン画面からお進みください。',
+    'auth.err.tooMany': '登録の試行が続いたため、しばらくお待ちください。時間をおいて再度お試しください。',
+    'auth.err.tooManyShared': '同じ回線からのアクセスが集中しています。しばらく時間をおいてから、もう一度お試しください。',
+    'auth.err.network': '通信が不安定なため、登録が完了したか確認できませんでした。同じ電話番号・同じパスワードで、もう一度お試しください。',
     'auth.err.invalidCredentials': '電話番号またはパスワードが違います。',
     'auth.err.emailConfirm': 'メール確認の設定が有効になっています。管理者にお問い合わせください。',
     'auth.err.noSession': 'アカウント作成後に自動ログインできませんでした。お手数ですが管理者にお問い合わせください。',
-    'auth.err.saveFailed': '登録情報の保存に失敗しました：{detail}',
+    'auth.err.saveFailed': '登録情報の保存に失敗しました。お手数ですが、同じ電話番号・同じパスワードで、もう一度お試しください。',
     'auth.err.generic': 'エラーが発生しました：{detail}',
 
     // 求人一覧
@@ -436,9 +453,16 @@ const I18N = {
     'reg.email': '邮箱（选填）',
     'reg.email.ph': '例：xiaomei@example.com',
     'reg.password': '登录密码',
-    'reg.password.ph': '8位以上（字母和数字）',
-    'reg.password.note': '将使用此「手机号＋密码」登录',
-    'reg.err.password': '密码请输入8位以上',
+    'reg.password.ph': '8位以上（字母＋数字）',
+    'reg.password.rule': '需8位以上，且同时包含字母和数字',
+    'reg.password.note': '💬 将使用此「手机号＋密码」登录',
+    // 密码规则的具体提示（对应 lib/auth/password-policy.ts 的 PasswordIssue）
+    'reg.err.pw.short': '密码请输入8位以上',
+    'reg.err.pw.long': '密码过长（字母数字最多72位；含汉字时请更短一些）',
+    'reg.err.pw.letter': '密码中请至少包含1个字母（a〜z）',
+    'reg.err.pw.digit': '密码中请至少包含1个数字（0〜9）',
+    'reg.err.pw.common': '这是常见密码，请更换为不易被猜到的密码',
+    'reg.err.pw.phone': '密码中不能包含手机号',
     'reg.step3.title': '请填写您持有的资格证书',
     'reg.step3.sub': '用于为您推荐合适的职位。',
     'reg.jlpt': '日语能力（JLPT）',
@@ -453,12 +477,16 @@ const I18N = {
     'reg.agree': '同意《用户协议》和《隐私政策》',
     'reg.submit': '确认注册',
     'reg.err.required': '有未填写的必填项',
+    'reg.err.invalid': '填写内容有误，请重新确认。',
     'reg.err.agree': '请先同意用户协议',
+    'reg.toLogin': '前往登录页面',
     'reg.done.badge': '注册成功',
     'reg.done.title': '注册成功！',
     'reg.done.sub': '您的账号已开通。\n快去看看适合您的职位吧。',
     'reg.done.accountId': '会员ID',
     'reg.done.cta': '查看职位',
+    'reg.done.ctaLogin': '前往登录页面',
+    'reg.done.loginNeeded': '注册已完成，但未能自动登录。请用注册时的手机号和密码登录。',
 
     'login.title': '欢迎回来',
     'login.sub': '请使用注册时的手机号登录',
@@ -471,11 +499,16 @@ const I18N = {
     'login.demoNote': '',
     'login.success': '登录成功',
 
-    'auth.err.exists': '该手机号已注册，请直接登录。',
+    // ⚠️ 注册失败统一为 auth.err.registerFailed 一条（防止账号枚举・Issue #35）
+    'auth.err.registerFailed':
+      '注册未能完成。请确认填写内容后重试。如果该手机号已经注册，请从登录页面登录。',
+    'auth.err.tooMany': '短时间内注册尝试次数过多，请稍后再试。',
+    'auth.err.tooManyShared': '当前网络的访问较为集中，请稍后再试。',
+    'auth.err.network': '网络不稳定，无法确认注册是否已完成。请用相同的手机号和密码再试一次。',
     'auth.err.invalidCredentials': '手机号或密码有误。',
     'auth.err.emailConfirm': '邮箱确认功能已开启，请联系管理员。',
     'auth.err.noSession': '注册后无法自动登录，请联系管理员。',
-    'auth.err.saveFailed': '保存注册信息失败：{detail}',
+    'auth.err.saveFailed': '保存注册信息失败。请用相同的手机号和密码再试一次。',
     'auth.err.generic': '发生错误：{detail}',
 
     'jobs.title': '找工作',

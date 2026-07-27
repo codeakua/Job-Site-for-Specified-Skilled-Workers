@@ -21,71 +21,95 @@ export type RegisterInput = {
 };
 
 // エラーは翻訳キー（＋任意の詳細）で返し、表示はUI側で t(errorKey, {detail}) により日中翻訳する。
+// loginHint が true のときは「すでに登録済みかもしれない人」向けにログイン導線を併記する。
+// signedIn は「登録は成功したが、その場でログイン状態にできたか」。false のときは
+// 完了画面でログインを案内する（登録自体は成功しているので失敗扱いにはしない）。
 export type AuthResult =
-  | { ok: true; memberNo: string }
-  | { ok: false; errorKey: string; errorDetail?: string };
+  | { ok: true; memberNo: string; signedIn: boolean }
+  | { ok: false; errorKey: string; errorDetail?: string; loginHint?: boolean };
 
-/** Supabaseの英語エラーを辞書キーに対応づける（文言は辞書 auth.err.* / reg.err.* にある）。 */
-function mapAuthError(msg: string): { errorKey: string; errorDetail?: string } {
+/** Supabaseの英語エラーを辞書キーに対応づける（**ログイン専用**。登録はサーバー側で一般化する）。 */
+function mapLoginError(msg: string): { errorKey: string; errorDetail?: string } {
   const m = msg.toLowerCase();
-  if (m.includes("already registered") || m.includes("already exists") || m.includes("user already"))
-    return { errorKey: "auth.err.exists" };
   if (m.includes("invalid login credentials")) return { errorKey: "auth.err.invalidCredentials" };
-  if (m.includes("password")) return { errorKey: "reg.err.password" };
   if (m.includes("email") && m.includes("confirm")) return { errorKey: "auth.err.emailConfirm" };
   return { errorKey: "auth.err.generic", errorDetail: msg };
 }
 
-/** 新規会員登録: 認証ユーザー作成＋membersプロフィール保存（ブラウザ側・SMS不要）。 */
-export async function registerMember(input: RegisterInput): Promise<AuthResult> {
-  const supabase = createClient();
-  const email = phoneToEmail(input.phoneCode, input.phone);
+type RegisterResponse = {
+  ok?: boolean;
+  memberNo?: string;
+  errorKey?: string;
+  loginHint?: boolean;
+  session?: { access_token?: string; refresh_token?: string };
+};
 
-  const { data: signUp, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password: input.password,
-  });
-  if (signUpError) return { ok: false, ...mapAuthError(signUpError.message) };
-  if (!signUp.user || !signUp.session) {
-    return { ok: false, errorKey: "auth.err.noSession" };
-  }
-
-  // 会員番号(member_no)はDB側のトリガが採番する（0004_member_no.sql / Issue #34）。
-  // ここで送っても無視されるため送らない。登録完了画面に表示する実値は insert の返り値から受け取る。
-  const { data: inserted, error: insertError } = await supabase
-    .from("members")
-    .insert({
-      id: signUp.user.id,
-      last_name: input.lastName,
-      first_name: input.firstName,
-      pinyin: input.pinyin,
-      birth: input.birth || null,
-      gender: input.gender || null,
-      nationality: input.nationality || "cn",
-      residence: input.residence || "jp",
-      address: input.address,
-      phone_code: input.phoneCode,
-      phone: input.phone,
-      wechat_id: input.wechat,
-      email: input.email || null,
-      jlpt: input.jlpt || "none",
-      ssw_fields: input.ssw ?? [],
-      other_qual: input.otherQual || null,
-    })
-    .select("member_no")
-    .maybeSingle();
-  if (insertError) return { ok: false, errorKey: "auth.err.saveFailed", errorDetail: insertError.message };
-
-  // スタッフへ新規登録を通知（サーバー側でResend送信。失敗しても登録は成功扱いにする）。
+/**
+ * 新規会員登録。
+ *
+ * ⚠️ **ブラウザから直接 `supabase.auth.signUp()` を呼んではいけない**（Issue #30）。
+ * それだとサーバー側のレート制限・honeypot・入力検証・パスワード強度チェックを
+ * すべて素通りしてしまう。登録は必ず `/api/auth/register` に集約する。
+ *
+ * サーバーは `persistSession:false` のクライアントで動くため cookie を書かない。
+ * 発行されたトークンをここで `setSession()` に渡し、ブラウザ側のSupabaseクライアントに
+ * ログイン状態を持たせる（`onAuthStateChange` が発火して AuthProvider も更新される）。
+ *
+ * @param honeypot 画面上の隠しフィールドの値。人間なら必ず空。
+ */
+export async function registerMember(input: RegisterInput, honeypot: string): Promise<AuthResult> {
+  let payload: RegisterResponse;
   try {
-    await fetch("/api/notify/registration", { method: "POST" });
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...input, contact_note: honeypot }),
+    });
+    payload = (await res.json().catch(() => ({}))) as RegisterResponse;
   } catch {
-    // 通知の失敗は登録結果に影響させない
+    // 通信そのものが失敗（電波が切れた等）。アカウントができたかは分からないので、
+    // 「同じ内容でもう一度」と案内する（サーバー側が孤児を回復してくれる）。
+    return { ok: false, errorKey: "auth.err.network" };
   }
 
-  // 万一 member_no を読み戻せなくても、登録そのものは成功している。
-  // ここで失敗扱いにすると会員が登録し直そうとして「登録済み」で弾かれるため、番号なしで完了とする。
-  return { ok: true, memberNo: inserted?.member_no ?? "" };
+  if (!payload.ok) {
+    return {
+      ok: false,
+      errorKey: payload.errorKey ?? "auth.err.registerFailed",
+      loginHint: payload.loginHint,
+    };
+  }
+
+  // 登録は成功している。ここから先で失敗しても「登録できなかった」とは言わない
+  // （言うと会員が登録し直して「登録済み」で弾かれ、直そうとしたロックアウトを自分で作る）。
+  // ただし**ログイン状態にできたかどうかは正直に返す**。できていないのに完了画面から
+  // 求人一覧へ進ませると、ログイン画面へ弾き返されて理由が分からなくなるため。
+  return { ok: true, memberNo: payload.memberNo ?? "", signedIn: await adoptSession(payload) };
+}
+
+/**
+ * サーバーが返したトークンをブラウザ側のSupabaseクライアントへ引き継ぐ。
+ *
+ * ⚠️ `setSession()` は**失敗しても例外を投げず `{ error }` を返す**（トークン検証や
+ * `/auth/v1/user` の呼び出しに失敗した場合など）。try/catch だけで成功とみなすと、
+ * セッションが無いまま「登録完了」を表示してしまう。戻り値を必ず確認すること。
+ */
+async function adoptSession(payload: RegisterResponse): Promise<boolean> {
+  const access_token = payload.session?.access_token;
+  const refresh_token = payload.session?.refresh_token;
+  if (!access_token || !refresh_token) return false;
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
+    if (error || !data.session) {
+      console.error("[register] セッションの引き継ぎに失敗しました:", error?.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("[register] セッションの引き継ぎで例外:", e);
+    return false;
+  }
 }
 
 /** ログイン: 電話番号＋パスワード。 */
@@ -97,8 +121,8 @@ export async function login(
   const supabase = createClient();
   const email = phoneToEmail(phoneCode, phone);
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { ok: false, ...mapAuthError(error.message) };
-  return { ok: true, memberNo: "" };
+  if (error) return { ok: false, ...mapLoginError(error.message) };
+  return { ok: true, memberNo: "", signedIn: true };
 }
 
 /** ログアウト。 */
