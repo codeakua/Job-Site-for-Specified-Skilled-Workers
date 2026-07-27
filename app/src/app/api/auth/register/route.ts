@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js";
 import { phoneToEmail } from "@/lib/auth/phone-email";
 import { firstPasswordIssue, passwordIssueKey } from "@/lib/auth/password-policy";
+import { birthIssue } from "@/lib/auth/birth-policy";
 import { consumeRateLimit, consumeRateLimits } from "@/lib/security/rate-limit";
 import { clientIp, isSameOriginRequest } from "@/lib/security/request";
 import {
@@ -81,9 +82,8 @@ const JLPTS = new Set(["N1", "N2", "N3", "N4", "N5", "none"]);
 const PHONE_CODES = new Set(["+81", "+86"]);
 const FIELD_IDS = new Set(FIELDS.map((f) => f.id));
 
-/** 画面の date 入力（min/max）と同じ範囲。 */
-const BIRTH_MIN = "1960-01-01";
-const BIRTH_MAX = "2008-12-31";
+// 生年月日の範囲は birth-policy.ts に集約した（画面と同じ関数で判定する）。
+// 以前ここに固定値 "2008-12-31" を置いていたため、17歳が登録できてしまっていた。
 
 type CleanInput = {
   lastName: string;
@@ -158,10 +158,8 @@ function parseInput(body: Record<string, unknown>): CleanInput | null {
   if (!PHONE_CODES.has(input.phoneCode)) return null;
   if (input.ssw.length > FIELD_IDS.size || input.ssw.some((id) => !FIELD_IDS.has(id))) return null;
 
-  // 生年月日
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.birth)) return null;
-  if (Number.isNaN(Date.parse(input.birth))) return null;
-  if (input.birth < BIRTH_MIN || input.birth > BIRTH_MAX) return null;
+  // 生年月日（18歳以上。形式・範囲とも birth-policy.ts の判定を唯一の正とする）
+  if (birthIssue(input.birth)) return null;
 
   // 電話番号（数字のみ 6〜15桁。国番号を除いた本体）
   const digits = input.phone.replace(/\D/g, "");

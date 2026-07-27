@@ -413,11 +413,27 @@ function celebrate() {
 }
 
 /* ---------- ページ初期化 ---------- */
+/* 生年月日の入力範囲（18歳以上）を、開いた日から求めて設定する。
+   以前は登録画面のHTMLに max="2008-12-31" と直書きしていたため、年が変わるにつれ
+   意味がズレ、2026年時点では17歳が選べる状態になっていた。
+   ※ 本番アプリ側の実装は app/src/lib/auth/birth-policy.ts。規則を変えるときは両方直すこと。 */
+function applyBirthRange() {
+  const el = qs('#f-birth');
+  if (!el) return;
+  // 端末のタイムゾーンに左右されないよう、UTCに+9時間して「日本時間の今日」を使う。
+  const jst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const p = n => String(n).padStart(2, '0');
+  const md = `-${p(jst.getUTCMonth() + 1)}-${p(jst.getUTCDate())}`;
+  el.max = `${jst.getUTCFullYear() - 18}${md}`;   // 満18歳の誕生日
+  el.min = `${jst.getUTCFullYear() - 100}${md}`;  // 西暦の打ち間違い避け
+}
+
 function initPage(opts) {
   const o = opts || {};
   applyPrefs();
   applyI18n();
   renderDemoBar();
+  applyBirthRange();
   if (o.tab) renderTabbar(o.tab);
   requestAnimationFrame(initReveal);
 }
