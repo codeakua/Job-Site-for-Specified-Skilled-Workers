@@ -1,6 +1,6 @@
 # 進捗・引き継ぎメモ（新しいチャットはまずこれを読む）
 
-最終更新: 2026-07-27（**PR-2（#29・#32）マージ済み＝本番反映済み＋オーナー実機確認完了。Issue #29・#32・#34 を close。open Issue は #12・#30・#31・#33・#35 の5件のみ**。**open PR は0件＝コードは一区切り。次の実装は PR-3（#30 登録bot/レート制限・#35 アカウント列挙）で、これが公開前セキュリティ是正の最後の実装**。あわせてオーナー向け手順書2本を新設＝`docs/ops/supabase-auth-policy-guide.md`（#31 パスワードポリシー設定）・`docs/ops/domain-setup-guide.md`（独自ドメイン取得）。詳細 §19）。前回: 2026-07-26（PR-2 実装・検証完了。軽量4ヘッダ＋`frame-ancestors 'none'` を全ルートに付与、strict CSP は **Report-Only に留めた**（React の `style={{...}}` が25か所あり強制すると崩れるため）。ログインの `?redirect=` は相対パスのみ許可。詳細 §18）。前回: 2026-07-26（**PR-1b 会員番号のDB採番＝Issue #34 完了。`0004_member_no.sql` 本番適用済み**（確認クエリ `1/1/1/0/0`）**＋ PR #41 マージ済み**。詳細 §17。**#27 もclose（Vercelに service_role キー無しを確認）。完了済みだったIssue #1〜#9・#11 もコメントを添えてclose＝open Issueはセキュリティ是正の残り＋#12 のみ**）。前回: 2026-07-25（**PR-1a 公開前セキュリティ是正の第1弾＝マージ＋本番SQL適用まで完了**＝Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。詳細 §16。**`0003_security.sql` は 2026-07-25 に本番適用済み**）。前回: 2026-07-25（**提出用ドキュメント生成基盤**＝法務3文書のWord/PDF化・管理者マニュアル新設。§15）／2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。§14）／2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
+最終更新: 2026-07-27（**PR-2（#29・#32）マージ済み＝本番反映済み＋オーナー実機確認完了。Issue #29・#32・#34 に加え #31（Supabaseのパスワードポリシー設定・オーナー実施）も close。open Issue は #12・#30・#33・#35 の4件のみ**。**open PR は0件＝コードは一区切り。次の実装は PR-3（#30 登録bot/レート制限・#35 アカウント列挙）で、これが公開前セキュリティ是正の最後の実装**。あわせてオーナー向け手順書2本を新設＝`docs/ops/supabase-auth-policy-guide.md`（#31 パスワードポリシー設定）・`docs/ops/domain-setup-guide.md`（独自ドメイン取得）。詳細 §19）。前回: 2026-07-26（PR-2 実装・検証完了。軽量4ヘッダ＋`frame-ancestors 'none'` を全ルートに付与、strict CSP は **Report-Only に留めた**（React の `style={{...}}` が25か所あり強制すると崩れるため）。ログインの `?redirect=` は相対パスのみ許可。詳細 §18）。前回: 2026-07-26（**PR-1b 会員番号のDB採番＝Issue #34 完了。`0004_member_no.sql` 本番適用済み**（確認クエリ `1/1/1/0/0`）**＋ PR #41 マージ済み**。詳細 §17。**#27 もclose（Vercelに service_role キー無しを確認）。完了済みだったIssue #1〜#9・#11 もコメントを添えてclose＝open Issueはセキュリティ是正の残り＋#12 のみ**）。前回: 2026-07-25（**PR-1a 公開前セキュリティ是正の第1弾＝マージ＋本番SQL適用まで完了**＝Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定／#27(a) service_role記載削除／#28 ④管理アクションのstaff明示。詳細 §16。**`0003_security.sql` は 2026-07-25 に本番適用済み**）。前回: 2026-07-25（**提出用ドキュメント生成基盤**＝法務3文書のWord/PDF化・管理者マニュアル新設。§15）／2026-07-25（**M0-B**: トップを「求職者0円」訴求へ全面置換＋管理画面PC化・ダッシュボード新設＝#16実施。§14）／2026-07-24（**M0-A**: CI導入＋本番保護手順／セキュリティ是正起票 #25〜#35／法務ドラフト。§13）。**新セッションのClaudeは、作業前にこのファイルと `AGENTS.md`・`CLAUDE.md`・`app/AGENTS.md`・`docs/beta-plan.md`・`docs/tasks.md` を読むこと。** M0-Aの全体像は下記 §13 と `docs/launch-plan.md` を参照。
 
 ## 0. 一言サマリー
 中国人向け特定技能求人サイトの**β版**を、モック（リポジトリ直下HTML）→ Next.js実装へ移行中。
@@ -468,11 +468,12 @@ script-src 'self' 'unsafe-inline'
 1. 🔴 **次の実装＝PR-3（#30 登録bot/レート制限＝server-mediated signUp ＋ #35 アカウント列挙）。これが公開前セキュリティ是正の最後の実装**（別チャットで実施予定。依頼プロンプトの要点は §19）。
 2. **その後＝文書**（#33 退会/削除・PW復旧の運用手順）。#31 はコード不要のオーナー設定作業（手順書は作成済み・下記）。
 3. **オーナー作業**（手順書は用意済み。実施後にClaudeへ結果を伝えると記録欄を埋めてコミットする）:
-   - **#31 パスワードポリシー設定** → `docs/ops/supabase-auth-policy-guide.md`
+   - ✅ **#31 パスワードポリシー設定は 2026-07-27 に実施・close 済み**（無料プランでできる範囲。詳細 §19）。**残作業＝Pro化時に漏洩PW保護をONにする**（下記 M2 チェック項目）
    - **独自ドメイン取得**（今週中の予定・DNS反映に最大48h） → `docs/ops/domain-setup-guide.md`
    - 顧問弁護士へ法務3文書（`docs/legal/export/`）を送付（実施予定）
    - 実求人の収集方法を検討中
 4. 並行: M2（監視3点・Supabase/Vercel Pro化・バックアップ復元予行・実求人投入・独自ドメイン公開）、弁護士FBの反映（§15）。
+   - 🔖 **M2「Supabase Pro化」時の必須チェック項目**（#31 の積み残し）: **Authentication → Sign In / Providers → Email の `Prevent use of leaked passwords` を ON にする**（無料プランでは保存が拒否される。§19 参照）。
    - ⚠️ **`docs/launch-plan.md` は本ファイルの各所から参照されているが実在しない**（M0-A で作成予定だったが未作成）。M2の内容が要るときは `docs/tasks.md` の M0 節と本節を正とすること。
 
 ---
@@ -484,7 +485,28 @@ script-src 'self' 'unsafe-inline'
 ### Issue の整理
 - **#29・#32**（PR-2）: オーナーが本番で ①ログイン後の遷移が従来どおり ②`/login?redirect=https://evil.com` から外部へ飛ばない を確認 → close。
 - **#34**（PR-1b）: 実機テスト登録で完了画面の会員番号と `/admin/members` の一致を確認 → close。
-- **残り**: #12（E2E・総合QA・独自ドメイン）／#30・#35（PR-3）／#31（Supabase設定）／#33（運用文書）。
+- **#31**（Supabase設定）: 同日オーナーが実施 → close（下記「#31 の実施結果」）。
+- **残り**: #12（E2E・総合QA・独自ドメイン）／#30・#35（PR-3）／#33（運用文書）**の3件のみ**。
+
+### #31 パスワードポリシーの実施結果（2026-07-27・オーナー実施・close 済み）
+
+| 項目 | 結果 |
+|---|---|
+| Minimum password length | **8 characters**（再読み込み後も維持を確認） |
+| Password requirements | `No required characters (default)`／**変更なし**（意図的） |
+| Prevent use of leaked passwords | **OFF**（❌ 無料プランのため設定不可） |
+| Rate limit for sign-ups and sign-ins | 30 requests / 5 min（IP単位・360/hour）／**変更なし**（意図的） |
+| Confirm email | **OFF のまま維持** |
+
+**⚠️ 実地で判明した挙動（手順書に反映済み・次に触る人は必読）**
+
+1. **漏洩PW保護は無料プランでは設定できず、しかも①の設定まで巻き添えで保存されない。** スイッチは**グレーアウトせず普通に押せてしまう**が、Save の瞬間に `Configuring leaked password protection via HaveIBeenPwned.org is available on Pro Plans and up.` で**保存自体が失敗**する。Supabaseはこの画面を**一括保存**するため、同時に変更した `Minimum password length` も保存されない。**画面には入力値が残るので成功したように錯覚する** → OFFに戻して再保存し、**再読み込みで値が残っているかの確認が必須**。
+2. **UIの導線が想定と違う。** 漏洩PW保護のスイッチは `Attack Protection` ページには無く、同ページの「Configure in email provider」ボタンから **Sign In / Providers → Email** へ遷移した先（＝`Minimum password length` と同じ画面）にある。
+3. **Save がグレーで押せないのは正常。** Supabaseの Save は未保存の変更がある時だけ活性化する＝押せない＝保存済みの内容と一致している、という意味。
+
+**意図的にやらなかったこと**: `Password requirements`（文字種要件）は、クライアント側が検証しておらず**中国語利用者に英語エラーが出る**ため **PR-3 でクライアント検証を揃えてから**有効化する。レート制限は**IP単位＋中国のCGNAT**のため厳格化しない（むしろ利用者増で「厳しすぎ」に転ぶ可能性があり、**ログイン不能の問い合わせが相次いだら対処は引き上げ**）。`Enable Captcha protection` は中国到達性が不確実なためOFFのまま。
+
+**積み残し**: 漏洩PW保護の有効化 → **M2のSupabase Pro化と同時に実施**（上記チェック項目に登録済み）。
 
 ### 新設した手順書（いずれも「専門知識不要」トーン・`github-settings-guide.md` と同じ構成）
 - **`docs/ops/supabase-auth-policy-guide.md`（#31）**: パスワード最低文字数・漏洩PW保護・ログイン試行制限。設定記録欄つき。**重要な設計判断を3点埋め込んである**:
