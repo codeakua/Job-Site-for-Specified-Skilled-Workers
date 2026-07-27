@@ -19,9 +19,9 @@ const ROOT = path.resolve(__dirname, "../..");
 const SRC = path.join(ROOT, "docs/legal");
 const OUT = path.join(SRC, "export");
 
-const TODAY = "2026年7月25日";
+const TODAY = "2026年7月27日";
 const SERVICE = "樱聘 YingPin";
-const VERSION = "v0 ドラフト";
+const VERSION = "v1.0（弁護士レビュー用）";
 
 /** 表紙に載せる事業者情報（3文書で共通） */
 const FACTS = [
@@ -35,16 +35,17 @@ const FACTS = [
 ];
 
 const SET_NOTE =
-  "本書は「①利用規約（下書き）／②プライバシーポリシー（下書き）／③確認論点リスト」の3点セットのうちの1点です。";
+  "本書は「①レビュー依頼書／②利用規約（案）／③プライバシーポリシー（案）／④確認論点リスト」の4点セットのうちの1点です。";
 
 /**
  * 原本のMarkdownはリポジトリ内のファイルパスで相互参照している。
  * 社外へ出す文書ではファイル名は意味を持たないため、文書名に置き換える。
  */
 const DOC_NAMES = {
+  "cover-letter.md": "レビュー依頼書",
   "lawyer-checklist.md": "確認論点リスト",
-  "terms-draft.md": "利用規約（下書き）",
-  "privacy-draft.md": "プライバシーポリシー（下書き）",
+  "terms-draft.md": "利用規約（案）",
+  "privacy-draft.md": "プライバシーポリシー（案）",
   "launch-plan.md": "事業計画メモ（社内資料・別途ご提示）",
 };
 
@@ -57,25 +58,32 @@ function humanizeRefs(md) {
 
 const DOCS = [
   {
-    src: "terms-draft.md",
-    out: "01_利用規約_下書き",
-    title: "利用規約（下書き）",
-    subtitle: "顧問弁護士レビュー用",
+    src: "cover-letter.md",
+    out: "01_レビュー依頼書",
+    title: "レビュー依頼書",
+    subtitle: "前提事実とご確認の進め方",
     kicker: "顧問弁護士 レビュー依頼資料 ①",
   },
   {
-    src: "privacy-draft.md",
-    out: "02_プライバシーポリシー_下書き",
-    title: "プライバシーポリシー（下書き）",
+    src: "terms-draft.md",
+    out: "02_利用規約_案",
+    title: "利用規約（案）",
     subtitle: "顧問弁護士レビュー用",
     kicker: "顧問弁護士 レビュー依頼資料 ②",
   },
   {
+    src: "privacy-draft.md",
+    out: "03_プライバシーポリシー_案",
+    title: "プライバシーポリシー（案）",
+    subtitle: "顧問弁護士レビュー用",
+    kicker: "顧問弁護士 レビュー依頼資料 ③",
+  },
+  {
     src: "lawyer-checklist.md",
-    out: "03_確認論点リスト",
+    out: "04_確認論点リスト",
     title: "確認論点リスト",
     subtitle: "公開前にご確認いただきたい法的論点の一覧",
-    kicker: "顧問弁護士 レビュー依頼資料 ③",
+    kicker: "顧問弁護士 レビュー依頼資料 ④",
   },
 ];
 
