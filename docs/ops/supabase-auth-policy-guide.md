@@ -34,12 +34,13 @@
 
 ## 準備：管理画面を開く
 
-1. ブラウザで下のURLを開きます（Supabase にログインした状態で）。
-   ```
-   https://supabase.com/dashboard/project/jqevswrbdbmxifauqhfi
-   ```
+> ⚠️ **プロジェクトを作り直した場合（東京リージョンへの移設など）は、この設定をやり直す必要があります。** 認証の設定は新しいプロジェクトには引き継がれません。以下のURLに含まれる `<プロジェクトID>` は、**そのとき設定したいプロジェクトのID**に読み替えてください。IDは、Supabaseでそのプロジェクトを開いたときのアドレス欄に出ています。
+>
+> 現在の本番プロジェクトのIDは `jqevswrbdbmxifauqhfi`（オーストラリア）です。移設後は新しいIDに変わります。
+
+1. https://supabase.com/dashboard を開き（Supabase にログインした状態で）、**設定したいプロジェクトを選びます**。
+   - 直接開く場合のURL: `https://supabase.com/dashboard/project/<プロジェクトID>`
 2. 「YingPin」等のプロジェクト名の画面が開けばOKです。
-   - ※開けない場合は https://supabase.com/dashboard にアクセスし、プロジェクト一覧から選んでください。
 3. 画面の**左側に縦に並んだアイコン**があります。その中の **鍵マーク（Authentication＝認証）** を押すと、このガイドで使うメニューが開きます。
 
 ---
