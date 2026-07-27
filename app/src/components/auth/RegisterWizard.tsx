@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppState } from "@/components/providers";
 import { pick } from "@/lib/i18n";
 import { FIELDS } from "@/data/mock-data";
 import { IconBack, IconCheck, IconGlobe } from "@/components/icons";
 import { registerMember, type RegisterInput } from "@/lib/auth/client-auth";
+import { firstPasswordIssue, passwordIssueKey } from "@/lib/auth/password-policy";
 
 const EMPTY: RegisterInput = {
   lastName: "", firstName: "", pinyin: "", birth: "", gender: "",
@@ -21,14 +23,23 @@ export function RegisterWizard() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<RegisterInput>(EMPTY);
   const [error, setError] = useState("");
+  // 一般化した登録エラー（Issue #35）に添えるログイン導線を出すか。
+  const [loginHint, setLoginHint] = useState(false);
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
-  // 完了画面の表示フラグ＋DBが採番した会員番号。
+  // honeypot（隠しフィールド・Issue #30）。人間は触れないので常に空のまま送られる。
+  const [honeypot, setHoneypot] = useState("");
+  // 完了画面の表示フラグ＋DBが採番した会員番号＋その場でログイン状態にできたか。
   // 番号は空文字になり得る（DB採番を読み戻せなかった場合）ため、文字列ではなくオブジェクトで持つ。
-  const [done, setDone] = useState<{ memberNo: string } | null>(null);
+  const [done, setDone] = useState<{ memberNo: string; signedIn: boolean } | null>(null);
 
   const set = <K extends keyof RegisterInput>(k: K, v: RegisterInput[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  /** パスワードの違反（サーバー側 /api/auth/register と同じ関数で判定する）。 */
+  const pwIssue = form.password
+    ? firstPasswordIssue(form.password, `${form.phoneCode}${form.phone}`)
+    : null;
 
   function toggleSsw(id: string) {
     setForm((f) => {
@@ -40,14 +51,25 @@ export function RegisterWizard() {
   function validate(n: number): boolean {
     if (n === 1)
       return !!(form.lastName && form.firstName && form.pinyin && form.birth && form.gender && form.address);
-    if (n === 2) return !!(form.phone && form.wechat && form.password.length >= 8);
     return true;
   }
 
   function next() {
     setError("");
-    if (!validate(step)) {
-      setError(step === 2 && form.password.length < 8 ? t("reg.err.password") : t("reg.err.required"));
+    setLoginHint(false);
+    // STEP2 はパスワード規則（サーバーと同じ）まで見てから進める。
+    // ここで通しておけば、送信してから英語のエラーが返る事態を避けられる。
+    if (step === 2) {
+      if (!form.phone || !form.wechat || !form.password) {
+        setError(t("reg.err.required"));
+        return;
+      }
+      if (pwIssue) {
+        setError(t(passwordIssueKey(pwIssue)));
+        return;
+      }
+    } else if (!validate(step)) {
+      setError(t("reg.err.required"));
       return;
     }
     setStep((s) => Math.min(4, s + 1));
@@ -55,24 +77,27 @@ export function RegisterWizard() {
   }
   function back() {
     setError("");
+    setLoginHint(false);
     setStep((s) => Math.max(1, s - 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function submit() {
     setError("");
+    setLoginHint(false);
     if (!agree) {
       setError(t("reg.err.agree"));
       return;
     }
     setBusy(true);
-    const res = await registerMember(form);
+    const res = await registerMember(form, honeypot);
     if (!res.ok) {
       setError(t(res.errorKey, res.errorDetail ? { detail: res.errorDetail } : undefined));
+      setLoginHint(Boolean(res.loginHint));
       setBusy(false);
       return;
     }
-    setDone({ memberNo: res.memberNo });
+    setDone({ memberNo: res.memberNo, signedIn: res.signedIn });
     window.scrollTo({ top: 0, behavior: "auto" });
   }
 
@@ -97,15 +122,21 @@ export function RegisterWizard() {
               <b>{done.memberNo}</b>
             </div>
           )}
+          {/*
+            登録は成功しているが、その場でログイン状態にできなかった場合（トークンの
+            引き継ぎに失敗）。そのまま求人一覧へ進ませるとログイン画面へ弾き返されて
+            理由が分からなくなるので、ログイン画面へ誘導する。
+          */}
+          {!done.signedIn && <p className="form-error">{t("reg.done.loginNeeded")}</p>}
           <button
             type="button"
             className="btn btn-primary btn-block"
             onClick={() => {
-              router.push("/jobs");
+              router.push(done.signedIn ? "/jobs" : "/login");
               router.refresh();
             }}
           >
-            {t("reg.done.cta")}
+            {t(done.signedIn ? "reg.done.cta" : "reg.done.ctaLogin")}
           </button>
         </section>
       </div>
@@ -232,7 +263,11 @@ export function RegisterWizard() {
           </Field>
           <Field label={t("reg.password")} required>
             <input className="input" type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder={t("reg.password.ph")} />
-            <p className="hint">🔑 {t("reg.password.note")}</p>
+            {/* 入力中にその場で規則違反を知らせる（送信してから英語エラーが返るのを防ぐ・Issue #31） */}
+            <p className="hint" style={pwIssue ? { color: "var(--danger)" } : undefined}>
+              🔑 {pwIssue ? t(passwordIssueKey(pwIssue)) : t("reg.password.rule")}
+            </p>
+            <p className="hint">{t("reg.password.note")}</p>
           </Field>
           <Field label={t("reg.wechat")} required>
             <input className="input" value={form.wechat} onChange={(e) => set("wechat", e.target.value)} placeholder={t("reg.wechat.ph")} />
@@ -241,6 +276,27 @@ export function RegisterWizard() {
           <Field label={t("reg.email")} optional>
             <input className="input" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder={t("reg.email.ph")} />
           </Field>
+          {/*
+            honeypot（Issue #30）: 画面外に置いた隠しフィールド。
+            人間には見えず、キーボード操作でも到達しない（tabIndex=-1）ので必ず空のまま送られる。
+            自動でフォームを埋める bot だけがここに値を入れるため、サーバー側で弾ける。
+            ブラウザの自動入力に巻き込まれないよう autoComplete="off" と一般的でない名前にしてある。
+          */}
+          <div
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}
+          >
+            <label htmlFor="contact-note">Contact note</label>
+            <input
+              id="contact-note"
+              name="contact_note"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+            />
+          </div>
           {error && <p className="form-error">{error}</p>}
           <div className="step-nav">
             <button type="button" className="btn btn-back" onClick={back}>{t("common.back")}</button>
@@ -324,6 +380,16 @@ export function RegisterWizard() {
             <span className="agree-text">{t("reg.agree")}</span>
           </label>
           {error && <p className="form-error">{error}</p>}
+          {/*
+            登録エラーは「すでに登録済み」かどうかを明かさない一般化文言にしてある（Issue #35）。
+            そのままだと本当に登録済みの人が行き止まりになるため、ログイン画面への導線を添える。
+            この導線は「登録できなかった」全ケースで同じように出るので、番号の登録有無は分からない。
+          */}
+          {loginHint && (
+            <div className="auth-links" style={{ marginTop: 0, marginBottom: 14 }}>
+              <Link href="/login">{t("reg.toLogin")}</Link>
+            </div>
+          )}
           <div className="step-nav">
             <button type="button" className="btn btn-back" onClick={back}>{t("common.back")}</button>
             <button type="button" className="btn btn-primary" disabled={busy} onClick={submit}>
