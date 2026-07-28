@@ -47,6 +47,7 @@ const DOC_NAMES = {
   "terms-draft.md": "利用規約（案）",
   "privacy-draft.md": "プライバシーポリシー（案）",
   "launch-plan.md": "事業計画メモ（社内資料・別途ご提示）",
+  "third-party-consent-guide.md": "求人企業への情報提供の同意に関する社内手順書（社内資料・ご要望に応じてご提示）",
 };
 
 function humanizeRefs(md) {
