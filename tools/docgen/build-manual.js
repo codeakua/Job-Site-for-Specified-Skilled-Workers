@@ -5,8 +5,14 @@
  *   node tools/docgen/render-figures.js   # 先に画面図を作る（図を直したときだけ）
  *   node tools/docgen/build-manual.js
  *
- * 入力: docs/ops/staff-registration-guide.md（原本。編集はこちらだけを触ること）
+ * 入力: docs/ops/*.md（原本。編集はこちらだけを触ること）
  * 出力: docs/ops/export/*.docx / *.pdf
+ *
+ * ■ 差し込み（include）
+ *   `<!-- include:別ファイル.md#名前 -->` と書いた行は、そのファイルの
+ *   `<!-- 名前:start ... -->` 〜 `<!-- 名前:end -->` の中身に置き換わる。
+ *   会員へ送る定型文のように「正式な手順書」と「社内共有資料」の両方に載る文章を、
+ *   1か所だけで管理するための仕組み。二重に持つと、片方だけ古い文面が残る。
  */
 
 const fs = require("fs");
@@ -34,7 +40,44 @@ const DOCS = [
     ],
     setNote: "この手順で分からない画面が出たら、その画面をそのままClaudeに見せてください。",
   },
+  {
+    src: "third-party-consent-staff-note.md",
+    out: "社内共有_求人企業に会員の情報を渡すときのルール",
+    title: "求人企業に会員の情報を渡すときのルール",
+    subtitle: "職業紹介を担当する社員の方へ",
+    kicker: "樱聘 YingPin 社内共有資料",
+    facts: [
+      ["対象", "職業紹介を担当する社員"],
+      ["読む時間", "10分（作業は会員1人・企業1社あたり5〜10分）"],
+      ["関係する法律", "個人情報保護法 第27条 ／ 職業安定法 第5条の3・第32条の15"],
+      ["版数", "v1.0"],
+      ["作成日", "2026年7月28日"],
+    ],
+    setNote:
+      "判断に迷ったときは、送る前に止めて上長に相談してください。送ってしまってからでは取り返せません。",
+  },
 ];
+
+/** `<!-- 名前:start ... -->` 〜 `<!-- 名前:end -->` の中身を取り出す。 */
+function extractMarked(md, name, srcName) {
+  const startTag = md.indexOf(`<!-- ${name}:start`);
+  if (startTag === -1) throw new Error(`${srcName} に ${name}:start の目印がありません`);
+  const startEnd = md.indexOf("-->", startTag);
+  if (startEnd === -1) throw new Error(`${srcName} の ${name}:start のコメントが閉じていません`);
+
+  const endTag = md.indexOf(`<!-- ${name}:end`, startEnd);
+  if (endTag === -1) throw new Error(`${srcName} に ${name}:end の目印がありません`);
+
+  return md.slice(startEnd + 3, endTag).trim();
+}
+
+/** `<!-- include:ファイル名#名前 -->` を、その範囲の中身に置き換える。 */
+function applyIncludes(md) {
+  return md.replace(/<!--\s*include:([^#\s]+)#([^\s]+?)\s*-->/g, (_whole, file, name) => {
+    const src = fs.readFileSync(path.join(SRC, file), "utf8");
+    return extractMarked(src, name, file);
+  });
+}
 
 function toPdf(docxPath) {
   execFileSync("soffice", [
@@ -50,7 +93,7 @@ async function main() {
   fs.mkdirSync(OUT, { recursive: true });
 
   for (const d of DOCS) {
-    const md = fs.readFileSync(path.join(SRC, d.src), "utf8");
+    const md = applyIncludes(fs.readFileSync(path.join(SRC, d.src), "utf8"));
     const buf = await markdownToDocx(md, {
       ...d,
       service: "樱聘 YingPin",

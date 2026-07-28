@@ -42,7 +42,7 @@
 
 > ⚠️ **プロジェクトを作り直した場合（東京リージョンへの移設など）は、この設定をやり直す必要があります。** 認証の設定は新しいプロジェクトには引き継がれません。以下のURLに含まれる `<プロジェクトID>` は、**そのとき設定したいプロジェクトのID**に読み替えてください。IDは、Supabaseでそのプロジェクトを開いたときのアドレス欄に出ています。
 >
-> 現在の本番プロジェクトのIDは `jqevswrbdbmxifauqhfi`（オーストラリア）です。移設後は新しいIDに変わります。
+> **現在の本番プロジェクトのIDは `jdiybvtytrdkuxsiddic`（東京 `ap-northeast-1`）です。**（2026-07-28 に豪州シドニーの `jqevswrbdbmxifauqhfi` から移設しました。旧プロジェクトは数日後に削除予定です）
 
 1. https://supabase.com/dashboard を開き（Supabase にログインした状態で）、**設定したいプロジェクトを選びます**。
    - 直接開く場合のURL: `https://supabase.com/dashboard/project/<プロジェクトID>`
@@ -57,7 +57,7 @@
 
 1. 下のURLを直接開きます。
    ```
-   https://supabase.com/dashboard/project/jqevswrbdbmxifauqhfi/auth/providers
+   https://supabase.com/dashboard/project/jdiybvtytrdkuxsiddic/auth/providers
    ```
    ※開けない場合: 左メニューの **Authentication**（認証）→ **Sign In / Providers**（サインイン／プロバイダ）。Supabaseの画面更新により **Providers** とだけ表示されていることもあります。
 
@@ -161,7 +161,7 @@ Supabase には、そうしたリストと照合して登録を拒否する機�
 
 1. 下のURLを直接開きます。
    ```
-   https://supabase.com/dashboard/project/jqevswrbdbmxifauqhfi/auth/rate-limits
+   https://supabase.com/dashboard/project/jdiybvtytrdkuxsiddic/auth/rate-limits
    ```
    ※開けない場合: 左メニューの **Authentication** → **Rate Limits**（レート制限）。
 
@@ -217,15 +217,32 @@ Supabase には、そうしたリストと照合して登録を拒否する機�
 
 > この表は**Claudeが書き込みます**（ファイルの編集操作は不要です）。設定した内容を画面のスクリーンショットや口頭でClaudeに伝えていただければ、記入してコミットします。
 
+> ### 🔄 この表は**東京プロジェクト `jdiybvtytrdkuxsiddic`（現行）** の記録です
+> 2026-07-28 の東京移設に伴い、認証設定は**新プロジェクトでやり直しました**（認証設定はプロジェクト間で引き継がれません）。旧プロジェクト `jqevswrbdbmxifauqhfi`（豪州）での 2026-07-27 の設定内容は、下の「旧プロジェクトでの記録」に残してあります。
+
 | 項目 | 設定した値 | 実施日 | 備考 |
 |---|---|---|---|
-| ① Minimum password length | **8 characters**（✅ 再読み込み後も `8` を維持することを確認済み） | 2026-07-27 | サイト側の表示「8文字以上」と一致。**初回のSaveは②の巻き添えで失敗する**ため、再読み込みで `8` が残っているかの確認が必須 |
-| ① Password Requirements | **No required characters (default)** → ⏳ **`Letters and digits` へ変更する（PR-3マージ後・未実施）** | 2026-07-27 | PR-3でサイト側の検証が揃ったので解禁。**これより厳しい選択肢は選ばない**（上の①-4を参照） |
-| ② Leaked password protection | **OFF（無料プランのため設定不可）** | 2026-07-27 | `Configuring leaked password protection via HaveIBeenPwned.org is available on Pro Plans and up.` で保存が拒否される。**スイッチは押せてしまうが保存時に画面全体の更新が失敗する**点に注意。**Pro化（M2）のタイミングで再実施** |
-| ③ Sign-ups and sign-ins のレート制限 | **30 requests / 5 min（IPアドレスごと＝360 requests/hour）／既定値のまま変更なし** | 2026-07-27 | 中国のCGNAT事情のため厳格化しない。**むしろ利用者増で厳しすぎに転ぶ可能性**があり、ログイン不能の問い合わせが相次いだ場合は引き上げを検討（上記の申し送り参照） |
-| ⛔ Confirm email | （未記入・OFFのまま維持すること） | | ONにすると全員が新規登録できなくなる。**プロジェクトを作り直したときは既定ONの可能性があるため、必ず画面で確認すること** |
+| ⛔ **Confirm email** | **OFF**（✅ 画面で確認済み） | 2026-07-28 | **新プロジェクトでの最初の確認項目。** ONにすると全員が新規登録できなくなるうえ、試した電話番号は中途半端なアカウントが残って**回復不能**になる。実測では**この場所は `Sign In / Providers` の最初の画面（User Signups）**にあり、Email プロバイダの中ではなかった |
+| ① Minimum password length | **8 characters**（✅ 保存後に確認） | 2026-07-28 | サイト側の表示「8文字以上」と一致 |
+| ① Password Requirements | ✅ **`Letters and digits`** | 2026-07-28 | サイト側 `password-policy.ts` の判定と完全一致。**これより厳しい選択肢は選ばない**（上の①-4を参照） |
+| ② Leaked password protection | **OFF（無料プランのため設定不可）** | 2026-07-28 | 画面に `Only available on Pro plan and above` と表示される。**Pro化（M2）のタイミングで再実施** |
+| ③ Sign-ups and sign-ins のレート制限 | **既定値のまま変更なし** | 2026-07-28 | 中国のCGNAT事情のため厳格化しない（上記の申し送り参照） |
+| その他（`Allow new users to sign up` ON／`Allow manual linking` OFF／`Allow anonymous sign-ins` OFF／`Enable email provider` ON） | 既定のまま | 2026-07-28 | 匿名サインイン・Web3・Phoneプロバイダはいずれも当サイト未使用 |
 
-### ③ で確認したその他のレート制限（2026-07-27 時点・いずれも既定値のまま変更なし）
+### 旧プロジェクト `jqevswrbdbmxifauqhfi`（豪州・削除予定）での記録
+
+> 参考として残す。**この表の内容は現行環境には適用されていない。**
+
+| 項目 | 設定した値 | 実施日 |
+|---|---|---|
+| ① Minimum password length | **8 characters** | 2026-07-27 |
+| ① Password Requirements | **`Letters and digits`** | 2026-07-27 |
+| ② Leaked password protection | **OFF（無料プランのため不可）** | 2026-07-27 |
+| ③ レート制限 | 既定値のまま | 2026-07-27 |
+
+> 🚨 **旧プロジェクトで実測した重要な罠**（新プロジェクトでも同じ挙動なので残す）: ②のスイッチは押せてしまうが、**Saveの瞬間に保存全体が失敗し、同じ画面で設定した①も巻き添えで保存されない**。画面には入力値が残って見えるため成功したように錯覚する。**②はOFFのままにし、Save後に再読み込みして①が残っているかを必ず確認すること。**
+
+### ③ で確認したその他のレート制限（2026-07-27・旧プロジェクトで確認。いずれも既定値のまま変更なし）
 
 | 項目 | 値 |
 |---|---|

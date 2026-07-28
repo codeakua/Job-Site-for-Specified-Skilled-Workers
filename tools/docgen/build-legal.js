@@ -19,9 +19,9 @@ const ROOT = path.resolve(__dirname, "../..");
 const SRC = path.join(ROOT, "docs/legal");
 const OUT = path.join(SRC, "export");
 
-const TODAY = "2026年7月27日";
+const TODAY = "2026年7月28日";
 const SERVICE = "樱聘 YingPin";
-const VERSION = "v1.0（弁護士レビュー用）";
+const VERSION = "v1.0";
 
 /** 表紙に載せる事業者情報（3文書で共通） */
 const FACTS = [
@@ -32,6 +32,12 @@ const FACTS = [
   ["版数", VERSION],
   ["作成日", TODAY],
   ["ご提出先", "顧問弁護士 御中"],
+];
+
+/** 表紙に載せる記号の説明（この4点セット固有のもの） */
+const LEGEND = [
+  ["★", "事業の可否・公開時期に関わるため、特に優先してご確認いただきたい項目です。"],
+  ["☐", "ご回答の記入欄です（資料④「確認論点リスト」の各論点の末尾にあります）。"],
 ];
 
 const SET_NOTE =
@@ -47,6 +53,7 @@ const DOC_NAMES = {
   "terms-draft.md": "利用規約（案）",
   "privacy-draft.md": "プライバシーポリシー（案）",
   "launch-plan.md": "事業計画メモ（社内資料・別途ご提示）",
+  "third-party-consent-guide.md": "求人企業への情報提供の同意に関する社内手順書（社内資料・ご要望に応じてご提示）",
 };
 
 function humanizeRefs(md) {
@@ -109,6 +116,7 @@ async function main() {
       service: SERVICE,
       version: VERSION,
       facts: FACTS,
+      legend: LEGEND,
       setNote: SET_NOTE,
     });
     const docxPath = path.join(OUT, `${d.out}.docx`);

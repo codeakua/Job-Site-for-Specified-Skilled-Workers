@@ -101,7 +101,12 @@ function parseInline(text, ctx = {}) {
 
 /** Markdown本文を、描画しやすい中間ブロック配列へ分解する。 */
 function parseBlocks(md) {
-  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  const lines = md
+    .replace(/\r\n/g, "\n")
+    // HTMLコメントは表示しない。原本には生成スクリプト用の目印
+    // （<!-- zh-summary:start --> 等）が入っており、そのままだと本文に印字される。
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .split("\n");
   const blocks = [];
   let i = 0;
   let olCounter = 0;
@@ -398,31 +403,31 @@ function coverParagraphs(meta) {
     rows,
   }));
 
-  // 凡例
-  P.push(new Paragraph({ spacing: { before: 500, after: 100 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: "本書の読み方（凡例）", bold: true, font: HEAD_FONT, size: SIZE_SMALL, color: COLOR_MUTED })] }));
-  const legend = [
-    ["★", "事業の可否・公開時期に関わるため、特に優先してご確認いただきたい項目です。"],
-    ["☐", "ご回答の記入欄です（資料④「確認論点リスト」の各論点の末尾にあります）。"],
-  ];
-  P.push(new Table({
-    columnWidths: [1800, 6200],
-    width: { size: 8000, type: WidthType.DXA },
-    alignment: AlignmentType.CENTER,
-    rows: legend.map(([k, v]) => new TableRow({
-      children: [
-        new TableCell({
-          width: { size: 1800, type: WidthType.DXA },
-          margins: { top: 60, bottom: 60, left: 120, right: 120 },
-          children: [new Paragraph({ spacing: { after: 0 }, alignment: AlignmentType.CENTER, children: parseInline(k, { size: SIZE_SMALL }) })],
-        }),
-        new TableCell({
-          width: { size: 6200, type: WidthType.DXA },
-          margins: { top: 60, bottom: 60, left: 120, right: 120 },
-          children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun({ text: v, size: SIZE_SMALL })] })],
-        }),
-      ],
-    })),
-  }));
+  // 凡例（記号の説明）。文書ごとに違うので、渡されたときだけ出す。
+  // ここを共通の固定文にすると、弁護士向けの「★」「☐」の説明が
+  // 社内マニュアルの表紙にも出てしまう。
+  if (Array.isArray(meta.legend) && meta.legend.length) {
+    P.push(new Paragraph({ spacing: { before: 500, after: 100 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: "本書の読み方（凡例）", bold: true, font: HEAD_FONT, size: SIZE_SMALL, color: COLOR_MUTED })] }));
+    P.push(new Table({
+      columnWidths: [1800, 6200],
+      width: { size: 8000, type: WidthType.DXA },
+      alignment: AlignmentType.CENTER,
+      rows: meta.legend.map(([k, v]) => new TableRow({
+        children: [
+          new TableCell({
+            width: { size: 1800, type: WidthType.DXA },
+            margins: { top: 60, bottom: 60, left: 120, right: 120 },
+            children: [new Paragraph({ spacing: { after: 0 }, alignment: AlignmentType.CENTER, children: parseInline(k, { size: SIZE_SMALL }) })],
+          }),
+          new TableCell({
+            width: { size: 6200, type: WidthType.DXA },
+            margins: { top: 60, bottom: 60, left: 120, right: 120 },
+            children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun({ text: v, size: SIZE_SMALL })] })],
+          }),
+        ],
+      })),
+    }));
+  }
 
   if (meta.setNote) {
     P.push(new Paragraph({

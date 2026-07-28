@@ -2,6 +2,11 @@
 
 > **目的**: 本番Supabaseに「どのSQLを・いつ・誰が適用したか」を1枚で追えるようにする（launch-plan §8「適用記録（台帳）」）。新しいマイグレーションを本番へ流すたびに、この表へ1行追記する。
 > **運用**: 適用は Supabase の SQL Editor で手動実行。適用したら下表の「状態」を `適用済` にし、日付・実行者を記入する。
+>
+> ## 🔄 対象プロジェクト（2026-07-28 更新）
+>
+> **現行の本番プロジェクトは `jdiybvtytrdkuxsiddic`（東京 `ap-northeast-1`）です。**
+> 2026-07-28 に豪州シドニーの `jqevswrbdbmxifauqhfi` から移設しました（progress.md §24）。**下表の 0001〜0004 は、移設時に `setup.sql`（0001〜0004 の手動結合版）として新プロジェクトへ一括適用済み**です。旧プロジェクトは数日後に削除予定。
 
 ## マイグレーション適用状況
 
@@ -11,6 +16,27 @@
 | `app/supabase/migrations/0002_seed.sql` | 分野マスタ11件＋サンプル求人14件（ダミー） | ✅ 適用済 | 〔既存〕 | 〔オーナー〕 |
 | `app/supabase/migrations/0003_security.sql` | 公開前セキュリティ是正 PR-1a（Issue #25 ①staff_note分離／#26 ②verified・member_noロック／③applications自己insert列固定） | ✅ 適用済 | 2026-07-25 | オーナー |
 | `app/supabase/migrations/0004_member_no.sql` | 会員番号(member_no)のDB採番 PR-1b（Issue #34 ⑩。番号衝突による登録失敗＝ロックアウトの解消） | ✅ 適用済 | 2026-07-26 | オーナー |
+| **`app/supabase/setup.sql`（0001〜0004 一括）** | **東京移設に伴い、新プロジェクト `jdiybvtytrdkuxsiddic` へ全スキーマを一括適用** | ✅ 適用済 | **2026-07-28** | オーナー |
+
+### `setup.sql` 適用後の確認結果（2026-07-28・新・東京プロジェクトで実行）
+
+```sql
+select
+  (select count(*) from information_schema.tables where table_schema = 'public') as "表の数",
+  (select count(*) from jobs)                                                    as "サンプル求人",
+  (select count(*) from fields)                                                  as "分野マスタ",
+  (select count(*) from members)                                                 as "会員",
+  (select count(*) from pg_policies where schemaname = 'public')                 as "アクセス制御ルール",
+  (select count(*) from pg_proc where proname = 'generate_member_no')            as "採番関数";
+```
+
+結果: `8 / 14 / 11 / 0 / 13 / 1` ✅
+
+> ⚠️ **ポリシー数の期待値は 14 ではなく 13。** `setup.sql` 内の `create policy` は14行あるが、`apps_self_insert` だけは 0001 が作ったものを 0003 が `drop` して作り直すため、最終的に残るのは13本。**13 は 0003 が効いている証拠**。
+>
+> ⚠️ **`setup.sql` の実行結果は `Success. No rows returned` ではなく `setval = 1` が返る。** 最後に値を返す文が `applications` の採番シーケンス合わせ（空テーブルなので `0 + 1 = 1`）であるため。**これは正常。**
+
+> ✅ **新プロジェクトでは「本人確認フラグ（verified）の棚卸し」は不要。** 下記の棚卸しは「0003 が入る前に会員が自分で `verified` を立てられた」ことへの後始末だが、`setup.sql` は 0003・0004 のガードを**最初から含む**ため、新環境では会員が自分でフラグを立てられた期間が存在しない（かつ移設時点で会員0件）。
 
 ### 0003 適用後の確認結果（2026-07-25・本番で実行）
 

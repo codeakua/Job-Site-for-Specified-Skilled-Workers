@@ -26,6 +26,12 @@ jobs:
         working-directory: app
     steps:
       - uses: actions/checkout@v4
+      # 法務文書の原本（docs/legal/*.md）と、サイト掲出用の生成物
+      # （app/src/content/legal/documents.ts）がズレていないかを確認する。
+      # 条文だけ直して再生成を忘れると、サイトに古い条文が出たままになるため。
+      - name: 法務文書の原本と生成物の一致を確認
+        working-directory: .
+        run: node tools/docgen/build-legal-pages.js --check
       - uses: actions/setup-node@v4
         with:
           # Nodeバージョンは app/package.json の engines.node を唯一の真実とする（Vercelも同じ値を読む）。
