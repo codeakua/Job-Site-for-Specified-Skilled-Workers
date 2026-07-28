@@ -43,8 +43,9 @@ export function LegalPage({ docKey }: { docKey: LegalDocument["key"] }) {
       </header>
 
       <article className="legal-doc">
-        <h1>{doc.title}</h1>
-        <p className="legal-meta">
+        {/* 文書名は原本どおりの日本語（「利用規約」「プライバシーポリシー」） */}
+        <h1 lang="ja">{doc.title}</h1>
+        <p className="legal-meta" lang={lang === "zh" ? "zh-CN" : "ja"}>
           {t("legal.meta", { enactedOn: doc.enactedOn, version: doc.version })}
         </p>
 
@@ -53,7 +54,7 @@ export function LegalPage({ docKey }: { docKey: LegalDocument["key"] }) {
           日本語表示のときは、同じ内容が本文にあるため出さない。
         */}
         {lang === "zh" && (
-          <section className="legal-summary">
+          <section className="legal-summary" lang="zh-CN">
             <h2>{t("legal.summary.title")}</h2>
             {/*
               「参考訳であり日本語が正文」という注意書きは、要約そのものの中（原本）に
@@ -66,7 +67,17 @@ export function LegalPage({ docKey }: { docKey: LegalDocument["key"] }) {
           </section>
         )}
 
-        <LegalMarkdown source={doc.body} />
+        {/*
+          条文は**日本語が正文**（第26条）。`<html lang>` は画面の表示言語（既定は zh-CN）なので、
+          ここに `lang="ja"` を付けて「この部分は日本語」と明示する。付けないと、ブラウザが
+          「中国語のページ」と判断して日本語への自動翻訳を提案・実行し、**条文が機械翻訳に
+          差し替わる**（実際に「矢澤」が「矢沢」に書き換わる事象が起きた）。
+          あわせて translate="no" で自動翻訳の対象から外す。中国語の読者には、人が確認した
+          要約（上）を出しており、正文を機械翻訳で置き換えさせない方針（D-1）。
+        */}
+        <div lang="ja" translate="no">
+          <LegalMarkdown source={doc.body} />
+        </div>
       </article>
     </div>
   );

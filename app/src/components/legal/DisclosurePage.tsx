@@ -33,11 +33,14 @@ export function DisclosurePage() {
 
   /** 参照先の条文（手数料＝第8条、苦情＝第22条）を、それ単体で読める形で並べる。 */
   const reference = (ref: DisclosureReference) => (
-    <aside className="disclosure-ref">
+    <aside className="disclosure-ref" lang="ja">
       <h3>{t("disclosure.ref", { doc: DISCLOSURE.sourceDoc, heading: ref.heading })}</h3>
       <LegalMarkdown source={ref.body} />
     </aside>
   );
+
+  /** 画面の表示言語（i18nの文言はこちら。条文は日本語固定なので別に `lang="ja"` を付ける） */
+  const uiLang = lang === "zh" ? "zh-CN" : "ja";
 
   return (
     <div className="shell">
@@ -64,7 +67,7 @@ export function DisclosurePage() {
         </p>
 
         {lang === "zh" && (
-          <section className="legal-summary">
+          <section className="legal-summary" lang="zh-CN">
             <h2>{t("legal.summary.title")}</h2>
             <LegalMarkdown source={DISCLOSURE.zhSummary} />
             <hr className="legal-hr" />
@@ -72,10 +75,19 @@ export function DisclosurePage() {
           </section>
         )}
 
-        {/* 柱書（根拠条文と、常時掲示する旨）— 利用規約 第9条より */}
-        <p>{DISCLOSURE.intro}</p>
+        {/*
+          ここから下は**日本語が正文**。`<html lang>` は画面の表示言語（既定は zh-CN）なので、
+          このかたまりに `lang="ja"` を付けて「ここは日本語」と明示する。付けないと、
+          ブラウザが「中国語のページ」と判断して日本語への自動翻訳を提案・実行し、
+          **条文が機械翻訳に差し替わる**（実際に「矢澤」が「矢沢」に書き換わる事象が起きた）。
+          あわせて translate="no" で自動翻訳の対象から外す。D-1 の決定どおり
+          中国語には人が確認した要約（上）を出しており、正文を機械翻訳で置き換えさせない。
+        */}
+        <div lang="ja" translate="no">
+          {/* 柱書（根拠条文と、常時掲示する旨）— 利用規約 第9条より */}
+          <p>{DISCLOSURE.intro}</p>
 
-        {DISCLOSURE.items.map((item) => (
+          {DISCLOSURE.items.map((item) => (
           <section key={item.no}>
             <h2>
               {item.no}. {item.title}
@@ -85,7 +97,7 @@ export function DisclosurePage() {
             {/* 1. 取扱職種の範囲等 — 分野名はアプリの分野マスタから出す */}
             {item.no === 1 && (
               <>
-                <p className="disclosure-note">{t("disclosure.fieldsNote")}</p>
+                <p className="disclosure-note" lang={uiLang}>{t("disclosure.fieldsNote")}</p>
                 <ul className="disclosure-fields">
                   {FIELDS.map((f) => (
                     <li key={f.id} style={{ "--f-color": f.color } as CSSProperties}>
@@ -93,7 +105,7 @@ export function DisclosurePage() {
                       <span className="df-name">
                         {/* 日本語が正文。中国語表示のときは参考として中国語名も添える */}
                         {f.name.ja}
-                        {lang === "zh" && <em className="df-zh">{f.name.zh}</em>}
+                        {lang === "zh" && <em className="df-zh" lang="zh-CN">{f.name.zh}</em>}
                       </span>
                     </li>
                   ))}
@@ -121,19 +133,20 @@ export function DisclosurePage() {
 
             {/* 5. 個人情報の取扱い — プライバシーポリシーへ */}
             {item.no === 5 && (
-              <p>
+              <p lang={uiLang}>
                 <Link className="agree-link" href="/privacy">
                   {t("legal.privacy")}
                 </Link>
               </p>
             )}
           </section>
-        ))}
+          ))}
 
-        <h2>{t("disclosure.operator")}</h2>
-        <LegalMarkdown source={DISCLOSURE.operator.body} />
+          <h2 lang={uiLang}>{t("disclosure.operator")}</h2>
+          <LegalMarkdown source={DISCLOSURE.operator.body} />
+        </div>
 
-        <p className="legal-summary-note">{t("disclosure.sourceNote")}</p>
+        <p className="legal-summary-note" lang={uiLang}>{t("disclosure.sourceNote")}</p>
 
         <nav className="footer-links">
           <Link href="/terms">{t("footer.terms")}</Link>
