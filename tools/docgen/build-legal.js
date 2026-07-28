@@ -34,6 +34,12 @@ const FACTS = [
   ["ご提出先", "顧問弁護士 御中"],
 ];
 
+/** 表紙に載せる記号の説明（この4点セット固有のもの） */
+const LEGEND = [
+  ["★", "事業の可否・公開時期に関わるため、特に優先してご確認いただきたい項目です。"],
+  ["☐", "ご回答の記入欄です（資料④「確認論点リスト」の各論点の末尾にあります）。"],
+];
+
 const SET_NOTE =
   "本書は「①レビュー依頼書／②利用規約（案）／③プライバシーポリシー（案）／④確認論点リスト」の4点セットのうちの1点です。";
 
@@ -110,6 +116,7 @@ async function main() {
       service: SERVICE,
       version: VERSION,
       facts: FACTS,
+      legend: LEGEND,
       setNote: SET_NOTE,
     });
     const docxPath = path.join(OUT, `${d.out}.docx`);
