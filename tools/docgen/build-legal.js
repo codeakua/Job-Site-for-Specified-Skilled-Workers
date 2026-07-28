@@ -19,9 +19,9 @@ const ROOT = path.resolve(__dirname, "../..");
 const SRC = path.join(ROOT, "docs/legal");
 const OUT = path.join(SRC, "export");
 
-const TODAY = "2026年7月27日";
+const TODAY = "2026年7月28日";
 const SERVICE = "樱聘 YingPin";
-const VERSION = "v1.0（弁護士レビュー用）";
+const VERSION = "v1.0";
 
 /** 表紙に載せる事業者情報（3文書で共通） */
 const FACTS = [
