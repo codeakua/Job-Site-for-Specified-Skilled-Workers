@@ -101,7 +101,12 @@ function parseInline(text, ctx = {}) {
 
 /** Markdown本文を、描画しやすい中間ブロック配列へ分解する。 */
 function parseBlocks(md) {
-  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  const lines = md
+    .replace(/\r\n/g, "\n")
+    // HTMLコメントは表示しない。原本には生成スクリプト用の目印
+    // （<!-- zh-summary:start --> 等）が入っており、そのままだと本文に印字される。
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .split("\n");
   const blocks = [];
   let i = 0;
   let olCounter = 0;

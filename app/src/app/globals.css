@@ -972,3 +972,131 @@ select.input {
   .hero h1 { font-size: 27px; }
   .features { grid-template-columns: 1fr; }
 }
+
+/* =========================================================
+ * 法務文書の掲出ページ（D-1）— /terms・/privacy
+ * 条文は長いので、読み進めやすさ（見出しの区切り・行間）を優先する。
+ * 表は幅を取りやすいため、ページではなく表だけを横スクロールさせる
+ * （390px幅で本文が横スクロールしないことが要件）。
+ * ======================================================= */
+
+.legal-doc {
+  padding: 4px 16px 40px;
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: var(--text);
+  /* 長い英数字・URLが枠を突き破らないように */
+  overflow-wrap: anywhere;
+}
+
+.legal-doc h1 {
+  font-size: 21px; font-weight: 800; line-height: 1.4;
+  margin: 12px 0 6px;
+}
+
+.legal-meta {
+  font-size: 11.5px; color: var(--text-faint);
+  margin: 0 0 18px;
+}
+
+.legal-doc h2 {
+  font-size: 15.5px; font-weight: 800; line-height: 1.5;
+  margin: 28px 0 10px; padding-top: 14px;
+  border-top: 1.5px solid var(--line);
+}
+
+.legal-doc h3 {
+  font-size: 13.5px; font-weight: 800;
+  margin: 18px 0 8px;
+}
+
+.legal-doc p { margin: 0 0 12px; }
+
+.legal-doc ol,
+.legal-doc ul { margin: 0 0 14px; padding-inline-start: 1.4em; }
+.legal-doc li { margin-bottom: 7px; }
+
+.legal-doc code {
+  font-size: 12px; padding: 1px 5px; border-radius: 5px;
+  background: var(--primary-softer); color: var(--primary-deep);
+}
+
+.legal-hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+
+/* 引用（原本の「>」）— 補足説明として控えめに見せる */
+.legal-note {
+  margin: 0 0 14px; padding: 12px 14px;
+  background: var(--primary-softer);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+}
+.legal-note p { margin: 0 0 6px; }
+.legal-note p:last-child { margin-bottom: 0; }
+
+/* 表 — ここだけ横スクロールさせ、ページ本体は崩さない */
+.legal-table-wrap {
+  margin: 0 0 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--card);
+}
+.legal-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 420px; /* これ未満に潰すと文字が縦積みになって読めなくなる */
+  font-size: 12px;
+  line-height: 1.6;
+}
+.legal-table th,
+.legal-table td {
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  text-align: start;
+  vertical-align: top;
+}
+.legal-table th {
+  background: var(--bg);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* 中国語の要約ブロック（条文の前に置く） */
+.legal-summary {
+  margin: 0 0 26px; padding: 16px;
+  background: var(--card);
+  border: 1.5px solid color-mix(in srgb, var(--primary) 22%, #fff);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+.legal-summary h2 {
+  margin: 0 0 6px; padding-top: 0; border-top: 0;
+  font-size: 15px;
+}
+.legal-summary-note {
+  font-size: 11.5px; color: var(--text-sub); margin: 0 0 12px;
+}
+.legal-summary ul { margin-bottom: 0; }
+
+/* 登録画面の同意文のリンク */
+.agree-link {
+  color: var(--primary-deep);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* フッターの法務リンク */
+.footer-links {
+  display: flex; justify-content: center; flex-wrap: wrap;
+  gap: 8px 18px;
+  padding: 22px 16px 0;
+}
+.footer-links a {
+  font-size: 12px; font-weight: 700;
+  color: var(--text-sub);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -172,6 +172,18 @@ const I18N = {
     'reg.step4.title': '入力内容の確認',
     'reg.step4.sub': '内容に間違いがないかご確認ください。',
     'reg.agree': '利用規約とプライバシーポリシーに同意する',
+    // 同意文はリンクを差し込むためテンプレートで持つ（{terms}/{privacy} の位置に語を置く）。
+    // 日中で語順が違うので、前後の文字列ごと言語別に持たせている。
+    'reg.agree.tpl': '{terms}と{privacy}に同意する',
+
+    // 法務文書のページ（D-1）
+    'legal.terms': '利用規約',
+    'legal.privacy': 'プライバシーポリシー',
+    'legal.meta': '制定日 {enactedOn}／版数 {version}',
+    'legal.summary.title': '中文摘要（参考译文）',
+    'legal.summary.fullTextNote': '以下が正文（日本語）です。',
+    'footer.terms': '利用規約',
+    'footer.privacy': 'プライバシーポリシー',
     'reg.submit': 'この内容で登録する',
     'reg.err.required': '未入力の必須項目があります',
     'reg.err.invalid': '入力内容に誤りがあります。もう一度ご確認ください。',
@@ -478,6 +490,16 @@ const I18N = {
     'reg.step4.title': '确认填写内容',
     'reg.step4.sub': '请确认以下信息无误。',
     'reg.agree': '同意《用户协议》和《隐私政策》',
+    'reg.agree.tpl': '同意{terms}和{privacy}',
+
+    // 法務文書のページ（D-1）
+    'legal.terms': '《用户协议》',
+    'legal.privacy': '《隐私政策》',
+    'legal.meta': '制定日 {enactedOn}／版本 {version}',
+    'legal.summary.title': '中文摘要（参考译文）',
+    'legal.summary.fullTextNote': '以下为正文（日语）。',
+    'footer.terms': '用户协议',
+    'footer.privacy': '隐私政策',
     'reg.submit': '确认注册',
     'reg.err.required': '有未填写的必填项',
     'reg.err.invalid': '填写内容有误，请重新确认。',

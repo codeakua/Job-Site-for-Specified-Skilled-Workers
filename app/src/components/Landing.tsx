@@ -159,6 +159,14 @@ export function Landing() {
         <div className="op-line">{t("op.license")}</div>
         <div className="op-line">{t("op.support")}</div>
       </div>
+      {/*
+        法務文書への常時リンク（D-1）。会員登録の同意チェックからも開けるが、
+        登録しない利用者にも常に読める場所が必要なため、フッターにも置く。
+      */}
+      <nav className="footer-links">
+        <Link href="/terms">{t("footer.terms")}</Link>
+        <Link href="/privacy">{t("footer.privacy")}</Link>
+      </nav>
       <footer className="footer">{t("footer.copy")}</footer>
 
       {user ? (

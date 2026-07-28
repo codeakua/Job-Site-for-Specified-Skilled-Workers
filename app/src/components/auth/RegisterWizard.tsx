@@ -41,6 +41,32 @@ export function RegisterWizard() {
   const set = <K extends keyof RegisterForm>(k: K, v: RegisterForm[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  /*
+    同意文の中の「利用規約」「プライバシーポリシー」をリンクにする（D-1）。
+    ・語順が日中で異なる（日「規約と方針に同意する」／中「同意 规约 和 政策」）ため、
+      文言そのものをテンプレートで持ち、{terms}{privacy} の位置で差し替える。
+    ・**必ず別タブで開く**。ウィザードの途中で遷移すると入力がすべて消えるため。
+  */
+  const agreeLabel = t("reg.agree.tpl")
+    .split(/(\{terms\}|\{privacy\})/g)
+    .map((part, i) => {
+      if (part === "{terms}") {
+        return (
+          <Link key={i} href="/terms" target="_blank" rel="noopener noreferrer" className="agree-link">
+            {t("legal.terms")}
+          </Link>
+        );
+      }
+      if (part === "{privacy}") {
+        return (
+          <Link key={i} href="/privacy" target="_blank" rel="noopener noreferrer" className="agree-link">
+            {t("legal.privacy")}
+          </Link>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+
   /** パスワードの違反（サーバー側 /api/auth/register と同じ関数で判定する）。 */
   const pwIssue = form.password
     ? firstPasswordIssue(form.password, `${form.phoneCode}${form.phone}`)
@@ -397,7 +423,7 @@ export function RegisterWizard() {
                 <IconCheck />
               </span>
             </span>
-            <span className="agree-text">{t("reg.agree")}</span>
+            <span className="agree-text">{agreeLabel}</span>
           </label>
           {error && <p className="form-error">{error}</p>}
           {/*
