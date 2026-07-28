@@ -162,10 +162,13 @@ export function Landing() {
       {/*
         法務文書への常時リンク（D-1）。会員登録の同意チェックからも開けるが、
         登録しない利用者にも常に読める場所が必要なため、フッターにも置く。
+        明示事項（D-4）は職業安定法第32条の13の「常時掲示」にあたるので、
+        ログインしていない状態でも必ずここから開けるようにしておく。
       */}
       <nav className="footer-links">
         <Link href="/terms">{t("footer.terms")}</Link>
         <Link href="/privacy">{t("footer.privacy")}</Link>
+        <Link href="/disclosure">{t("footer.disclosure")}</Link>
       </nav>
       <footer className="footer">{t("footer.copy")}</footer>
 

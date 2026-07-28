@@ -184,6 +184,15 @@ const I18N = {
     'legal.summary.fullTextNote': '以下が正文（日本語）です。',
     'footer.terms': '利用規約',
     'footer.privacy': 'プライバシーポリシー',
+
+    // 明示事項のページ（D-4・職業安定法第32条の13）
+    'disclosure.title': '明示事項',
+    'disclosure.fieldsNote': '取り扱う分野は次のとおりです。これ以外の分野の職業紹介は行いません。',
+    'disclosure.ref': '参考：{doc} {heading}',
+    'disclosure.feeTable': '求人企業から受領する手数料',
+    'disclosure.operator': '事業者情報',
+    'disclosure.sourceNote': '本ページの内容は、利用規約 第2条・第8条・第9条・第22条と同一です。',
+    'footer.disclosure': '明示事項',
     'reg.submit': 'この内容で登録する',
     'reg.err.required': '未入力の必須項目があります',
     'reg.err.invalid': '入力内容に誤りがあります。もう一度ご確認ください。',
@@ -500,6 +509,15 @@ const I18N = {
     'legal.summary.fullTextNote': '以下为正文（日语）。',
     'footer.terms': '用户协议',
     'footer.privacy': '隐私政策',
+
+    // 明示事項のページ（D-4・職業安定法第32条の13）
+    'disclosure.title': '明示事项',
+    'disclosure.fieldsNote': '本公司可介绍的领域如下。除此之外的领域不提供职业介绍。',
+    'disclosure.ref': '参考：{doc} {heading}',
+    'disclosure.feeTable': '向招聘企业收取的手续费',
+    'disclosure.operator': '运营者信息',
+    'disclosure.sourceNote': '本页内容与《用户协议》第2条·第8条·第9条·第22条一致。',
+    'footer.disclosure': '明示事项',
     'reg.submit': '确认注册',
     'reg.err.required': '有未填写的必填项',
     'reg.err.invalid': '填写内容有误，请重新确认。',

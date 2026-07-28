@@ -1012,9 +1012,22 @@ select.input {
 
 .legal-doc p { margin: 0 0 12px; }
 
+/*
+  条文は「第8条第2項」のように項番号で引用される。全体のリセット（ul, ol { list-style: none }）
+  が効いたままだと番号が消えて、どれが第何項なのか読み取れなくなるので、ここだけ戻す。
+*/
+.legal-doc ol { list-style: decimal; }
+.legal-doc ul { list-style: disc; }
 .legal-doc ol,
 .legal-doc ul { margin: 0 0 14px; padding-inline-start: 1.4em; }
 .legal-doc li { margin-bottom: 7px; }
+.legal-doc li::marker { color: var(--text-sub); }
+
+/* 入れ子のリスト（「1.」の下に「-」が並ぶ条文がある）。項目の中の余白は詰める */
+.legal-doc li > p { margin: 6px 0; }
+.legal-doc li > p:last-child { margin-bottom: 0; }
+.legal-doc li > ol,
+.legal-doc li > ul { margin: 6px 0 0; }
 
 .legal-doc code {
   font-size: 12px; padding: 1px 5px; border-radius: 5px;
@@ -1079,6 +1092,54 @@ select.input {
   font-size: 11.5px; color: var(--text-sub); margin: 0 0 12px;
 }
 .legal-summary ul { margin-bottom: 0; }
+
+/* =========================================================
+ * 明示事項ページ（D-4）— /disclosure
+ * 掲示物なので、5項目それぞれを見出しで区切って拾い読みできるようにする。
+ * ======================================================= */
+
+.disclosure-note { font-size: 12.5px; color: var(--text-sub); margin: 0 0 10px; }
+
+/* 取扱分野の一覧（FIELDS から生成）。390pxで2列に折り返る */
+/* `.legal-doc ul` より詳細度を上げないと、条文用のリスト装飾に負ける */
+ul.disclosure-fields {
+  list-style: none;
+  margin: 0 0 16px; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.disclosure-fields li {
+  display: flex; align-items: center; gap: 7px;
+  margin: 0; padding: 8px 12px 8px 9px;
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--f-color, var(--primary));
+  border-radius: var(--r-sm);
+  background: var(--card);
+  font-size: 12.5px; line-height: 1.35;
+}
+.disclosure-fields .df-emoji { font-size: 15px; }
+.disclosure-fields .df-name { font-weight: 700; }
+/* 中国語表示のときだけ添える参考の訳語（正文は日本語） */
+.disclosure-fields .df-zh {
+  display: block;
+  font-style: normal; font-weight: 500;
+  font-size: 11px; color: var(--text-sub);
+}
+
+/* 参照している条文（第8条・第22条）をそのまま添える枠 */
+.disclosure-ref {
+  margin: 0 0 16px; padding: 13px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+}
+.disclosure-ref h3 {
+  margin: 0 0 8px;
+  font-size: 12px; font-weight: 800; color: var(--text-sub);
+}
+.disclosure-ref ol,
+.disclosure-ref ul { margin-bottom: 0; }
+.disclosure-ref p:last-child { margin-bottom: 0; }
 
 /* 登録画面の同意文のリンク */
 .agree-link {

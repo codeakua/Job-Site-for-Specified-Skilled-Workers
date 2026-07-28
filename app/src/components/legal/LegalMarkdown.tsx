@@ -9,7 +9,7 @@ import { Fragment, type ReactNode } from "react";
  *
  * 対応する記法（`tools/docgen/build-legal-pages.js` の生成物に実際に出現するもの）:
  *   ## 見出し ／ ### 小見出し ／ 段落 ／ 番号付きリスト ／ 箇条書き ／
- *   表 ／ 引用（>） ／ 区切り線（---） ／ **強調** ／ `コード`
+ *   入れ子のリスト（字下げ）／ 表 ／ 引用（>） ／ 区切り線（---） ／ **強調** ／ `コード`
  *
  * ⚠️ dangerouslySetInnerHTML は使わない。すべてReact要素として組み立てる。
  */
@@ -42,7 +42,19 @@ function isDivider(line: string): boolean {
   return /^\|[\s:|-]+\|$/.test(line.trim());
 }
 
-export function LegalMarkdown({ source }: { source: string }) {
+/** 字下げ幅（先頭の空白の数）。 */
+function indentOf(line: string): number {
+  return line.length - line.trimStart().length;
+}
+
+/** リストの項目の中身から、共通の字下げを取り除いて入れ子を1段浅くする。 */
+function dedent(lines: string[]): string[] {
+  const widths = lines.filter((l) => l.trim()).map(indentOf);
+  const min = widths.length ? Math.min(...widths) : 0;
+  return lines.map((l) => l.slice(min));
+}
+
+function parseBlocks(source: string): ReactNode[] {
   const lines = source.split("\n");
   const out: ReactNode[] = [];
   let i = 0;
@@ -131,42 +143,46 @@ export function LegalMarkdown({ source }: { source: string }) {
       continue;
     }
 
-    // 番号付きリスト
-    if (/^\d+\.\s/.test(trimmed)) {
-      const items: string[] = [];
-      while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
-        items.push(lines[i].trim().replace(/^\d+\.\s/, ""));
-        i += 1;
-        // 続く字下げ行は同じ項目の続きとして連結する
-        while (i < lines.length && /^\s{3,}\S/.test(lines[i]) && !/^\s*[-*]\s/.test(lines[i])) {
-          items[items.length - 1] += " " + lines[i].trim();
-          i += 1;
+    // リスト（番号付き・箇条書き）
+    // 字下げされた行は、直前の項目の中身として1段深く読み直す。
+    // 条文には「1. …の下に - を3つ」「2. …の下に 1. 2. 3.」という書き方があり、
+    // 平らに読むと番号が振り直されたり、入れ子が本文に混ざったりする。
+    const marker = /^\d+\.\s/.test(trimmed) ? /^\d+\.\s/ : /^[-*]\s/;
+    if (marker.test(trimmed)) {
+      const ordered = /^\d+\.\s/.test(trimmed);
+      const baseIndent = indentOf(line);
+      const items: string[][] = [];
+      while (i < lines.length) {
+        const cur = lines[i];
+        if (!cur.trim()) {
+          // 空行は、次も同じリストが続くときだけ項目の区切りとして読み飛ばす
+          const next = lines.slice(i + 1).find((l) => l.trim());
+          if (next && indentOf(next) > baseIndent) {
+            if (items.length) items[items.length - 1].push("");
+            i += 1;
+            continue;
+          }
+          break;
         }
+        if (indentOf(cur) === baseIndent && marker.test(cur.trim())) {
+          items.push([cur.trim().replace(marker, "")]);
+          i += 1;
+          continue;
+        }
+        if (items.length && indentOf(cur) > baseIndent) {
+          items[items.length - 1].push(cur);
+          i += 1;
+          continue;
+        }
+        break;
       }
-      out.push(
-        <ol key={key++}>
-          {items.map((t, n) => (
-            <li key={n}>{renderInline(t)}</li>
-          ))}
-        </ol>,
-      );
-      continue;
-    }
-
-    // 箇条書き（先頭が - または *。字下げされたものも同じ階層として扱う）
-    if (/^[-*]\s/.test(trimmed)) {
-      const items: string[] = [];
-      while (i < lines.length && /^\s*[-*]\s/.test(lines[i])) {
-        items.push(lines[i].trim().replace(/^[-*]\s/, ""));
-        i += 1;
-      }
-      out.push(
-        <ul key={key++}>
-          {items.map((t, n) => (
-            <li key={n}>{renderInline(t)}</li>
-          ))}
-        </ul>,
-      );
+      const li = items.map(([head, ...rest], n) => (
+        <li key={n}>
+          {renderInline(head)}
+          {rest.some((r) => r.trim()) ? parseBlocks(dedent(rest).join("\n")) : null}
+        </li>
+      ));
+      out.push(ordered ? <ol key={key++}>{li}</ol> : <ul key={key++}>{li}</ul>);
       continue;
     }
 
@@ -192,5 +208,9 @@ export function LegalMarkdown({ source }: { source: string }) {
     out.push(<p key={key++}>{renderInline(buf.join(" "))}</p>);
   }
 
-  return <>{out}</>;
+  return out;
+}
+
+export function LegalMarkdown({ source }: { source: string }) {
+  return <>{parseBlocks(source)}</>;
 }

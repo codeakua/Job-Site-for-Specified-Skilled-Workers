@@ -154,6 +154,17 @@ export function MypageClient() {
         </section>
 
         <section className="op-info reveal"><div className="op-title">{t("op.title")}</div><div className="op-name">{t("op.name")}</div><div className="op-line">{t("op.license")}</div><div className="op-line">{t("op.support")}</div></section>
+
+        {/*
+          規約・プライバシーポリシー・明示事項への常時リンク（D-1・D-4）。
+          トップページのフッターにも置いてあるが、ログイン後はタブでトップへ戻らない
+          導線もあるため、マイページからも必ず開けるようにする。
+        */}
+        <nav className="footer-links reveal">
+          <Link href="/terms">{t("footer.terms")}</Link>
+          <Link href="/privacy">{t("footer.privacy")}</Link>
+          <Link href="/disclosure">{t("footer.disclosure")}</Link>
+        </nav>
       </main>
       <TabBar />
     </>
