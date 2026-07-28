@@ -8,7 +8,7 @@
  * 体裁の方針:
  *  - 本文は明朝、見出しはゴシック（日本の法務文書の慣行）
  *  - 〔　〕＝事業者が記入する箇所は薄いグレー地で可視化
- *  - 【要確認】＝弁護士に確認いただく論点は黄色マーカーで可視化
+ *  - 【要確認】＝黄色マーカー（v1.0 の法務文書では未使用。論点は「確認論点リスト」へ集約した）
  *  - 1ページ目は表紙（ヘッダー/フッターなし）、2ページ目以降にページ番号
  */
 
@@ -67,7 +67,8 @@ function mkRun(text, ctx) {
  * `code` / **bold** / 【要確認…】 / 〔記入欄〕 を認識する（入れ子も可）。
  *
  * 〔…〕は原本では「記入欄」と「条文の出典・補足」の両方に使われている。
- * 網掛けは凡例どおり“記入欄”＝中身が空白のものだけに限定する（出典に色を付けると誤読を招くため）。
+ * 網掛けは凡例どおり“記入欄”＝中身が空白か「記入」で始まるものだけに限定する
+ * （〔DPA〕〔個人情報保護法第17条〕のような出典・略語に色を付けると誤読を招くため）。
  */
 function parseInline(text, ctx = {}) {
   const out = [];
@@ -84,7 +85,7 @@ function parseInline(text, ctx = {}) {
     if (m[1]) out.push(mkRun(tok.slice(1, -1), { ...ctx, code: true }));
     else if (m[2]) out.push(...parseInline(tok.slice(2, -2), { ...ctx, bold: true }));
     else if (m[3]) out.push(mkRun(tok, { ...ctx, warn: true, bold: true }));
-    else if (/^[\s　]*$/.test(tok.slice(1, -1))) out.push(mkRun(tok, { ...ctx, blank: true }));
+    else if (/^[\s　]*$/.test(tok.slice(1, -1)) || /^記入/.test(tok.slice(1, -1))) out.push(mkRun(tok, { ...ctx, blank: true }));
     else out.push(...parseInline(tok.slice(1, -1), ctx).reduce((acc, r, i, arr) => {
       if (i === 0) acc.push(mkRun("〔", ctx));
       acc.push(r);
@@ -400,8 +401,8 @@ function coverParagraphs(meta) {
   // 凡例
   P.push(new Paragraph({ spacing: { before: 500, after: 100 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: "本書の読み方（凡例）", bold: true, font: HEAD_FONT, size: SIZE_SMALL, color: COLOR_MUTED })] }));
   const legend = [
-    ["〔　　　〕", "事業者が確定・記入する箇所です（薄いグレーの網掛け）。"],
-    ["【要確認】", "先生にご確認・ご判断をお願いしたい論点です（黄色のマーカー）。"],
+    ["★", "事業の可否・公開時期に関わるため、特に優先してご確認いただきたい項目です。"],
+    ["☐", "ご回答の記入欄です（資料④「確認論点リスト」の各論点の末尾にあります）。"],
   ];
   P.push(new Table({
     columnWidths: [1800, 6200],

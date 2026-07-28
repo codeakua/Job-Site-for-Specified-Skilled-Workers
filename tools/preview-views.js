@@ -176,7 +176,7 @@ function viewRegister() {
       </div>
       <div class="field">
         <label class="label" for="f-birth"><span data-i18n="reg.birth"></span><span class="req" data-i18n="common.required"></span></label>
-        <input class="input" id="f-birth" type="date" max="2008-12-31" min="1960-01-01">
+        <input class="input" id="f-birth" type="date"><!-- min/max は applyBirthRange() が設定（18歳以上） -->
       </div>
       <div class="field">
         <div class="label"><span data-i18n="reg.gender"></span><span class="req" data-i18n="common.required"></span></div>

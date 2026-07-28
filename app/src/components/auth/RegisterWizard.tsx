@@ -9,6 +9,7 @@ import { FIELDS } from "@/data/mock-data";
 import { IconBack, IconCheck, IconGlobe } from "@/components/icons";
 import { registerMember, type RegisterInput } from "@/lib/auth/client-auth";
 import { firstPasswordIssue, passwordIssueKey } from "@/lib/auth/password-policy";
+import { birthIssue, birthIssueKey, birthRange } from "@/lib/auth/birth-policy";
 
 const EMPTY: RegisterInput = {
   lastName: "", firstName: "", pinyin: "", birth: "", gender: "",
@@ -16,6 +17,10 @@ const EMPTY: RegisterInput = {
   phoneCode: "+81", phone: "", wechat: "", email: "",
   jlpt: "none", ssw: [], otherQual: "", password: "",
 };
+
+// 日付入力の選択範囲（18歳の誕生日〜）。日本時間の今日から求めるので、
+// 年をまたいでも「17歳が選べる」状態にはならない（birth-policy.ts 参照）。
+const BIRTH_RANGE = birthRange();
 
 export function RegisterWizard() {
   const { t, lang, toggleLang } = useAppState();
@@ -57,9 +62,22 @@ export function RegisterWizard() {
   function next() {
     setError("");
     setLoginHint(false);
+    // STEP1 は年齢まで見てから進める。date入力の max だけでは、
+    // 直接入力やブラウザ差で18歳未満の値が残り得るため。
+    if (step === 1) {
+      if (!validate(1)) {
+        setError(t("reg.err.required"));
+        return;
+      }
+      const bIssue = birthIssue(form.birth);
+      if (bIssue) {
+        setError(t(birthIssueKey(bIssue)));
+        return;
+      }
+    }
     // STEP2 はパスワード規則（サーバーと同じ）まで見てから進める。
     // ここで通しておけば、送信してから英語のエラーが返る事態を避けられる。
-    if (step === 2) {
+    else if (step === 2) {
       if (!form.phone || !form.wechat || !form.password) {
         setError(t("reg.err.required"));
         return;
@@ -210,7 +228,7 @@ export function RegisterWizard() {
             <input className="input" style={{ textTransform: "uppercase" }} value={form.pinyin} onChange={(e) => set("pinyin", e.target.value)} placeholder={t("reg.pinyin.ph")} />
           </Field>
           <Field label={t("reg.birth")} required>
-            <input className="input" type="date" max="2008-12-31" min="1960-01-01" value={form.birth} onChange={(e) => set("birth", e.target.value)} />
+            <input className="input" type="date" max={BIRTH_RANGE.max} min={BIRTH_RANGE.min} value={form.birth} onChange={(e) => set("birth", e.target.value)} />
           </Field>
           <Field label={t("reg.gender")} required>
             <div className="opt-chips">
