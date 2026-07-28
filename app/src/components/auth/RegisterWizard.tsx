@@ -7,11 +7,11 @@ import { useAppState } from "@/components/providers";
 import { pick } from "@/lib/i18n";
 import { FIELDS } from "@/data/mock-data";
 import { IconBack, IconCheck, IconGlobe } from "@/components/icons";
-import { registerMember, type RegisterInput } from "@/lib/auth/client-auth";
+import { registerMember, type RegisterForm } from "@/lib/auth/client-auth";
 import { firstPasswordIssue, passwordIssueKey } from "@/lib/auth/password-policy";
 import { birthIssue, birthIssueKey, birthRange } from "@/lib/auth/birth-policy";
 
-const EMPTY: RegisterInput = {
+const EMPTY: RegisterForm = {
   lastName: "", firstName: "", pinyin: "", birth: "", gender: "",
   nationality: "cn", residence: "jp", address: "",
   phoneCode: "+81", phone: "", wechat: "", email: "",
@@ -26,7 +26,7 @@ export function RegisterWizard() {
   const { t, lang, toggleLang } = useAppState();
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<RegisterInput>(EMPTY);
+  const [form, setForm] = useState<RegisterForm>(EMPTY);
   const [error, setError] = useState("");
   // 一般化した登録エラー（Issue #35）に添えるログイン導線を出すか。
   const [loginHint, setLoginHint] = useState(false);
@@ -38,7 +38,7 @@ export function RegisterWizard() {
   // 番号は空文字になり得る（DB採番を読み戻せなかった場合）ため、文字列ではなくオブジェクトで持つ。
   const [done, setDone] = useState<{ memberNo: string; signedIn: boolean } | null>(null);
 
-  const set = <K extends keyof RegisterInput>(k: K, v: RegisterInput[K]) =>
+  const set = <K extends keyof RegisterForm>(k: K, v: RegisterForm[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
   /** パスワードの違反（サーバー側 /api/auth/register と同じ関数で判定する）。 */
@@ -108,7 +108,9 @@ export function RegisterWizard() {
       return;
     }
     setBusy(true);
-    const res = await registerMember(form, honeypot);
+    // 同意チェックはウィザードの form とは別の state で持っているので、送信時に合流させる。
+    // サーバー側でも同じ値を検証し、同意記録（member_consents）に残す（D-2）。
+    const res = await registerMember({ ...form, agree }, honeypot);
     if (!res.ok) {
       setError(t(res.errorKey, res.errorDetail ? { detail: res.errorDetail } : undefined));
       setLoginHint(Boolean(res.loginHint));

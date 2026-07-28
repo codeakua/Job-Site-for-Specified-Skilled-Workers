@@ -3,6 +3,7 @@ import { createClient as createSupabaseClient, type SupabaseClient } from "@supa
 import { phoneToEmail } from "@/lib/auth/phone-email";
 import { firstPasswordIssue, passwordIssueKey } from "@/lib/auth/password-policy";
 import { birthIssue } from "@/lib/auth/birth-policy";
+import { LEGAL_VERSION, REGISTER_CONSENT_TYPES } from "@/lib/legal/version";
 import { consumeRateLimit, consumeRateLimits } from "@/lib/security/rate-limit";
 import { clientIp, isSameOriginRequest } from "@/lib/security/request";
 import {
@@ -102,6 +103,7 @@ type CleanInput = {
   ssw: string[];
   otherQual: string;
   password: string;
+  agree: boolean;
 };
 
 function text(value: unknown): string {
@@ -132,6 +134,8 @@ function parseInput(body: Record<string, unknown>): CleanInput | null {
     ssw: Array.isArray(body.ssw) ? body.ssw.map(text).filter(Boolean) : [],
     otherQual: text(body.otherQual),
     password: typeof body.password === "string" ? body.password : "",
+    // 同意チェック（D-2）。true 以外はすべて未同意として扱う。
+    agree: body.agree === true,
   };
 
   // 必須
@@ -231,13 +235,55 @@ async function insertMember(
       .insert(memberRow(userId, input))
       .select(MEMBER_NOTIFY_COLS)
       .maybeSingle();
-    if (!error) return (data as MemberInfo | null) ?? null;
+    if (!error) {
+      // 同意の記録（D-2）。members の行ができた直後に残す。
+      // 失敗しても登録は成功扱いにする（理由は recordConsents のコメント）。
+      await recordConsents(supabase, userId);
+      return (data as MemberInfo | null) ?? null;
+    }
 
     console.error(`[auth/register] members.insert 失敗 (${attempt}/2):`, error.code, error.message);
     // 一意制約違反は再試行しても同じ結果になる。
     if (error.code === "23505") break;
   }
   return null;
+}
+
+/**
+ * 規約・プライバシーポリシーへの同意を member_consents に記録する（D-2）。
+ *
+ * 記録するのは REGISTER_CONSENT_TYPES の3種類（利用規約・プライバシーポリシー・越境移転）。
+ * 登録画面のチェックは1つだが、プライバシーポリシー第7条に越境移転の同意が含まれるため、
+ * その分も同じ日時・同じ source で残す。論点A-9で「分けて取得すべき」となった場合は
+ * 画面を分割してこの配列を使い分けるだけでよく、DBのスキーマは変えなくて済む。
+ *
+ * **日時(agreed_at)と名義(member_id)は送らない。** DB側のトリガ
+ * （trg_member_consents_guard）がサーバー時刻とログイン中のUIDで上書きする。
+ * このアプリはサーバー側でも anon（公開鍵）で動くため、クライアント由来の値を
+ * 証拠として信用しない設計にしている。
+ *
+ * 失敗しても登録自体は成功扱いにする。ここで中断すると members の行ができた後に
+ * 利用者へエラーを見せることになり、「登録できていないと思って再登録を試みる」
+ * という一番わかりにくい状態を作ってしまう。記録が無い会員は管理画面で
+ * 「同意記録なし」として見えるので、運用で追える。
+ */
+async function recordConsents(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  const rows = REGISTER_CONSENT_TYPES.map((consentType) => ({
+    member_id: userId,
+    consent_type: consentType,
+    doc_version: LEGAL_VERSION,
+  }));
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const { error } = await supabase.from("member_consents").insert(rows);
+    if (!error) return true;
+    console.error(
+      `[auth/register] member_consents.insert 失敗 (${attempt}/2):`,
+      error.code,
+      error.message,
+    );
+  }
+  return false;
 }
 
 /* ------------------------------------------------------------------ *
@@ -331,6 +377,12 @@ export async function POST(req: Request) {
   // ── ③ 入力の検証 ──────────────────────────────────────
   const input = parseInput(body);
   if (!input) return fail("reg.err.invalid", 400);
+
+  // ── ③-2 規約・プライバシーポリシーへの同意（D-2）─────────
+  //     画面のチェックは迂回できるため、ここでも必ず確認する
+  //     （パスワード強度・年齢と同じ「画面とサーバーの両方で見る」方針）。
+  //     同意の記録そのものは members.insert 成功後に行う（下の recordConsents）。
+  if (!input.agree) return fail("reg.err.agree", 400);
 
   // ── ④ パスワード強度（サーバー側の強制・Issue #31）───────
   //     ここで落とす分にはアカウントの有無と無関係なので、具体的な理由を返してよい。

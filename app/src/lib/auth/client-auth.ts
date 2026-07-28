@@ -18,7 +18,20 @@ export type RegisterInput = {
   ssw: string[];
   otherQual: string;
   password: string;
+  /**
+   * 「利用規約とプライバシーポリシーに同意する」のチェック（D-2）。
+   * 画面の検証は迂回できるため、サーバー側（/api/auth/register）でも必ず確認し、
+   * true のときだけ登録を通して同意記録を残す。
+   */
+  agree: boolean;
 };
+
+/**
+ * 登録ウィザードが保持する入力値。
+ * 同意（agree）は「入力項目」ではなく最後の1アクションで、画面上も別の state で持つため、
+ * フォームの型からは外してある。送信時に合流させて RegisterInput にする。
+ */
+export type RegisterForm = Omit<RegisterInput, "agree">;
 
 // エラーは翻訳キー（＋任意の詳細）で返し、表示はUI側で t(errorKey, {detail}) により日中翻訳する。
 // loginHint が true のときは「すでに登録済みかもしれない人」向けにログイン導線を併記する。
