@@ -485,8 +485,8 @@ script-src 'self' 'unsafe-inline'
    - ✅ **#31 パスワードポリシー設定は 2026-07-27 に実施・close 済み**（無料プランでできる範囲。詳細 §19）。**残作業＝上記2(a) と、Pro化時に漏洩PW保護をONにする**（下記 M2 チェック項目）
    - ✅ **独自ドメイン `yingpin.jp` の取得＝2026-07-29 完了**（ConoHa）。→ **残りは接続作業。手順は `docs/ops/domain-conoha-vercel-guide.md`（§26）**
      - ✅ **ConoHa の「移管ロック」「WHOIS代行」を ON ＝2026-07-29 対応済み**（取得直後はどちらも未設定だった）
-     - 🔴 **次: Vercel に `yingpin.jp` を Add → 表示された A / CNAME を ConoHa の DNS に登録 → 反映待ち（最大48h）**
-       - **その前に ConoHa の「ネームサーバー設定」の中身を確認する**（空欄だと何をやってもサイトが表示されない。ガイド手順2-0）
+     - ✅ **Vercel への登録と ConoHa の DNS 設定＝2026-07-29 完了**（`A @ 216.198.79.1` ／ `CNAME www e7a29a99ea1defe5.vercel-dns-017.com`）。外部から `yingpin.jp → 216.198.79.1` と解決できることを確認済み
+     - 🔴 **残り: Vercel の `yingpin.jp` が `Valid Configuration`（緑）になるのを待つ → `https://yingpin.jp` の表示と鍵マークを確認**
      - その後: Resend でドメイン認証（SPF/DKIM）→ `NOTIFY_FROM_EMAIL` 設定＝**スタッフ複数名への通知が可能に**
      - 🔴 **中国在住者による実地接続確認（4G/5G・Wi-Fi 両方）を 8/8 までに**
    - 顧問弁護士へ法務**4**文書（`docs/legal/export/`）を送付。**空欄・要確認欄は解消済み（§21）。オーナーが埋める6項目も記入済み**（所在地・代表者名・協同組合所在地・問い合わせメール・管轄裁判所・制定日）
@@ -1144,11 +1144,33 @@ Production は本流ブランチを追跡しているため、この再デプロ
 
 ⚠️ WHOIS代行の欄に出る「※契約種別、氏名、組織名、メールアドレスのいずれかを変更した場合は対象ドメインの移管(OUT)が60日間行えません」は、**登録者情報の変更直後は他社へ引っ越せない**という意味で、他社移管の予定が無い本サイトには影響しない。
 
+### Vercel 登録と DNS 設定も当日中に完了（2026-07-29）
+
+**実際に指示された値は、一般に案内されている値ではなかった。**
+
+| 対象 | Type | Name | Value |
+|---|---|---|---|
+| `yingpin.jp` | **A** | `@` | **`216.198.79.1`** |
+| `www.yingpin.jp` | **CNAME** | `www` | **`e7a29a99ea1defe5.vercel-dns-017.com.`** |
+
+Vercel の画面に「We're expanding our IP range. We recommend the records above. The legacy records cname.vercel-dns.com and 76.76.21.21 will continue to work.」と表示されており、**`76.76.21.21` / `cname.vercel-dns.com` は旧来値**という位置づけだった。**ガイドで値を断定しなかった判断が正しかった**（断定していれば「動くが推奨外」の状態になっていた）。CNAME はプロジェクト固有のランダム文字列で、`0`/`O`・`1`/`l` の目視判別が危ういため、**コピーボタン以外で入力してはいけない**。
+
+#### 引っかかった点（ガイドに反映済み）
+
+1. **ConoHa の DNS リストにドメインが自動で入らない。** ネームサーバーは `ConoHa(標準)`（`ns-a1〜a3.conoha.io`）を向いていたが、左メニュー「DNS」のドメインリストには `yingpin.jp` が無く、**右上の「＋ドメイン」で手動追加**する必要があった。ガイド手順2-0 で「リストに無い場合」の分岐を先に置いていたので迷わず処理できた
+2. **Vercel の Domains 画面の入口が分かりにくい。** 追加は右上の **「Add Existing」**。中央の `Search any domain` は購入検索窓、黒い **「Buy」** は新規購入（押すと二重購入）
+3. **`A domain cannot redirect to itself.` エラー。** `www.yingpin.jp` を「`yingpin.jp` へ308転送」で追加する際、**`Include apex and www variants (recommended)` のチェックが入っていると Vercel が `yingpin.jp` も一緒に追加しようとし、自分自身への転送になって弾かれる**。チェックを外せば解決
+4. **CNAME 末尾のドット**は、ドットごと貼り付けると ConoHa 側が自動で外して保存する（保存後の表示はドット無し）。それで正常に機能した
+5. **`Failed To Generate Cert`（証明書の発行失敗）が出た。** 文面は `no valid A records found for yingpin.jp` だが、**Claude の実行環境から引くと `yingpin.jp → 216.198.79.1` と正しく解決できていた**＝反映は進んでおり、**Vercel が確認したタイミングが早かっただけ**。`www.yingpin.jp` が先に `Valid Configuration` になっていたことも、ゾーンが正しく機能している裏付けになった。対処は「待って Refresh」
+
+> 💡 **ノウハウ**: DNS の状態は **Claude の実行環境から `getent hosts` / Python の `socket.getaddrinfo` で確認できる**（このサンドボックスは Supabase 等へは出られないが、名前解決は通る）。ブラウザのキャッシュに左右されない客観的な判定手段として使える。
+
 ### 次にやること
 
 1. ✅ **オーナー: ConoHa の移管ロック・WHOIS代行 ON ＝完了（2026-07-29）**
-2. **オーナー: 手順1〜3**（Vercel に Add → ConoHa に DNS 2件 → 反映待ち）。**Vercel が表示した値のスクリーンショットを Claude に送る**
-   - ⚠️ **Vercel の本番ブランチは `main` ではなく `claude/skilled-worker-job-site-mock-lk07i6`。** ドメイン追加時に「Git Branch」欄が出たら**空欄のまま**にする（空欄＝Production＝この本番ブランチ）。ブランチ名を手入力すると別扱いになり、意図しない内容が公開され得る
+2. ✅ **オーナー: Vercel 登録＋ConoHa の DNS 設定＝完了（2026-07-29）**
+   - ⚠️ **Vercel の本番ブランチは `main` ではなく `claude/skilled-worker-job-site-mock-lk07i6`。** ドメイン追加時は **`Connect to an environment` → `Production`** を選べば正しくこのブランチに繋がる
+   - 🔴 **残り: `Valid Configuration`（緑）を待って `https://yingpin.jp` の表示と鍵マークを確認**
 3. **オーナー: 手順4**（Resend のドメイン認証）→ スタッフ複数名への通知が可能に
 4. **Claude: 手順5**（HSTS・手順書のURL一括更新・旧URLの扱い）＝ **ドメインが実際に表示できるようになってから着手**
 5. 🔴 **オーナー: 中国在住者による実地接続確認を 8/8 までに**
