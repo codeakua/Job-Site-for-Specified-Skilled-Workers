@@ -109,7 +109,7 @@ Vercel には外部サービスをまとめて追加できる仕組み（Marketp
 サイトの新規登録画面で、**同じ電話番号**で続けて登録を試してみてください。
 
 ```
-https://job-site-for-specified-skilled-work.vercel.app/register
+https://yingpin.jp/register
 ```
 
 1. 適当な未使用の電話番号と、**わざと違うパスワード**を入れて登録を試みます。

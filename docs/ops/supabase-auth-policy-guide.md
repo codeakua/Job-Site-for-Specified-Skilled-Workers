@@ -203,7 +203,7 @@ Supabase には、そうしたリストと照合して登録を拒否する機�
 
 1. サイトの新規登録画面を開きます。
    ```
-   https://job-site-for-specified-skilled-work.vercel.app/register
+   https://yingpin.jp/register
    ```
 2. **使っていない適当な電話番号**（例: 90-0000-0001）を入力して進みます。
 3. パスワード欄に **`password123`**（12文字なので、文字数チェックは通ってしまう）と入力して登録を試みます。

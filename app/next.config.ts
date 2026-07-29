@@ -64,6 +64,32 @@ function cspReportOnly(): string {
   ].join("; ");
 }
 
+/**
+ * HSTS（Strict-Transport-Security）の有効期間（秒）。
+ *
+ * HSTSは「このサイトには今後必ずHTTPSで来なさい」とブラウザに覚えさせるヘッダ。
+ * 覚えた期間中はブラウザ側が http:// を自動でHTTPSに書き換え、
+ * 証明書の警告を「無視して進む」こともできなくなる（＝通信の盗聴・改ざんを防ぐ）。
+ *
+ * ⚠️ 撤回が効きにくい点に注意する。ヘッダを消しても、既に覚えたブラウザは
+ * max-age の期間が切れるまでHTTPSを要求し続ける。そのため段階導入とし、
+ * まず**1日**から始める（問題が起きても24時間で自然に解消する）。
+ *
+ * 【段階導入の計画】
+ *   第1段（2026-07-29・今回）: max-age=86400（1日）のみ。includeSubDomains も preload も付けない
+ *   第2段（1週間ほど様子を見て・かつ手順4のResend用サブドメイン構成が確定した後）:
+ *          max-age=31536000（1年）＋ includeSubDomains へ引き上げる
+ *   第3段（任意・当面は見送る）: preload の付与と hstspreload.org への登録。
+ *          ⚠️ 登録すると解除に数か月かかるため、運用が安定してから判断する
+ *
+ * ※ includeSubDomains を第1段で付けないのは、`yingpin.jp` のサブドメインを
+ *   これから増やす予定があるため（通知メール用に `send.yingpin.jp` 等を作る可能性）。
+ *   HTTPSに対応しないサブドメインを作ってしまうと、そこへ到達できなくなる。
+ * ※ HSTSはHTTPS応答でのみ有効（RFC 6797）。ブラウザは平文HTTPで受け取った場合は無視するため、
+ *   HTTP→HTTPSの転送を行っているVercel上では意図どおりに機能する。
+ */
+const HSTS_MAX_AGE_SECONDS = 86_400; // 1日（第1段）
+
 const securityHeaders = [
   // 他サイトの iframe に埋め込ませない（クリックジャッキング対策）。
   { key: "X-Frame-Options", value: "DENY" },
@@ -79,8 +105,9 @@ const securityHeaders = [
   },
   { key: "Content-Security-Policy", value: CSP_ENFORCED },
   { key: "Content-Security-Policy-Report-Only", value: cspReportOnly() },
-  // ※ HSTS（Strict-Transport-Security）は独自ドメインが確定してから段階導入する。
-  //   ドメイン未確定のまま includeSubDomains / preload を入れると後戻りできないため。
+  // HSTS 第1段。独自ドメイン `yingpin.jp` の稼働（2026-07-29）を受けて導入。
+  // 期間と今後の引き上げ計画は HSTS_MAX_AGE_SECONDS のコメントを参照。
+  { key: "Strict-Transport-Security", value: `max-age=${HSTS_MAX_AGE_SECONDS}` },
 ];
 
 const nextConfig: NextConfig = {

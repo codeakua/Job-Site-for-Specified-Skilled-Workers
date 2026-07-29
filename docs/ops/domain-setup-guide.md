@@ -18,7 +18,7 @@
 
 ## 0. 最重要：独自ドメインは「見栄え」の問題ではありません
 
-現在の本番URLは `job-site-for-specified-skilled-work.vercel.app` です。
+（購入前の状況説明）当時の本番URLは `job-site-for-specified-skilled-work.vercel.app` でした。**現在は `https://yingpin.jp` が本番URLです**（2026-07-29 に接続完了。旧URLも引き続き有効）。
 
 > ### 🚨 **`.vercel.app` で終わるアドレスは、中国本土から接続できない（または非常に不安定になる）と広く報告されています。**
 >
