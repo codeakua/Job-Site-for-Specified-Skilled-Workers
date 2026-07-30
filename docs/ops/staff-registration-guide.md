@@ -51,7 +51,7 @@ Supabaseで使う画面は次の**2つだけ**です。他の画面は触らな�
 社員本人に、次のURLを送って会員登録をしてもらいます。
 
 ```
-https://job-site-for-specified-skilled-work.vercel.app/register
+https://yingpin.jp/register
 ```
 
 本人に伝えることは3つです。
@@ -155,7 +155,7 @@ order by s.created_at;
 最後に、**社員本人に管理画面を開いてもらいます**。
 
 ```
-https://job-site-for-specified-skilled-work.vercel.app/admin
+https://yingpin.jp/admin
 ```
 
 ログイン済みでない場合は、先に登録時の電話番号とパスワードでログインしてもらってください。

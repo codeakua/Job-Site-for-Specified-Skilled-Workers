@@ -19,6 +19,7 @@ const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
 const { markdownToDocx } = require("./md2docx");
+const { assertFontsInstalled, sofficeEnv } = require("./pdf-fonts");
 
 const ROOT = path.resolve(__dirname, "../..");
 const SRC = path.join(ROOT, "docs/ops");
@@ -79,17 +80,41 @@ function applyIncludes(md) {
   });
 }
 
+/**
+ * docx を PDF へ変換する。
+ *
+ * ⚠️ **soffice は変換に失敗しても終了コード0を返す。** 検証しないと
+ * 「古いPDFが残ったまま成功扱い」になる（詳細は build-legal.js の同名関数のコメント）。
+ * そのため出力が実際に更新されたかを必ず確認する。
+ */
 function toPdf(docxPath) {
-  execFileSync("soffice", [
+  const pdfPath = path.join(OUT, `${path.basename(docxPath, ".docx")}.pdf`);
+  const before = fs.existsSync(pdfPath) ? fs.statSync(pdfPath).mtimeMs : 0;
+
+  const res = execFileSync("soffice", [
     "--headless", "--norestore",
     "-env:UserInstallation=file:///tmp/lo-docgen",
     "--convert-to", "pdf",
     "--outdir", OUT,
     docxPath,
-  ], { stdio: "pipe", timeout: 180000 });
+  ], { stdio: "pipe", timeout: 180000, encoding: "utf8", env: sofficeEnv() });
+
+  if (!fs.existsSync(pdfPath) || fs.statSync(pdfPath).mtimeMs <= before) {
+    throw new Error(
+      `PDFの生成に失敗しました（soffice は終了コード0を返しましたが、` +
+      `${path.relative(ROOT, pdfPath)} が更新されていません）。\n` +
+      `soffice の出力: ${String(res).trim() || "(なし)"}\n` +
+      `よくある原因: libreoffice-writer が未導入（libreoffice-core だけでは docx を読めません）。\n` +
+      `  apt-get install -y --no-install-recommends libreoffice-writer`
+    );
+  }
 }
 
 async function main() {
+  // フォントが揃っていない環境では、日本語が別のフォントに置き換わった
+  // PDFが「一見成功」で出てしまうため、生成前に止める。
+  assertFontsInstalled();
+
   fs.mkdirSync(OUT, { recursive: true });
 
   for (const d of DOCS) {
