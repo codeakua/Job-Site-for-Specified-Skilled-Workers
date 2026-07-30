@@ -32,6 +32,17 @@ jobs:
       - name: 法務文書の原本と生成物の一致を確認
         working-directory: .
         run: node tools/docgen/build-legal-pages.js --check
+      # 検証用の一時ページ（認証ガードの外に置く）を消し忘れたまま
+      # マージされると、本番に「誰でも見られるページ」が残ってしまう。
+      # 一時ページには必ず __YP_TEMP_VERIFY__ を書く決まりにして、ここで機械的に止める。
+      - name: 検証用の一時ページが残っていないことを確認
+        working-directory: .
+        run: |
+          if grep -rn "__YP_TEMP_VERIFY__" app/src 2>/dev/null; then
+            echo "::error::検証用の一時ページが残っています。上記のファイルを削除してください。"
+            exit 1
+          fi
+          echo "✓ 一時ページの残りはありません"
       - uses: actions/setup-node@v4
         with:
           # Nodeバージョンは app/package.json の engines.node を唯一の真実とする（Vercelも同じ値を読む）。
