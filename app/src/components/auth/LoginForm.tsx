@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppState } from "@/components/providers";
 import { IconBack, IconGlobe } from "@/components/icons";
+import { WECHAT_ID } from "@/lib/contact/wechat";
 import { login } from "@/lib/auth/client-auth";
 
 /** `?redirect=` が無い／危険なときの既定の行き先。 */
@@ -127,11 +128,33 @@ export function LoginForm() {
         {error && <p className="form-error">{error}</p>}
 
         <button type="button" className="btn btn-primary btn-block" disabled={busy} onClick={onSubmit}>
-          {busy ? "…" : t("login.btn")}
+          {busy ? t("login.sending") : t("login.btn")}
         </button>
 
         <div className="auth-links">
           <Link href="/register">{t("login.toRegister")}</Link>
+        </div>
+
+        {/*
+          パスワード再設定の窓口。利用規約 第6条2項で「登録済みのWeChat IDを通じて申し出れば
+          仮パスワードを発行する」と約束しているが、ログインできない会員がその窓口に辿りつく
+          経路がサイト上に無かった（WeChat IDは求人詳細＝ログイン必須の画面にしか出ていない）。
+        */}
+        <details className="auth-help">
+          <summary>{t("login.forgot")}</summary>
+          <p>{t("login.forgotDesc")}</p>
+          <div className="wechat-id">
+            <span>{t("wechat.idLabel")}</span>
+            <b>{WECHAT_ID}</b>
+          </div>
+        </details>
+
+        <div className="auth-links">
+          <span className="sub">
+            <Link href="/terms">{t("footer.terms")}</Link>
+            {" ・ "}
+            <Link href="/privacy">{t("footer.privacy")}</Link>
+          </span>
         </div>
       </div>
     </div>
