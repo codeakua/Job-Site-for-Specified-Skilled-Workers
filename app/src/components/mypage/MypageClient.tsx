@@ -52,38 +52,54 @@ export function MypageClient() {
   const { lang, theme, setLang, setTheme, t } = useAppState();
   const [member, setMember] = useState<MemberRow | null>(null);
   const [applications, setApplications] = useState<ApplicationRow[]>([]);
+  const [memberFailed, setMemberFailed] = useState(false);
+  const [appsFailed, setAppsFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let ignore = false;
     const supabase = createClient();
 
-    supabase.auth.getUser().then(async ({ data }) => {
+    // 区画ごとに成否を持つ。設定・言語切替・ログアウトは、登録情報が読めなくても
+    // 使えなければならないので、画面全体をエラーにはしない。
+    async function load() {
+      setMemberFailed(false);
+      setAppsFailed(false);
+      const { data } = await supabase.auth.getUser();
       const userId = data.user?.id;
       if (!userId) return;
 
-      const [{ data: memberData }, { data: appData }] = await Promise.all([
+      const [{ data: memberData, error: memberError }, { data: appData, error: appError }] = await Promise.all([
         supabase
           .from("members")
           .select("member_no, last_name, first_name, pinyin, birth, gender, residence, address, phone_code, phone, wechat_id, jlpt, ssw_fields")
           .eq("id", userId)
-          .single(),
+          // single() だと0件でもエラーになり、「行が無い」と「通信できない」を区別できない。
+          .maybeSingle(),
         supabase
           .from("applications")
           .select("id, status, created_at, jobs(id, field_id, title_ja, title_zh)")
           .eq("member_id", userId)
-          .order("created_at", { ascending: false }),
+          .order("created_at", { ascending: false })
+          .limit(1000), // Supabaseの暗黙上限（1000件）で黙って切れるのを防ぐ
       ]);
 
-      if (!ignore) {
-        setMember((memberData as MemberRow | null) ?? null);
-        setApplications((appData as unknown as ApplicationRow[] | null) ?? []);
-      }
+      if (ignore) return;
+      // 読み込めなかったときに「ゲストさん」と出すと、会員本人に他人の扱いをすることになる。
+      if (memberError) { console.error("[mypage] member load error:", memberError); setMemberFailed(true); }
+      else setMember((memberData as MemberRow | null) ?? null);
+      if (appError) { console.error("[mypage] applications load error:", appError); setAppsFailed(true); }
+      else setApplications((appData as unknown as ApplicationRow[] | null) ?? []);
+    }
+    load().catch((e) => {
+      console.error("[mypage] load error:", e);
+      if (!ignore) { setMemberFailed(true); setAppsFailed(true); }
     });
 
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [reloadKey]);
 
   const fullName = useMemo(() => {
     const name = `${member?.last_name ?? ""}${member?.first_name ?? ""}`.trim();
@@ -120,6 +136,12 @@ export function MypageClient() {
           <div className="qual-badges">
             {qualBadges.map((badge) => <span className="qual-badge" key={badge}>{badge}</span>)}
           </div>
+          {memberFailed && (
+            <p className="form-error">
+              {t("my.err.profile")}
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setReloadKey((n) => n + 1)}>{t("common.retry")}</button>
+            </p>
+          )}
         </section>
 
         <section className="menu-card reveal">
@@ -143,7 +165,15 @@ export function MypageClient() {
                 <span className="status-chip">{t(`application.status.${application.status ?? "new"}`)}</span>
               </Link>
             );
-          }) : <div className="empty"><div className="e-emoji">📝</div><h3>{t("my.appEmpty")}</h3></div>}
+          }) : appsFailed ? (
+            // 「まだ応募がありません」と出すと、応募したのに消えたように見えてしまう。
+            <div className="empty">
+              <div className="e-emoji">😢</div>
+              <h3>{t("my.err.applications")}</h3>
+              <p>{t("common.networkHint")}</p>
+              <button type="button" className="btn btn-primary" onClick={() => setReloadKey((n) => n + 1)}>{t("common.retry")}</button>
+            </div>
+          ) : <div className="empty"><div className="e-emoji">📝</div><h3>{t("my.appEmpty")}</h3></div>}
         </section>
 
         <section className="menu-card reveal">

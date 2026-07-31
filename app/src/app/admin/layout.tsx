@@ -15,14 +15,14 @@ export const metadata: Metadata = {
  * データを取得する各 page 冒頭でも requireStaff() を必ず呼ぶこと（lib/admin/guard.ts 参照）。
  */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { staff } = await getStaffContext();
+  const { staff, unavailable } = await getStaffContext();
 
   if (!staff) {
     return (
       <div className="admin-root admin-root--denied">
         <main className="admin-main">
           <div className="admin-page">
-            <AdminDenied />
+            <AdminDenied reason={unavailable ? "unavailable" : "denied"} />
           </div>
         </main>
       </div>

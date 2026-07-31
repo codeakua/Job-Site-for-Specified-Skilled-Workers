@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { TabBar } from "@/components/chrome/TabBar";
+import { showToast } from "@/components/chrome/Toaster";
 import { IconCheck, IconGlobe, IconHeart, IconPin, IconSearch } from "@/components/icons";
 import { useAppState } from "@/components/providers";
 import { FIELDS, QUICK_TAGS, REGIONS, type LocalizedText } from "@/data/mock-data";
@@ -156,32 +157,50 @@ export function JobsList() {
   const [areaOpen, setAreaOpen] = useState(false);
   const [memberId, setMemberId] = useState<string | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set());
+  /** 読み込み中／表示できる／読み込めなかった の3状態。ゼロ件はこれとは別（`ready` かつ0件）。 */
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let ignore = false;
     const supabase = createClient();
 
-    supabase
-      .from("jobs")
-      .select("id, field_id, region, is_new, title_ja, title_zh, area_ja, area_zh, salary_min, salary_max, annual_min, annual_max, tags, benefits, chinese_support")
-      .eq("status", "published")
-      .then(({ data }) => {
-        if (!ignore) setJobs((data ?? []).map((row) => normalizeJob(row as JobRow)));
-      });
-
-    supabase.auth.getUser().then(async ({ data }) => {
-      const userId = data.user?.id ?? null;
+    async function load() {
+      setState("loading");
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id, field_id, region, is_new, title_ja, title_zh, area_ja, area_zh, salary_min, salary_max, annual_min, annual_max, tags, benefits, chinese_support")
+        .eq("status", "published")
+        // Supabaseは指定しないと暗黙で1000件までしか返さず、超えた分は黙って切り捨てられる。
+        // 明示しておけば「どの1000件か」も決まる（順序が無いと不定になる）。
+        .order("id", { ascending: false })
+        .limit(1000);
       if (ignore) return;
-      setMemberId(userId);
-      if (!userId) return;
-      const { data: favData } = await supabase.from("favorites").select("job_id").eq("member_id", userId);
-      if (!ignore) setFavoriteIds(new Set((favData ?? []).map((favorite) => String(favorite.job_id))));
-    });
+      // 求人が読めなかったときは「0件」ではなく「読み込めなかった」として見せる。
+      // 同じ画面だと、障害とゼロ件を利用者が区別できない。
+      if (error) { console.error("[jobs] load error:", error); setState("error"); return; }
+      setJobs((data ?? []).map((row) => normalizeJob(row as JobRow)));
+      setState("ready");
+    }
+    load().catch((e) => { console.error("[jobs] load error:", e); if (!ignore) setState("error"); });
+
+    // お気に入りは読めなくても求人一覧は出す（♡が付いていないだけで、探す作業は続けられる）。
+    supabase.auth
+      .getUser()
+      .then(async ({ data }) => {
+        const userId = data.user?.id ?? null;
+        if (ignore) return;
+        setMemberId(userId);
+        if (!userId) return;
+        const { data: favData } = await supabase.from("favorites").select("job_id").eq("member_id", userId).limit(1000);
+        if (!ignore) setFavoriteIds(new Set((favData ?? []).map((favorite) => String(favorite.job_id))));
+      })
+      .catch((e) => console.error("[jobs] favorites load error:", e));
 
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [reloadKey]);
 
   const filteredJobs = useMemo(() => {
     const keyword = filters.q.trim().toLowerCase();
@@ -216,8 +235,21 @@ export function JobsList() {
       return next;
     });
     const supabase = createClient();
-    if (isFavorite) await supabase.from("favorites").delete().eq("member_id", memberId).eq("job_id", jobId);
-    else await supabase.from("favorites").insert({ member_id: memberId, job_id: jobId });
+    const { error } = isFavorite
+      ? await supabase.from("favorites").delete().eq("member_id", memberId).eq("job_id", jobId)
+      : await supabase.from("favorites").insert({ member_id: memberId, job_id: jobId });
+    // 保存に失敗したら見た目を元へ戻す。戻さないと、リロードした瞬間に消えて
+    //「勝手に外れた」ように見える。
+    if (error) {
+      console.error("[jobs] favorite save error:", error);
+      setFavoriteIds((current) => {
+        const next = new Set(current);
+        if (isFavorite) next.add(jobId);
+        else next.delete(jobId);
+        return next;
+      });
+      showToast(t("job.favFailed"));
+    }
   };
 
   const regionLabel = filters.region === ALL ? t("jobs.area") : t(`region.${filters.region}`);
@@ -286,11 +318,24 @@ export function JobsList() {
         ) : null}
 
         <div className="count-row">
-          <span className="count">{t("jobs.count", { n: String(filteredJobs.length) })}</span>
+          {/* 読み込みが終わるまで件数を出さない。取得前は0件なので「0件の求人」と嘘をついてしまう。 */}
+          <span className="count">{state === "ready" ? t("jobs.count", { n: String(filteredJobs.length) }) : ""}</span>
           <span className="count">{t("jobs.sort.new")}</span>
         </div>
 
-        {filteredJobs.length > 0 ? (
+        {state === "loading" ? (
+          <div className="empty">
+            <div className="e-emoji">🌸</div>
+            <h3>{t("common.loading")}</h3>
+          </div>
+        ) : state === "error" ? (
+          <div className="empty">
+            <div className="e-emoji">😢</div>
+            <h3>{t("common.loadFailed")}</h3>
+            <p>{t("common.networkHint")}</p>
+            <button type="button" className="btn btn-primary" onClick={() => setReloadKey((n) => n + 1)}>{t("common.retry")}</button>
+          </div>
+        ) : filteredJobs.length > 0 ? (
           <div className="job-list">
             {filteredJobs.map((job) => (
               <JobCard job={job} isFavorite={favoriteIds.has(job.id)} onFavorite={toggleFavorite} key={job.id} />
