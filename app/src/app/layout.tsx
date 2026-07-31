@@ -3,6 +3,7 @@ import "./globals.css";
 import { AppStateProvider } from "@/components/providers";
 import { AuthProvider } from "@/components/auth-provider";
 import { RevealObserver } from "@/components/RevealObserver";
+import { Toaster } from "@/components/chrome/Toaster";
 
 // 中国アクセス配慮: next/font/google（Google Fonts）は使わず、
 // globals.css のシステムフォントスタックにフォールバックさせる。
@@ -43,6 +44,7 @@ export default function RootLayout({
           <AppStateProvider>{children}</AppStateProvider>
         </AuthProvider>
         <RevealObserver />
+        <Toaster />
       </body>
     </html>
   );

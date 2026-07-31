@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/admin/guard";
+import { isNotifyConfigured } from "@/lib/notify";
+import { rateLimitBackend } from "@/lib/security/rate-limit";
 import { AdminDenied } from "./AdminDenied";
 import {
   APPLICATION_STATUSES,
@@ -26,6 +28,9 @@ type RecentApplication = {
 export default async function AdminDashboardPage() {
   if (!(await requireStaff())) return <AdminDenied />;
   const supabase = await createClient();
+  // 環境変数から決まる設定の状態（サーバー側でのみ読める値）。
+  const notifyReady = isNotifyConfigured();
+  const rateLimitStore = rateLimitBackend();
   // Server Componentはリクエスト毎に1回だけ描画されるため、基準時刻の取得はここで行ってよい。
   // eslint-disable-next-line react-hooks/purity
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -140,6 +145,37 @@ export default async function AdminDashboardPage() {
             <p className="admin-page-desc">応募はまだありません。</p>
           )}
           <p className="admin-panel-foot"><Link href="/admin/applications">応募管理へ →</Link></p>
+        </section>
+
+        {/*
+          外から見えない設定が効いているかを、本番の画面で確かめられるようにする。
+          どちらも「設定しなくてもサイトは動くが、静かに効いていない」たぐいのもので、
+          これまでは確認する手段が無かった。
+        */}
+        <section className="admin-panel">
+          <h2>システム状態</h2>
+          <div className="admin-recent">
+            <div className="admin-recent-row">
+              <span className={`admin-badge ${notifyReady ? "is-on" : "is-warn"}`}>{notifyReady ? "設定済み" : "未設定"}</span>
+              <span>応募・登録の通知メール</span>
+              <span className="admin-page-desc">
+                {notifyReady
+                  ? "送信先が設定されています。実際に届くかはテスト応募で確認してください。"
+                  : "送信されません（RESEND_API_KEY と STAFF_NOTIFY_EMAILS が必要）。応募が来ても気づけない状態です。"}
+              </span>
+            </div>
+            <div className="admin-recent-row">
+              <span className={`admin-badge ${rateLimitStore === "upstash" ? "is-on" : "is-warn"}`}>
+                {rateLimitStore === "upstash" ? "共有ストア" : "簡易（メモリ）"}
+              </span>
+              <span>新規登録の回数制限</span>
+              <span className="admin-page-desc">
+                {rateLimitStore === "upstash"
+                  ? "設計どおりに効いています。"
+                  : "サーバーごとに別々に数えるため、上限がゆるくなります（Upstashの設定で解消）。"}
+              </span>
+            </div>
+          </div>
         </section>
       </div>
     </>
