@@ -43,6 +43,11 @@ jobs:
             exit 1
           fi
           echo "✓ 一時ページの残りはありません"
+      # QRは素の <img> で出しているため、パスだけ設定して画像を置き忘れても
+      # ビルドは通ってしまい、本番で画像が割れるまで誰も気づけない。
+      - name: WeChatのQR画像の実体を確認
+        working-directory: .
+        run: node tools/check-wechat-qr.js
       - uses: actions/setup-node@v4
         with:
           # Nodeバージョンは app/package.json の engines.node を唯一の真実とする（Vercelも同じ値を読む）。

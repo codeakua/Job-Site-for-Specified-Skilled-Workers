@@ -247,7 +247,10 @@ const I18N = {
     'apply.done.title': '応募を受け付けました！',
     'apply.done.desc': '担当者からのWeChat連絡をお待ちください。マイページから応募状況を確認できます。',
     'wechat.title': 'WeChatで相談',
-    'wechat.desc': 'QRコードをスキャンするか、IDを検索して友だち追加してください。中国語でOKです。',
+    'wechat.desc': '下のIDをコピーし、WeChatで検索して友だち追加してください。中国語でOKです。',
+    'wechat.descQr': 'QRコードを読み取るか、下のIDを検索して友だち追加してください。中国語でOKです。',
+    'wechat.descQrOnly': 'QRコードを読み取って友だち追加してください。中国語でOKです。',
+    'wechat.searchHint': 'WeChat →「+」→ 友だちを追加 → 検索 → IDを貼り付け',
     'wechat.idLabel': '公式サポートID',
     'related.title': 'この分野の他の求人',
 
@@ -506,7 +509,10 @@ const I18N = {
     'apply.done.title': '申请成功！',
     'apply.done.desc': '请等待工作人员的微信联系。您可以在“我的”页面查看申请进度。',
     'wechat.title': '微信咨询',
-    'wechat.desc': '请扫描二维码，或搜索微信号添加好友。可直接用中文咨询。',
+    'wechat.desc': '请复制下方微信号，在微信中搜索并添加好友。可直接用中文咨询。',
+    'wechat.descQr': '请扫描二维码，或搜索下方微信号添加好友。可直接用中文咨询。',
+    'wechat.descQrOnly': '请扫描或长按识别二维码添加好友。可直接用中文咨询。',
+    'wechat.searchHint': '微信 →「+」→ 添加朋友 → 搜索 → 粘贴微信号',
     'wechat.idLabel': '官方客服微信号',
     'related.title': '相关职位',
 
