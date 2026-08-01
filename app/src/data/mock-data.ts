@@ -26,8 +26,8 @@ const REGIONS = ['hokkaido_tohoku', 'kanto', 'chubu', 'kansai', 'chugoku_shikoku
 /* こだわりタグ（クイックフィルタに使用） */
 const QUICK_TAGS = ['dorm', 'chinese', 'noExp', 'lowOT'];
 
-/* WeChat公式サポートID（モック用ダミー） */
-const WECHAT_ID = 'yingpin-support';
+/* WeChatの連絡先はここに置かない。唯一の真実は `src/lib/contact/wechat.ts`。
+   以前ここにも重複した定義があり、誰からも使われないまま誤ったIDを保持していた。 */
 
 /* 求人ダミーデータ */
 const JOBS = [
@@ -384,4 +384,4 @@ const JOBS = [
 ];
 
 export type LocalizedText = { ja: string; zh: string };
-export { FIELDS, REGIONS, QUICK_TAGS, WECHAT_ID, JOBS };
+export { FIELDS, REGIONS, QUICK_TAGS, JOBS };

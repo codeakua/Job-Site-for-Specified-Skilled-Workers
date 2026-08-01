@@ -55,30 +55,37 @@ function Overlay({ titleId, onClose, closeLabel, children }: { titleId: string; 
 
 /**
  * WeChatの連絡先。**QRは自前生成しない**（IDからは作れず、作っても友だち追加にならない。
- * 詳しい理由は `lib/contact/wechat.ts`）。公式画像が設定されているときだけQRを出し、
- * 無いあいだはIDのコピーと検索手順を主役にする。
+ * 詳しい理由は `lib/contact/wechat.ts`）。
+ *
+ * QRと微信号は**それぞれ独立して有る／無い**ので、両方に対応する:
+ * - 検索できる微信号が無いあいだ、ID行・コピー・検索手順は**出さない**。
+ *   検索しても見つからないIDを見せるのは、ダミーQRと同じ行き止まりになるため。
  */
 function WechatDialog({ titleId, onClose }: { titleId: string; onClose: () => void }) {
   const { t } = useAppState();
   const [copied, setCopied] = useState(false);
   useEffect(() => { if (!copied) return; const timer = setTimeout(() => setCopied(false), 1500); return () => clearTimeout(timer); }, [copied]);
   async function copyId() {
+    if (!WECHAT_ID) return;
     // コピーできたときだけ「コピーしました」を出す。失敗したときは黙って何もしない
     //（IDは長押しで選択できるので、利用者は手で選んでコピーできる）。
     try { await navigator.clipboard?.writeText(WECHAT_ID); setCopied(true); } catch { setCopied(false); }
   }
+  const descKey = WECHAT_QR_SRC ? (WECHAT_ID ? "wechat.descQr" : "wechat.descQrOnly") : "wechat.desc";
   return (
     <div className="wechat-dialog">
       <div className="wechat-head">💬<h3 id={titleId}>{t("wechat.title")}</h3></div>
-      <p>{t(WECHAT_QR_SRC ? "wechat.descQr" : "wechat.desc")}</p>
+      <p>{t(descKey)}</p>
       {/* next/image ではなく素の <img> を使う。QRは変換の要らない小さな静的画像で、
           最適化を通すと sharp（画像処理ライブラリ）に依存が増えるだけ。加えて
           WeChat内蔵ブラウザの「长按识别」はビットマップ画像にしか効かない。 */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {WECHAT_QR_SRC && <div className="qr-wrap"><img className="qr" src={WECHAT_QR_SRC} alt={t("wechat.title")} width={158} height={158} /></div>}
-      <div className="wechat-id"><span>{t("wechat.idLabel")}</span><b>{WECHAT_ID}</b></div>
-      <p>{t("wechat.searchHint")}</p>
-      <button className="btn btn-primary btn-block" type="button" onClick={copyId}>{copied ? t("common.copied") : t("common.copy")}</button>
+      {WECHAT_ID && <>
+        <div className="wechat-id"><span>{t("wechat.idLabel")}</span><b>{WECHAT_ID}</b></div>
+        <p>{t("wechat.searchHint")}</p>
+        <button className="btn btn-primary btn-block" type="button" onClick={copyId}>{copied ? t("common.copied") : t("common.copy")}</button>
+      </>}
       <button className="btn btn-ghost btn-block" type="button" onClick={onClose}>{t("common.close")}</button>
     </div>
   );
