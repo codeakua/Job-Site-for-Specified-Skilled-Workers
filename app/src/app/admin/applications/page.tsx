@@ -22,7 +22,7 @@ export default async function AdminApplicationsPage({ searchParams }: { searchPa
     supabase
       .from("applications")
       .select(
-        "id, status, created_at, updated_at, members(id, member_no, last_name, first_name, pinyin, phone_code, phone, wechat_id), jobs(id, title_ja, area_ja)",
+        "id, status, created_at, updated_at, members(id, member_no, last_name, first_name, pinyin, phone_code, phone, wechat_id), jobs(id, title_ja, area_ja, companies(id, name))",
       )
       .order("updated_at", { ascending: false })
       .limit(1000),

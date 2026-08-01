@@ -36,6 +36,9 @@ export type AdminJob = {
   desc_zh: string | null;
   duties_ja: string[];
   duties_zh: string[];
+  company_id: number | null;
+  /** 一覧クエリの埋め込み（select("*, companies(id, name)")）で入る。単体取得時は無い。 */
+  companies?: { id: number | string; name: string | null } | null;
   created_at?: string | null;
   updated_at?: string | null;
 };

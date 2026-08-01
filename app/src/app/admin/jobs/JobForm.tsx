@@ -4,6 +4,7 @@ import { JOB_BENEFITS, JOB_TAGS, regionLabel } from "@/lib/admin/labels";
 import { translate } from "@/lib/i18n";
 import { saveJob } from "./actions";
 import type { AdminJob } from "./types";
+import type { CompanyOption } from "../companies/types";
 
 /**
  * 求人フォーム（新規/編集共用・Server Component＝クライアントJSなし）。
@@ -69,7 +70,7 @@ function CheckGroup({ name, values, selected, prefix }: { name: string; values: 
   );
 }
 
-export function JobForm({ job }: { job: Partial<AdminJob> }) {
+export function JobForm({ job, companies }: { job: Partial<AdminJob>; companies: CompanyOption[] }) {
   return (
     <form action={saveJob}>
       {job.id ? <input type="hidden" name="id" value={job.id} /> : null}
@@ -155,6 +156,22 @@ export function JobForm({ job }: { job: Partial<AdminJob> }) {
 
       <section className="admin-fieldset">
         <h2>企業情報（匿名プロフィール）</h2>
+        <div className="admin-form-grid">
+          <label className="field">
+            <span>求人企業（管理用の紐づけ）</span>
+            <select className="input" name="company_id" defaultValue={job.company_id ?? ""}>
+              <option value="">（未設定）</option>
+              {companies.map((c) => (
+                <option key={c.id} value={String(c.id)}>
+                  {c.record_no !== null ? `${c.record_no}｜` : ""}{c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="admin-hint">
+            ※ 会員側には一切表示されません。どの企業の求人票か管理画面で分かるようにするための紐づけです（企業の追加・編集は「企業管理」から）。
+          </p>
+        </div>
         <div className="admin-form-grid">
           <TextPair base="company" label="企業プロフィール" job={job} />
           <p className="admin-hint span-2">

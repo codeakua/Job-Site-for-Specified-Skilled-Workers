@@ -9,6 +9,7 @@ type JobStatus = "draft" | "published";
 
 // ▼ FormData→行オブジェクト変換（旧 admin/page.tsx から無改変で移設。
 //   31列の列名・null化ルールは動作実績があるため変更しないこと）
+//   ※ 2026-08 企業管理(T-18)で company_id を末尾に追記（既存31列は無改変）。
 function readList(formData: FormData, name: string) {
   return String(formData.get(name) ?? "")
     .split("\n")
@@ -64,6 +65,7 @@ function jobPayload(formData: FormData) {
     desc_zh: String(formData.get("desc_zh") ?? "").trim() || null,
     duties_ja: readList(formData, "duties_ja"),
     duties_zh: readList(formData, "duties_zh"),
+    company_id: readNumber(formData, "company_id"), // 求人企業への紐づけ（未設定は null・T-18）
   };
 }
 // ▲ 移設ここまで

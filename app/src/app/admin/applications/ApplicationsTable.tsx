@@ -29,7 +29,13 @@ export type AdminApplication = {
     phone: string | null;
     wechat_id: string | null;
   } | null;
-  jobs: { id: number | string; title_ja: string | null; area_ja: string | null } | null;
+  jobs: {
+    id: number | string;
+    title_ja: string | null;
+    area_ja: string | null;
+    /** 求人企業（スタッフのみRLSで読める埋め込み・T-18）。 */
+    companies: { id: number | string; name: string | null } | null;
+  } | null;
 };
 
 type StatusFilter = ApplicationStatus | "all";
@@ -63,6 +69,7 @@ export function ApplicationsTable({ applications, updateApplication, initialStat
         app.members?.pinyin,
         app.members?.wechat_id,
         app.jobs?.title_ja,
+        app.jobs?.companies?.name,
       ]
         .filter(Boolean)
         .join(" ")
@@ -76,7 +83,7 @@ export function ApplicationsTable({ applications, updateApplication, initialStat
       <div className="admin-toolbar">
         <label className="field grow">
           <span>検索</span>
-          <input className="input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="会員名・会員番号・WeChat・求人タイトル" />
+          <input className="input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="会員名・会員番号・WeChat・求人タイトル・企業名" />
         </label>
         <label className="field">
           <span>ステータス</span>
@@ -133,7 +140,9 @@ export function ApplicationsTable({ applications, updateApplication, initialStat
                       {app.jobs?.id ? (
                         <>
                           <Link className="admin-cell-link" href={`/admin/jobs/${app.jobs.id}`}>{app.jobs.title_ja ?? `求人 #${app.jobs.id}`}</Link>
-                          <span className="admin-cell-sub">{app.jobs.area_ja ?? ""}</span>
+                          <span className="admin-cell-sub">
+                            {app.jobs.companies?.name ? `🏢 ${app.jobs.companies.name}` : app.jobs.area_ja ?? ""}
+                          </span>
                         </>
                       ) : (
                         "求人情報なし"
