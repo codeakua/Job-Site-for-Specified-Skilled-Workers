@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppState } from "@/components/providers";
 import { IconBack, IconGlobe } from "@/components/icons";
-import { WECHAT_ID } from "@/lib/contact/wechat";
+import { WECHAT_ID, WECHAT_QR_SRC } from "@/lib/contact/wechat";
 import { login } from "@/lib/auth/client-auth";
 
 /** `?redirect=` が無い／危険なときの既定の行き先。 */
@@ -142,11 +142,18 @@ export function LoginForm() {
         */}
         <details className="auth-help">
           <summary>{t("login.forgot")}</summary>
-          <p>{t("login.forgotDesc")}</p>
-          <div className="wechat-id">
-            <span>{t("wechat.idLabel")}</span>
-            <b>{WECHAT_ID}</b>
-          </div>
+          {/* 検索できる微信号が無いあいだは、案内文もQR前提にする。
+              「下のIDまでご連絡ください」と書いておいてIDが無い、を防ぐ。 */}
+          <p>{t(WECHAT_ID ? "login.forgotDesc" : "login.forgotDescQr")}</p>
+          {WECHAT_ID ? (
+            <div className="wechat-id">
+              <span>{t("wechat.idLabel")}</span>
+              <b>{WECHAT_ID}</b>
+            </div>
+          ) : WECHAT_QR_SRC && (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <div className="qr-wrap"><img className="qr" src={WECHAT_QR_SRC} alt={t("wechat.title")} width={158} height={158} /></div>
+          )}
         </details>
 
         <div className="auth-links">

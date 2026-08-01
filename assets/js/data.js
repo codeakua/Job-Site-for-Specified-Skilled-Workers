@@ -26,8 +26,15 @@ const REGIONS = ['hokkaido_tohoku', 'kanto', 'chubu', 'kansai', 'chugoku_shikoku
 /* こだわりタグ（クイックフィルタに使用） */
 const QUICK_TAGS = ['dorm', 'chinese', 'noExp', 'lowOT'];
 
-/* WeChat公式サポートID（モック用ダミー） */
-const WECHAT_ID = 'yingpin-support';
+/* WeChatサポート窓口。アプリ本体の唯一の真実は app/src/lib/contact/wechat.ts で、
+   ここはモック側の写し。値を変えるときは両方そろえること。
+
+   WECHAT_ID は「利用者が検索できる微信号」。wxid_ で始まる内部IDは検索しても
+   見つからないため入れない。未設定のあいだは null にしてQRだけを出す。
+   ※ const の宣言自体は消さないこと（app/supabase/_generate_seed.js が
+     このファイルを評価して WECHAT_ID を取り出すため、消すとシード生成が壊れる）。 */
+const WECHAT_ID = null;
+const WECHAT_QR_SRC = 'assets/img/wechat-qr.png';
 
 /* 求人ダミーデータ */
 const JOBS = [

@@ -339,42 +339,31 @@ function bindJobCards(container, opts) {
   });
 }
 
-/* ---------- ダミーQRコード（SVG） ---------- */
-function qrSVG() {
-  const size = 21, cell = 8, pad = 2;
-  /* 疑似乱数（固定シード）で毎回同じパターンを描く */
-  let seed = 20260721;
-  const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-  let rects = '';
-  const finder = (x, y) => `
-    <rect x="${x * cell}" y="${y * cell}" width="${7 * cell}" height="${7 * cell}" fill="#111"/>
-    <rect x="${(x + 1) * cell}" y="${(y + 1) * cell}" width="${5 * cell}" height="${5 * cell}" fill="#fff"/>
-    <rect x="${(x + 2) * cell}" y="${(y + 2) * cell}" width="${3 * cell}" height="${3 * cell}" fill="#111"/>`;
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const inFinder = (x < 8 && y < 8) || (x > size - 9 && y < 8) || (x < 8 && y > size - 9);
-      if (!inFinder && rnd() > 0.52) rects += `<rect x="${x * cell}" y="${y * cell}" width="${cell}" height="${cell}" fill="#111"/>`;
-    }
-  }
-  const px = (size + pad * 2) * cell;
-  return `<svg viewBox="${-pad * cell} ${-pad * cell} ${px} ${px}" class="qr">
-    <rect x="${-pad * cell}" y="${-pad * cell}" width="${px}" height="${px}" fill="#fff"/>
-    ${rects}${finder(0, 0)}${finder(size - 7, 0)}${finder(0, size - 7)}
-  </svg>`;
-}
+/* WeChat相談モーダル
 
-/* WeChat相談モーダル */
+   ⚠️ 以前ここには qrSVG() というダミーQRの生成関数があり、乱数で並べた黒い四角を
+   「QRコード」として表示していた。読み取っても何も起きず、中国の利用者にとっては
+   悪質業者の目印になるため撤去した。**QRを自前で作り直さないこと。**
+   友だち追加QRはWeChatがアカウントごとに発行するデータを持ち、IDからは計算できない。
+   出せるのは公式アプリから書き出した画像だけ（詳細は app/src/lib/contact/wechat.ts）。
+
+   QRと微信号はそれぞれ独立して有る／無いので、両方に対応する。
+   検索できない微信号を見せるのはダミーQRと同じ行き止まりなので、無いときは出さない。 */
 function openWechatDialog() {
+  const descKey = WECHAT_QR_SRC ? (WECHAT_ID ? 'wechat.descQr' : 'wechat.descQrOnly') : 'wechat.desc';
   const { el } = openDialog(`
     <div class="wechat-dialog">
       <div class="wechat-head">${icon('chat')}<h3>${t('wechat.title')}</h3></div>
-      <p>${t('wechat.desc')}</p>
-      <div class="qr-wrap">${qrSVG()}</div>
+      <p>${t(descKey)}</p>
+      ${WECHAT_QR_SRC ? `<div class="qr-wrap"><img class="qr" src="${WECHAT_QR_SRC}" alt="${t('wechat.title')}" width="158" height="158"></div>` : ''}
+      ${WECHAT_ID ? `
       <div class="wechat-id"><span>${t('wechat.idLabel')}</span><b>${WECHAT_ID}</b></div>
-      <button type="button" class="btn btn-primary btn-block" id="copy-wechat">${t('common.copy')}</button>
+      <p>${t('wechat.searchHint')}</p>
+      <button type="button" class="btn btn-primary btn-block" id="copy-wechat">${t('common.copy')}</button>` : ''}
       <button type="button" class="btn btn-ghost btn-block" data-close>${t('common.close')}</button>
     </div>`);
-  qs('#copy-wechat', el).addEventListener('click', () => {
+  const copyBtn = qs('#copy-wechat', el);
+  if (copyBtn) copyBtn.addEventListener('click', () => {
     if (navigator.clipboard) navigator.clipboard.writeText(WECHAT_ID).catch(() => {});
     showToast(t('common.copied'), 'check');
   });
