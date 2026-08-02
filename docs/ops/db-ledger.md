@@ -18,8 +18,8 @@
 | `app/supabase/migrations/0004_member_no.sql` | 会員番号(member_no)のDB採番 PR-1b（Issue #34 ⑩。番号衝突による登録失敗＝ロックアウトの解消） | ✅ 適用済 | 2026-07-26 | オーナー |
 | **`app/supabase/setup.sql`（0001〜0004 一括）** | **東京移設に伴い、新プロジェクト `jdiybvtytrdkuxsiddic` へ全スキーマを一括適用** | ✅ 適用済 | **2026-07-28** | オーナー |
 | `app/supabase/migrations/0005_consent.sql` | 規約・プライバシーポリシー等への同意の記録（D-2）。追記専用テーブル `member_consents`。**この行は記録漏れだったため 2026-07-31 に遡って追記**（適用の事実は progress.md §25 と PR #48 に記録あり） | ✅ 適用済 | 2026-07-28 | オーナー |
-| `app/supabase/migrations/0006_companies.sql` | 求人企業マスタ `companies`（**スタッフ専用RLS**）＋ `jobs.company_id`（求人と企業の紐づけ）。T-18 企業管理 | ⏳ **未適用**（PRマージ前に実行） | 〔記入〕 | 〔オーナー〕 |
-| 企業データ投入SQL（`import_companies.sql`） | 組合の企業情報データベース＋雇用条件書データベースを統合した約100社のINSERT。**実在の企業名・個人名を含むためリポジトリには置かず、チャットで受け渡し**（`on conflict (name) do nothing`＝2回実行しても安全）。0006 の適用後に実行 | ⏳ **未適用** | 〔記入〕 | 〔オーナー〕 |
+| `app/supabase/migrations/0006_companies.sql` | 求人企業マスタ `companies`（**スタッフ専用RLS**）＋ `jobs.company_id`（求人と企業の紐づけ）。T-18 企業管理 | ✅ 適用済 | 2026-08-02 | オーナー |
+| 企業データ投入SQL（`import_companies.sql`） | 組合の企業情報データベース＋雇用条件書データベースを統合した**100社**のINSERT。**実在の企業名・個人名を含むためリポジトリには置かず、チャットで受け渡し**（`on conflict (name) do nothing`＝2回実行しても安全）。0006 の適用後に実行。**適用後に `select count(*) from companies;` = 100 を確認済み** | ✅ 適用済 | 2026-08-02 | オーナー |
 
 ### `setup.sql` 適用後の確認結果（2026-07-28・新・東京プロジェクトで実行）
 
