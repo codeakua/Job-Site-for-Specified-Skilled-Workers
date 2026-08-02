@@ -28,7 +28,7 @@ export function JobsTable({ jobs, appCounts, toggleStatus, initialStatus }: Prop
       if (field !== "all" && job.field_id !== field) return false;
       if (region !== "all" && job.region !== region) return false;
       if (!q) return true;
-      return [String(job.id), job.title_ja, job.title_zh, job.area_ja]
+      return [String(job.id), job.title_ja, job.title_zh, job.area_ja, job.companies?.name]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
@@ -41,7 +41,7 @@ export function JobsTable({ jobs, appCounts, toggleStatus, initialStatus }: Prop
       <div className="admin-toolbar">
         <label className="field grow">
           <span>検索</span>
-          <input className="input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="タイトル・勤務地・ID" />
+          <input className="input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="タイトル・勤務地・企業名・ID" />
         </label>
         <label className="field">
           <span>分野</span>
@@ -73,13 +73,14 @@ export function JobsTable({ jobs, appCounts, toggleStatus, initialStatus }: Prop
       </div>
 
       <div className="admin-table-wrap">
-        <table className="admin-table" style={{ minWidth: 960 }}>
+        <table className="admin-table" style={{ minWidth: 1080 }}>
           <thead>
             <tr>
               <th>状態</th>
               <th>ID</th>
               <th>分野</th>
               <th>タイトル</th>
+              <th>企業</th>
               <th>勤務地</th>
               <th className="admin-num">月給(万円)</th>
               <th className="admin-num">応募</th>
@@ -101,6 +102,7 @@ export function JobsTable({ jobs, appCounts, toggleStatus, initialStatus }: Prop
                     <Link className="admin-cell-link" href={`/admin/jobs/${job.id}`}>{job.title_ja || "（タイトル未入力）"}</Link>
                     {job.is_new ? <span className="admin-cell-sub">🆕 新着表示中</span> : null}
                   </td>
+                  <td>{job.companies?.name ?? "—"}</td>
                   <td>
                     {job.area_ja}
                     <span className="admin-cell-sub">{regionLabel(job.region)}</span>

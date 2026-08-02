@@ -35,9 +35,9 @@ export default async function AdminDashboardPage() {
   // eslint-disable-next-line react-hooks/purity
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  // 並行6クエリ。会員数系は head:true で本文転送ゼロ、内訳は status のみ1本取ってJS集計
+  // 並行7クエリ。会員数系は head:true で本文転送ゼロ、内訳は status のみ1本取ってJS集計
   // （PostgRESTにGROUP BYが無いため、ステータス別に6本投げるより1本が速い）。
-  const [membersRes, unverifiedRes, recent7dRes, appStatusRes, recentAppsRes, jobStatusRes] = await Promise.all([
+  const [membersRes, unverifiedRes, recent7dRes, appStatusRes, recentAppsRes, jobStatusRes, companiesRes] = await Promise.all([
     supabase.from("members").select("id", { count: "exact", head: true }),
     supabase.from("members").select("id", { count: "exact", head: true }).eq("verified", false),
     supabase.from("members").select("id", { count: "exact", head: true }).gte("created_at", since),
@@ -48,6 +48,7 @@ export default async function AdminDashboardPage() {
       .order("created_at", { ascending: false })
       .limit(5),
     supabase.from("jobs").select("status").limit(COUNT_LIMIT),
+    supabase.from("companies").select("id", { count: "exact", head: true }),
   ]);
 
   const memberCount = membersRes.count ?? 0;
@@ -64,6 +65,7 @@ export default async function AdminDashboardPage() {
   for (const row of jobStatusRes.data ?? []) jobCounts[row.status] = (jobCounts[row.status] ?? 0) + 1;
   const publishedJobs = jobCounts["published"] ?? 0;
   const draftJobs = jobCounts["draft"] ?? 0;
+  const companyCount = companiesRes.count ?? 0;
 
   const recentApps = (recentAppsRes.data ?? []) as unknown as RecentApplication[];
 
@@ -86,6 +88,7 @@ export default async function AdminDashboardPage() {
         <div className={`admin-kpi${newApps ? " is-alert" : ""}`}><span>新規応募（未対応）</span><b>{newApps}</b></div>
         <div className="admin-kpi"><span>公開中の求人</span><b>{publishedJobs}</b></div>
         <div className="admin-kpi"><span>下書きの求人</span><b>{draftJobs}</b></div>
+        <div className="admin-kpi"><span>登録企業</span><b>{companyCount}</b></div>
       </div>
 
       <div className="admin-dash-grid">

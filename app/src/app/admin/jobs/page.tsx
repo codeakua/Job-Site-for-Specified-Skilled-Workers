@@ -14,7 +14,8 @@ export default async function AdminJobsPage({ searchParams }: { searchParams: Pr
 
   // 応募数はN+1にせず、job_id だけを1本で取ってJS集計する。
   const [jobsRes, appsRes] = await Promise.all([
-    supabase.from("jobs").select("*").order("updated_at", { ascending: false }).limit(1000),
+    // companies(name) はスタッフのみ読める（RLS）。一覧に企業名を出すための埋め込み。
+    supabase.from("jobs").select("*, companies(id, name)").order("updated_at", { ascending: false }).limit(1000),
     supabase.from("applications").select("job_id").limit(5000),
   ]);
   const appCounts: Record<string, number> = {};

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const ITEMS = [
   { href: "/admin", label: "ダッシュボード", emoji: "📊", exact: true },
   { href: "/admin/jobs", label: "求人管理", emoji: "💼", exact: false },
+  { href: "/admin/companies", label: "企業管理", emoji: "🏢", exact: false },
   { href: "/admin/applications", label: "応募管理", emoji: "📝", exact: false },
   { href: "/admin/members", label: "会員管理", emoji: "👤", exact: false },
 ];

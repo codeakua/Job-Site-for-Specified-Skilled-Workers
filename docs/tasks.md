@@ -119,6 +119,13 @@
 - **完了条件**: 法務3文書 × (docx+pdf) と管理者マニュアル × (docx+pdf) が生成でき、日本語・簡体字が豆腐にならないこと
 - **状態**: ✅ 完了（2026-07-25・詳細 `docs/progress.md` §15）。**原本はmd。Word/PDFは生成物なので直接編集しない**
 
+### T-18 🤖 企業管理（求人企業マスタ＋求人紐づけ＋CSV出力）
+- **担当**: 🤖 Claude（`app/supabase/` を含むためClaude専任）
+- **触る範囲**: `app/supabase/migrations/0006_companies.sql`（新規）・`setup.sql`・`app/src/app/admin/companies/`（新規一式）・`app/src/lib/admin/csv.ts`（新規）・`AdminNav`・`admin/jobs/*`（企業列/セレクト/company_id）・`admin/applications/*`（企業名サブ表示）・`admin/page.tsx`（KPI）・`docs/ops/company-import-guide.md`（新規）
+- **内容**: パートナー協同組合の企業データ（企業情報データベース＋雇用条件書データベースの統合・約100社）を **スタッフ専用RLS** の `companies` に登録。管理画面に企業一覧（検索/絞込）・新規/編集・**CSVダウンロード（UTF-8 BOM）**・求人フォームの「求人企業」セレクト・求人/応募一覧への企業名表示・ダッシュボード「登録企業」KPI。**実企業データの投入SQLはコミットせずチャット受け渡し**（`docs/ops/db-ledger.md` に記録）。
+- **完了条件**: lint/build緑・ローカルPostgreSQLでRLS検証（会員から companies が0行・匿名は権限なし）・CSVがExcelで文字化けなし・会員側の表示に変化なし
+- **状態**: ✅ 実装済み（2026-08-01・詳細 `docs/progress.md` §29）。適用手順は `docs/ops/company-import-guide.md`
+
 > ✅ **#21/#22 は PR#23/#24 でマージ済** → Issueをclose済。景表法「98%以上」(`support.statVal`)は**M0-Bのトップ改修で撤去済み**（数値アピール→「求職者0円・特定技能2号」のメリット訴求へ全面置換。`lawyer-checklist.md` C-1 参照）。
 
 ---
