@@ -126,6 +126,13 @@
 - **完了条件**: lint/build緑・ローカルPostgreSQLでRLS検証（会員から companies が0行・匿名は権限なし）・CSVがExcelで文字化けなし・会員側の表示に変化なし
 - **状態**: ✅ 実装済み（2026-08-01・詳細 `docs/progress.md` §29）。適用手順は `docs/ops/company-import-guide.md`
 
+### T-19 🤖 企業→求人の自動作成・公開状態・情報不足アラート
+- **担当**: 🤖 Claude（設計・実装・検証）
+- **触る範囲**: `app/src/lib/admin/company-job.ts`（新規・変換と不足判定の唯一の正）・`app/src/app/admin/companies/`（actions/page/CompaniesTable/[id]/export・`BackfillButton.tsx` 新規）・`app/src/components/job-detail/JobDetail.tsx`（空セクション/年収のハードニングのみ）・docs 4件。**DBマイグレーションなし**
+- **内容**: ①企業を登録すると下書き求人を自動作成（保存時＋「一括作成」ボタン＝SQL投入済みの約100社向け）②企業一覧の「契約状況」列を「公開状態」（公開中/非公開中/求人未作成・紐づく求人の status から導出）に置き換え、行から公開/停止 ③公開に必要な情報が欠けた企業に「⚠ 情報不足」（一覧は理由ツールチップ・編集画面に不足チェックリスト）。公開条件は「必須情報が揃えば公開可」（オーナー確認済み・中国語は順次改善）
+- **完了条件**: lint/build緑・純関数の単体テスト・Playwrightで一覧の4状態を確認・オーナーの本番作業（サンプル求人14件の削除SQL→一括作成→公開）は `docs/ops/company-import-guide.md` ④
+- **状態**: ✅ 実装済み（2026-08-03・詳細 `docs/progress.md` §30）
+
 > ✅ **#21/#22 は PR#23/#24 でマージ済** → Issueをclose済。景表法「98%以上」(`support.statVal`)は**M0-Bのトップ改修で撤去済み**（数値アピール→「求職者0円・特定技能2号」のメリット訴求へ全面置換。`lawyer-checklist.md` C-1 参照）。
 
 ---

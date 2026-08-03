@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/admin/guard";
 import { buildCsv } from "@/lib/admin/csv";
 import { formatDateTime } from "@/lib/admin/labels";
+import { companyPublishState, publishStateLabel } from "@/lib/admin/company-job";
 import type { AdminCompany } from "../types";
 
 // 企業一覧のCSVダウンロード。
@@ -17,13 +18,13 @@ export async function GET() {
   const supabase = await createClient();
   const [companiesRes, jobsRes] = await Promise.all([
     supabase.from("companies").select("*").order("record_no", { ascending: false, nullsFirst: true }).limit(1000),
-    supabase.from("jobs").select("company_id").limit(1000),
+    supabase.from("jobs").select("company_id, status").not("company_id", "is", null).limit(2000),
   ]);
-  const jobCounts: Record<string, number> = {};
+  const jobsByCompany: Record<string, { status: "draft" | "published" }[]> = {};
   for (const row of jobsRes.data ?? []) {
     if (row.company_id === null) continue;
     const key = String(row.company_id);
-    jobCounts[key] = (jobCounts[key] ?? 0) + 1;
+    (jobsByCompany[key] ??= []).push({ status: row.status as "draft" | "published" });
   }
 
   const header = [
@@ -35,7 +36,7 @@ export async function GET() {
     "年間休日日数", "定例休日", "月給(円)", "日給(円)", "時給(円)", "1時間当たり換算額(円)",
     "諸手当", "1か月支払概算額(円)", "控除税金(円)", "控除社会保険料(円)", "控除食費居住費(円)",
     "手取り支給額(円)", "昇給", "賞与", "退職金", "寮家賃(円)", "寮水道光熱費", "寮メモ",
-    "雇用条件書ファイル", "雇用条件書作成日", "スタッフメモ", "求人数", "登録日時", "更新日時",
+    "雇用条件書ファイル", "雇用条件書作成日", "スタッフメモ", "求人数", "公開状態", "登録日時", "更新日時",
   ];
   const rows = ((companiesRes.data ?? []) as AdminCompany[]).map((c) => [
     c.id, c.record_no, c.name, c.contract_status, c.representative, c.contact_person,
@@ -46,7 +47,8 @@ export async function GET() {
     c.annual_holidays, c.regular_holiday, c.wage_monthly, c.wage_daily, c.wage_hourly, c.wage_hourly_equiv,
     c.allowances, c.pay_monthly_total, c.deduct_tax, c.deduct_social, c.deduct_food_housing,
     c.net_pay, c.pay_raise, c.bonus, c.retirement_pay, c.dorm_rent, c.dorm_utilities, c.dorm_note,
-    c.cond_file, c.cond_date, c.note, jobCounts[String(c.id)] ?? 0,
+    c.cond_file, c.cond_date, c.note, (jobsByCompany[String(c.id)] ?? []).length,
+    publishStateLabel(companyPublishState(jobsByCompany[String(c.id)] ?? [])),
     formatDateTime(c.created_at ?? null), formatDateTime(c.updated_at ?? null),
   ]);
 
