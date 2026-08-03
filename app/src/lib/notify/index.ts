@@ -2,7 +2,7 @@
 import { sendStaffEmail, type SendResult } from "./resend";
 import { applicationEmail, registrationEmail, type JobInfo, type MemberInfo } from "./messages";
 
-export { isNotifyConfigured } from "./resend";
+export { isNotifyConfigured, staffRecipients, notifyFromAddress, isResendTestSender } from "./resend";
 export type { MemberInfo, JobInfo } from "./messages";
 
 /**

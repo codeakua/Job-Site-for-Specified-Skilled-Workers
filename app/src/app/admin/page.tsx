@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/admin/guard";
-import { isNotifyConfigured } from "@/lib/notify";
+import { isNotifyConfigured, staffRecipients, notifyFromAddress, isResendTestSender } from "@/lib/notify";
 import { rateLimitBackend } from "@/lib/security/rate-limit";
 import { AdminDenied } from "./AdminDenied";
 import {
@@ -30,6 +30,9 @@ export default async function AdminDashboardPage() {
   const supabase = await createClient();
   // 環境変数から決まる設定の状態（サーバー側でのみ読める値）。
   const notifyReady = isNotifyConfigured();
+  const notifyTo = staffRecipients();
+  const notifyFrom = notifyFromAddress();
+  const notifyTestSender = isResendTestSender();
   const rateLimitStore = rateLimitBackend();
   // Server Componentはリクエスト毎に1回だけ描画されるため、基準時刻の取得はここで行ってよい。
   // eslint-disable-next-line react-hooks/purity
@@ -165,6 +168,28 @@ export default async function AdminDashboardPage() {
                 {notifyReady
                   ? "送信先が設定されています。実際に届くかはテスト応募で確認してください。"
                   : "送信されません（RESEND_API_KEY と STAFF_NOTIFY_EMAILS が必要）。応募が来ても気づけない状態です。"}
+              </span>
+            </div>
+            {/*
+              誰に届くのかは環境変数（Vercel）にしか無く、これまで画面から確かめられなかった。
+              スタッフを増減させたとき「意図した人だけが宛先か」をここで目視できるようにする。
+            */}
+            <div className="admin-recent-row">
+              <span className={`admin-badge ${notifyTo.length ? "is-on" : "is-warn"}`}>
+                {notifyTo.length ? `${notifyTo.length}名` : "宛先なし"}
+              </span>
+              <span>通知メールの宛先</span>
+              <span className="admin-page-desc">
+                {notifyTo.length ? notifyTo.join(" / ") : "STAFF_NOTIFY_EMAILS が未設定です。"}
+                <br />
+                送信元: {notifyFrom}
+                {notifyTestSender ? (
+                  <>
+                    <br />
+                    ⚠️ 送信元がResendのテスト用アドレスのため、<strong>Resendアカウント所有者のアドレス以外には届きません。</strong>
+                    他のスタッフに届けるには、Resendでドメイン認証を済ませて NOTIFY_FROM_EMAIL を設定してください。
+                  </>
+                ) : null}
               </span>
             </div>
             <div className="admin-recent-row">
