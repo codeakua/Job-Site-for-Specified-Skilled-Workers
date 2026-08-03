@@ -4,6 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/admin/guard";
+import {
+  buildJobFromCompany,
+  companyBlockers,
+  GAP_JOB_COLUMNS,
+  type GapJob,
+} from "@/lib/admin/company-job";
+import type { AdminCompany } from "./types";
 
 // ▼ FormData→行オブジェクト変換（列名は companies テーブル＝0006_companies.sql と一致させること）
 function readText(formData: FormData, name: string) {
@@ -74,7 +81,29 @@ function companyPayload(formData: FormData) {
   };
 }
 
-/** 企業の作成/更新（/admin/companies/new・/admin/companies/[id] の両方から使う）。保存後は一覧へ戻る。 */
+/** 企業に求人が1件も無ければ、企業データから下書き求人を1件つくる（既存求人には一切触らない）。 */
+async function ensureDraftJob(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  company: AdminCompany,
+) {
+  const { count, error: countError } = await supabase
+    .from("jobs")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", company.id);
+  if (countError) {
+    console.error("[admin/companies] ensureDraftJob count error:", countError);
+    return;
+  }
+  if ((count ?? 0) > 0) return;
+  const { error } = await supabase.from("jobs").insert(buildJobFromCompany(company));
+  if (error) console.error("[admin/companies] ensureDraftJob insert error:", error);
+}
+
+/**
+ * 企業の作成/更新（/admin/companies/new・/admin/companies/[id] の両方から使う）。保存後は一覧へ戻る。
+ * 求人が無い企業には下書き求人を自動作成する（企業管理に登録すると求人管理にも並ぶ）。
+ * 更新時、既存の求人は上書きしない＝スタッフが求人側に加えた修正を守る。
+ */
 export async function saveCompany(formData: FormData) {
   // 是正④ #28: RLS任せにせずアクション単体でも fail-closed にする。
   if (!(await requireStaff())) return;
@@ -83,16 +112,133 @@ export async function saveCompany(formData: FormData) {
   const payload = companyPayload(formData);
   if (!payload.name) return; // 社名は必須（フォーム側required＋二重防御）
 
-  const { error } = id
-    ? await supabase.from("companies").update(payload).eq("id", id)
-    : await supabase.from("companies").insert(payload);
-  if (error) {
-    // 23505 = レコード番号または社名の重複。v1は保存されないまま一覧へ戻る
-    // （フォームへの結果表示は M-8「管理フォームの結果表示」で改善予定）。
-    console.error("[admin/companies] saveCompany error:", error);
+  if (id) {
+    const { error } = await supabase.from("companies").update(payload).eq("id", id);
+    if (error) {
+      console.error("[admin/companies] saveCompany error:", error);
+    } else {
+      await ensureDraftJob(supabase, { ...payload, id });
+    }
+  } else {
+    // 求人の自動作成に新しい企業idが要るため、insert に .select() を付けて採番結果を受け取る。
+    const { data, error } = await supabase.from("companies").insert(payload).select("id").single();
+    if (error) {
+      // 23505 = レコード番号または社名の重複。v1は保存されないまま一覧へ戻る
+      // （フォームへの結果表示は M-8「管理フォームの結果表示」で改善予定）。
+      console.error("[admin/companies] saveCompany error:", error);
+    } else if (data) {
+      await ensureDraftJob(supabase, { ...payload, id: data.id });
+    }
   }
 
   revalidatePath("/admin/companies");
+  revalidatePath("/admin/jobs");
   revalidatePath("/admin");
   redirect("/admin/companies"); // redirect は例外で制御されるため try/catch で囲まないこと
+}
+
+/**
+ * 求人が1件も無い全企業に下書き求人を一括作成する（企業一覧の「一括作成」ボタン）。
+ * SQLで直接投入された企業（本番の約100社）は saveCompany を通らないため、この入口が必要。
+ * 対象は「求人0件の企業」だけなので、繰り返し押しても増えない（冪等）。
+ */
+export async function backfillCompanyJobs() {
+  if (!(await requireStaff())) return;
+  const supabase = await createClient();
+
+  const [companiesRes, jobsRes] = await Promise.all([
+    supabase.from("companies").select("*").limit(1000),
+    // 紐づき済み企業の一覧。company_id が null の行（手動求人）はここでは関係ない。
+    supabase.from("jobs").select("company_id").not("company_id", "is", null).limit(2000),
+  ]);
+  if (companiesRes.error || jobsRes.error) {
+    console.error("[admin/companies] backfill fetch error:", companiesRes.error ?? jobsRes.error);
+    redirect("/admin/companies");
+  }
+
+  const linked = new Set((jobsRes.data ?? []).map((row) => String(row.company_id)));
+  const targets = ((companiesRes.data ?? []) as AdminCompany[]).filter((company) => !linked.has(String(company.id)));
+
+  let created = 0;
+  if (targets.length > 0) {
+    const { error } = await supabase.from("jobs").insert(targets.map(buildJobFromCompany));
+    if (error) console.error("[admin/companies] backfill insert error:", error);
+    else created = targets.length;
+  }
+
+  revalidatePath("/admin/companies");
+  revalidatePath("/admin/jobs");
+  revalidatePath("/admin");
+  // PRG: 再読み込みでの二重送信を避けつつ、作成件数を一覧の通知行で見せる。
+  redirect(`/admin/companies?created=${created}`);
+}
+
+/**
+ * 企業の公開/停止（企業一覧の行ボタン）。企業に紐づく全求人の status を一括で切り替える。
+ * 公開は、情報不足（computeJobGaps の blockers）が1件も無いときだけ通す。
+ * ボタン側でも disabled にしているが、サーバー側でも再チェックして fail-closed にする（是正④ #28 と同じ考え方）。
+ */
+export async function toggleCompanyPublish(formData: FormData) {
+  if (!(await requireStaff())) return;
+  const supabase = await createClient();
+  const companyId = String(formData.get("company_id") ?? "").trim();
+  if (!companyId) return;
+
+  const { data: jobRows, error: jobsError } = await supabase
+    .from("jobs")
+    .select(GAP_JOB_COLUMNS)
+    .eq("company_id", companyId);
+  if (jobsError) {
+    console.error("[admin/companies] toggleCompanyPublish jobs error:", jobsError);
+    return;
+  }
+  const jobs = (jobRows ?? []) as unknown as GapJob[];
+  if (jobs.length === 0) return; // 求人未作成（UIでは一括作成ボタンを案内）
+
+  if (jobs.some((job) => job.status === "published")) {
+    const { error } = await supabase.from("jobs").update({ status: "draft" }).eq("company_id", companyId);
+    if (error) console.error("[admin/companies] toggleCompanyPublish stop error:", error);
+  } else {
+    const { data: company, error: companyError } = await supabase
+      .from("companies")
+      .select("*")
+      .eq("id", companyId)
+      .maybeSingle();
+    if (companyError || !company) {
+      console.error("[admin/companies] toggleCompanyPublish company error:", companyError);
+      return;
+    }
+    const blockers = companyBlockers(jobs, company as AdminCompany);
+    if (blockers.length > 0) {
+      console.error("[admin/companies] toggleCompanyPublish blocked:", companyId, blockers);
+      return;
+    }
+    const { error } = await supabase.from("jobs").update({ status: "published" }).eq("company_id", companyId);
+    if (error) console.error("[admin/companies] toggleCompanyPublish publish error:", error);
+  }
+
+  revalidatePath("/admin/companies");
+  revalidatePath("/admin/jobs");
+  revalidatePath("/admin");
+  revalidatePath("/jobs");
+}
+
+/** 企業編集ページの「この企業の下書き求人を作成」ボタン（求人0件のときだけ表示される）。 */
+export async function createJobForCompany(formData: FormData) {
+  if (!(await requireStaff())) return;
+  const supabase = await createClient();
+  const companyId = String(formData.get("company_id") ?? "").trim();
+  if (!companyId) return;
+
+  const { data: company, error } = await supabase.from("companies").select("*").eq("id", companyId).maybeSingle();
+  if (error || !company) {
+    console.error("[admin/companies] createJobForCompany company error:", error);
+    return;
+  }
+  await ensureDraftJob(supabase, company as AdminCompany);
+
+  revalidatePath("/admin/companies");
+  revalidatePath(`/admin/companies/${companyId}`);
+  revalidatePath("/admin/jobs");
+  revalidatePath("/admin");
 }
