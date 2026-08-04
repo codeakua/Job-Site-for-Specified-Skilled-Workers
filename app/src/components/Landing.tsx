@@ -124,7 +124,8 @@ export function Landing() {
             <p className="lp-consent">{t("lp.hero.consent")}</p>
           </div>
           <div className="lp-hero-art" aria-hidden>
-            <HeroArt />
+            {/* ChatGPT生成のイメージビジュアル（PCのみ表示・装飾のためalt空） */}
+            <img src="/hero-visual.webp" alt="" width={1254} height={1254} />
           </div>
         </div>
       </section>
@@ -318,56 +319,3 @@ export function Landing() {
   );
 }
 
-/**
- * ヒーロー右側の装飾イラスト（PCのみ表示・aria-hidden）。
- * 「求職者カード」と「企業カード」を担当者（中央のチェック）がつなぐ抽象図。
- * グラデーション地の上に白系のみで描く（redテーマでもそのまま成立する）。
- */
-function HeroArt() {
-  return (
-    <svg viewBox="0 0 420 340" fill="none" xmlns="http://www.w3.org/2000/svg" role="presentation">
-      {/* つながりを示す点線の弧 */}
-      <path
-        d="M96 236 C 150 168, 250 168, 322 112"
-        stroke="rgba(255,255,255,.55)"
-        strokeWidth="2.5"
-        strokeDasharray="1 9"
-        strokeLinecap="round"
-      />
-      {/* 求職者カード（左下） */}
-      <g className="lp-art-a">
-        <rect x="24" y="176" width="150" height="128" rx="16" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.45)" strokeWidth="1.5" />
-        <circle cx="60" cy="212" r="16" fill="rgba(255,255,255,.55)" />
-        <rect x="86" y="202" width="66" height="9" rx="4.5" fill="rgba(255,255,255,.6)" />
-        <rect x="86" y="218" width="44" height="7" rx="3.5" fill="rgba(255,255,255,.35)" />
-        <rect x="40" y="246" width="46" height="14" rx="7" fill="rgba(255,255,255,.28)" />
-        <rect x="92" y="246" width="58" height="14" rx="7" fill="rgba(255,255,255,.28)" />
-        <rect x="40" y="268" width="94" height="14" rx="7" fill="rgba(255,255,255,.2)" />
-      </g>
-      {/* 企業カード（右上） */}
-      <g className="lp-art-b">
-        <rect x="252" y="40" width="144" height="120" rx="16" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.45)" strokeWidth="1.5" />
-        <rect x="272" y="62" width="34" height="44" rx="4" fill="rgba(255,255,255,.5)" />
-        <rect x="278" y="70" width="7" height="7" rx="1.5" fill="var(--primary)" opacity=".3" />
-        <rect x="291" y="70" width="7" height="7" rx="1.5" fill="var(--primary)" opacity=".3" />
-        <rect x="278" y="83" width="7" height="7" rx="1.5" fill="var(--primary)" opacity=".3" />
-        <rect x="291" y="83" width="7" height="7" rx="1.5" fill="var(--primary)" opacity=".3" />
-        <rect x="316" y="64" width="60" height="9" rx="4.5" fill="rgba(255,255,255,.6)" />
-        <rect x="316" y="80" width="42" height="7" rx="3.5" fill="rgba(255,255,255,.35)" />
-        <rect x="272" y="118" width="104" height="12" rx="6" fill="rgba(255,255,255,.25)" />
-        <rect x="272" y="136" width="72" height="12" rx="6" fill="rgba(255,255,255,.25)" />
-      </g>
-      {/* 中央の担当者ノード（チェック） */}
-      <g className="lp-art-c">
-        <circle cx="208" cy="176" r="30" fill="rgba(255,255,255,.92)" />
-        <circle cx="208" cy="176" r="30" stroke="rgba(255,255,255,.5)" strokeWidth="6" opacity=".5" />
-        <path d="m196 177 8 8 16-18" stroke="var(--primary)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-      </g>
-      {/* 浮遊する小さな装飾 */}
-      <circle cx="352" cy="220" r="10" fill="rgba(255,255,255,.3)" />
-      <circle cx="120" cy="96" r="7" fill="rgba(255,255,255,.35)" />
-      <circle cx="64" cy="132" r="4" fill="rgba(255,255,255,.4)" />
-      <circle cx="382" cy="284" r="5" fill="rgba(255,255,255,.35)" />
-    </svg>
-  );
-}

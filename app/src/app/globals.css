@@ -1282,9 +1282,7 @@ ul.disclosure-fields {
   .lp-btn-hero { width: auto; padding-inline: 36px; }
   .lp-hero-login { text-align: left; }
   .lp-hero-art { display: block; }
-  .lp-hero-art svg { width: 100%; height: auto; }
-  .lp-art-a { animation: lpFloat 7s ease-in-out infinite; }
-  .lp-art-b { animation: lpFloat 8.5s ease-in-out infinite reverse; }
+  .lp-hero-art img { width: 100%; height: auto; border-radius: var(--r-xl); border: 4px solid rgba(255, 255, 255, .55); box-shadow: var(--shadow-float); }
 
   .lp-sec { padding-top: 72px; }
   .lp-h { font-size: 29px; }
@@ -1340,6 +1338,6 @@ ul.disclosure-fields {
 
 /* --- アニメーションを減らす設定の尊重 --- */
 @media (prefers-reduced-motion: reduce) {
-  .lp-blob, .lp-art-a, .lp-art-b { animation: none; }
+  .lp-blob { animation: none; }
   .lp-pillar-card { transition: none; }
 }

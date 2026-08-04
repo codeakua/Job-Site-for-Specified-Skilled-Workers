@@ -1524,3 +1524,11 @@ app/配下の全コード（TS/TSX 60ファイル・SQL 6本）・リポジト�
 
 - **職業安定法の説明を削除**（オーナー指示「小難しくなるのでシンプルに」）: 「なぜ0円？」セクションはリード文「紹介にかかる費用は採用企業が支払うため、求職者は0円です」＋お金の流れ図解＋実費の事前書面説明のみに。`lp.fee.law`（ja/zh）・`.lp-law-note`（JSX/CSS）を削除。法定ページ（/disclosure等）の職業安定法記載は法令上の掲示義務のため不変更
 - **ヒーロー画像の生成ワークフロー開始**: 20代中国人に刺さる画像をオーナーがChatGPTで生成→Claudeが組み込む往復方式。コピペ用プロンプト（A案イラスト調透過PNG推奨／B案実写調）・チェックポイント・組み込み手順を **`docs/design/hero-image-brief.md`** に整備。⚠️ AI生成人物は「イメージビジュアル」に限定し、実在の担当者・会員と誤認させる文脈（担当者紹介・体験談）には使わない
+
+### ヒーロー画像の組み込み完了（2026-08-04・同日）
+
+- オーナーがChatGPTで生成した画像をチャットで受領（A案イラスト1024²透過あり／B案実写は差し替え版=食品工場の男女2人1254²）。チャット添付はディスクに残らないため、**会話トランスクリプト（`~/.claude/projects/…/<session>.jsonl` のattachmentレコード）からbase64のWebPを抽出**して取得した（再送依頼不要のノウハウ）
+- 両案を実際に仮組みして1280pxスクショを提示→**オーナー選択でB案（実写）を採用**。`app/public/hero-visual.webp`（1254×1254・約94KB・WebPのまま利用）
+- 実装: `Landing.tsx` の自作SVG `<HeroArt />` を `<img src="/hero-visual.webp" alt="" width height指定>` に差し替え（生imgタグ＝wechat-qr.png と同じ慣習。lintのno-img-element警告1件は既知・許容）。HeroArt関数は削除（git履歴に残存）。CSSは `.lp-hero-art img { width:100%; height:auto; border-radius: var(--r-xl); border: 4px solid rgba(255,255,255,.55); box-shadow: var(--shadow-float); }`（白フチ角丸カード）に置換し、旧 `.lp-art-a/b` アニメーションと reduced-motion 内の参照を掃除
+- モバイル（<1024px）は従来どおり `.lp-hero-art { display:none }` でCTAのファーストビュー優先を維持
+- 検証: lint（エラー0）/build 緑・Playwright 1280 zh/ja/red・390 zh 全て横はみ出し0・画像ロード確認（390は非表示が正）。redテーマでも白フチカードで違和感なし
