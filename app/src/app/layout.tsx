@@ -8,8 +8,9 @@ import { Toaster } from "@/components/chrome/Toaster";
 // 中国アクセス配慮: next/font/google（Google Fonts）は使わず、
 // globals.css のシステムフォントスタックにフォールバックさせる。
 export const metadata: Metadata = {
-  title: "樱聘 YingPin｜特定技能求人サイト",
-  description: "日本で働きたい中国人のための特定技能求人サイト。特定技能2号を目指せる11分野の求人を掲載。",
+  title: "樱聘 YingPin｜中国人のための特定技能就職エージェント",
+  description:
+    "特定技能にくわしい中国語スタッフが、企業の調査・条件交渉・面接・入社後まで一緒に進める就職エージェント。相談・応募・職業紹介の手数料は0円。",
 };
 
 export const viewport: Viewport = {

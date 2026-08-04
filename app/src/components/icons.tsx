@@ -60,3 +60,51 @@ export const IconCheck = (p: IconProps) => (
     <path d="m4.5 12.5 5 5 10-11" />
   </svg>
 );
+
+// ---- ランディング（エージェント型LP）用 ----
+export const IconBuildingSearch = (p: IconProps) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 21V5a1.5 1.5 0 0 1 1.5-1.5h7A1.5 1.5 0 0 1 14 5v6" />
+    <path d="M7.5 7h3M7.5 10.5h3M7.5 14H9" />
+    <path d="M2.5 21h9" />
+    <circle cx="16.5" cy="15.5" r="4" />
+    <path d="m19.5 18.5 2.5 2.5" />
+  </svg>
+);
+export const IconHandshake = (p: IconProps) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 7.5 7 6l5 2 4.5-2L21 7.5V15l-4 4-5.5-4.5" />
+    <path d="m12 8-4.5 4a1.6 1.6 0 0 0 2.2 2.3L12 12.5l4 3.5" />
+    <path d="M3 7.5V15l3.5 3" />
+  </svg>
+);
+export const IconCalendarCheck = (p: IconProps) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3.5" y="5" width="17" height="16" rx="2.5" />
+    <path d="M8 3v4M16 3v4M3.5 10.5h17" />
+    <path d="m8.5 15.5 2.5 2.5 4.5-5" />
+  </svg>
+);
+export const IconShieldHeart = (p: IconProps) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 21c-5-2-8-5.5-8-10V5.5L12 3l8 2.5V11c0 4.5-3 8-8 10Z" />
+    <path d="M12 15.5s-3.2-2-3.2-4.1c0-1.2.9-2.1 2-2.1.7 0 1.2.4 1.2.4s.5-.4 1.2-.4c1.1 0 2 .9 2 2.1 0 2.1-3.2 4.1-3.2 4.1Z" />
+  </svg>
+);
+export const IconArrowRight = (p: IconProps) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 12h15" />
+    <path d="m13 6 6 6-6 6" />
+  </svg>
+);
+export const IconChevronDown = (p: IconProps) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="m5 9 7 7 7-7" />
+  </svg>
+);
+export const IconYen = (p: IconProps) => (
+  <svg {...base(p)} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="9" />
+    <path d="m8.5 7 3.5 5 3.5-5M12 12v5M9.3 13.5h5.4M9.3 16h5.4" />
+  </svg>
+);
