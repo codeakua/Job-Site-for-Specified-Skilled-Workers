@@ -4,183 +4,318 @@ import Link from "next/link";
 import { useAppState } from "@/components/providers";
 import { useAuth } from "@/components/auth-provider";
 import { TabBar } from "@/components/chrome/TabBar";
-import { IconGlobe, IconSearch } from "@/components/icons";
+import {
+  IconGlobe,
+  IconSearch,
+  IconCheck,
+  IconBuildingSearch,
+  IconHandshake,
+  IconCalendarCheck,
+  IconShieldHeart,
+  IconArrowRight,
+  IconChevronDown,
+  IconYen,
+} from "@/components/icons";
 
 /**
- * ランディング。モック index.html を移植。
- * ログイン状態（useAuth）で下部CTAとヒーローの導線を切り替える。
- * 求人プレビューカードは T-04 で追加予定。
+ * ランディング（エージェント型LP）。
+ * 「求人を見て応募する求人サイト」ではなく「担当者と一緒に合う会社を探すエージェント」を訴求する。
+ * - 文言はすべて lp.* 辞書キー（日中両言語）
+ * - CTAは useAuth の loading 確定後に描画（ログイン済みへのゲストCTAちらつき防止）
+ * - PC(≥1024px)ではランディングだけ .lp-root で480px枠を解除（globals.css 末尾の lp- ブロック参照）
  */
 export function Landing() {
   const { t, lang, toggleLang } = useAppState();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const primaryHref = user ? "/jobs" : "/register";
+  const primaryLabel = t(user ? "lp.hero.ctaJobs" : "lp.hero.ctaMain");
+
+  const worries = [
+    { emoji: "🏭", k: "lp.worry.i1" },
+    { emoji: "💬", k: "lp.worry.i2" },
+    { emoji: "🧭", k: "lp.worry.i3" },
+  ];
+  const pillars = [
+    { num: "01", Icon: IconBuildingSearch, k: "lp.pillar.p1" },
+    { num: "02", Icon: IconHandshake, k: "lp.pillar.p2" },
+    { num: "03", Icon: IconCalendarCheck, k: "lp.pillar.p3" },
+    { num: "04", Icon: IconShieldHeart, k: "lp.pillar.p4" },
+  ];
+  const flowSteps = ["s1", "s2", "s3", "s4", "s5"];
+  const faqs = ["1", "2", "3", "4", "5"];
 
   return (
-    <div className={`shell ${user ? "has-tabbar" : "has-ctabar"}`}>
+    <div className={`shell lp-root ${user ? "has-tabbar" : "has-ctabar"}`}>
       <header className="topbar">
-        <Link className="brand" href="/">
-          <span className="brand-mark">🌸</span>
-          <span>
-            <span className="brand-name">樱聘</span>
-            <span className="brand-sub">YINGPIN</span>
-          </span>
-        </Link>
-        <div className="spacer" />
-        <button type="button" className="lang-pill" onClick={toggleLang}>
-          <span className="icon">
-            <IconGlobe />
-          </span>
-          <span>{lang === "ja" ? "中文" : "日本語"}</span>
-        </button>
-        {!user && (
-          <Link className="login-link" href="/login">
-            {t("common.login")}
+        <div className="lp-topbar-in">
+          <Link className="brand" href="/">
+            <span className="brand-mark">🌸</span>
+            <span>
+              <span className="brand-name">樱聘</span>
+              <span className="brand-sub">YINGPIN</span>
+            </span>
           </Link>
-        )}
+          <div className="spacer" />
+          <button type="button" className="lang-pill" onClick={toggleLang}>
+            <span className="icon">
+              <IconGlobe />
+            </span>
+            <span>{lang === "ja" ? "中文" : "日本語"}</span>
+          </button>
+          {!loading && !user && (
+            <Link className="login-link" href="/login">
+              {t("common.login")}
+            </Link>
+          )}
+          {!loading && (
+            <Link className="btn btn-primary btn-sm lp-nav-cta" href={primaryHref}>
+              {primaryLabel}
+            </Link>
+          )}
+        </div>
       </header>
 
-      <section className="hero">
-        <span className="hero-sticker" style={{ right: 18, top: 74, animationDelay: ".2s" }}>🗼</span>
-        <span className="hero-sticker" style={{ right: 64, top: 150, fontSize: 20, animationDelay: "1.1s" }}>✈️</span>
-        <span className="hero-sticker" style={{ right: 26, top: 196, fontSize: 22, animationDelay: ".6s" }}>🌸</span>
-        <div className="hero-badge">⛩️ {t("landing.badge")}</div>
-        <h1 style={{ whiteSpace: "pre-line" }}>{t("app.tagline")}</h1>
-        <div className="hero-free">
-          <b>{t("landing.free")}</b>
-          <span>{t("landing.freeSub")}</span>
+      {/* 1. ヒーロー（ファーストビューには reveal を付けない） */}
+      <section className="lp-hero">
+        <div className="lp-hero-bg" aria-hidden>
+          <span className="lp-blob lp-blob-a" />
+          <span className="lp-blob lp-blob-b" />
+          <span className="lp-blob lp-blob-c" />
         </div>
-        <p className="hero-sub">{t("landing.heroSub")}</p>
-        <div className="hero-cta">
-          {user ? (
-            <Link className="btn btn-white btn-block" href="/jobs">
-              <span className="icon">
-                <IconSearch />
-              </span>
-              {t("reg.done.cta")}
-            </Link>
-          ) : (
-            <>
-              <Link className="btn btn-white btn-block" href="/register">
-                ✨ {t("common.register")}
-              </Link>
-              <div className="hero-login">
-                {t("landing.haveAccount")} <Link href="/login">{t("common.login")}</Link>
-              </div>
-            </>
-          )}
+        <div className="lp-wrap lp-hero-grid">
+          <div className="lp-hero-main">
+            <div className="lp-hero-badge">🤝 {t("lp.hero.badge")}</div>
+            <h1>{t("lp.hero.h1")}</h1>
+            <p className="lp-hero-sub">{t("lp.hero.sub")}</p>
+            <div className="lp-fee-card">
+              <b>{t("lp.hero.fee")}</b>
+              <span>{t("lp.hero.feeSub")}</span>
+            </div>
+            <div className="lp-hero-cta">
+              {!loading &&
+                (user ? (
+                  <Link className="btn btn-white lp-btn-hero" href="/jobs">
+                    <span className="icon">
+                      <IconSearch />
+                    </span>
+                    {t("lp.hero.ctaJobs")}
+                  </Link>
+                ) : (
+                  <>
+                    <Link className="btn btn-white lp-btn-hero" href="/register">
+                      {t("lp.hero.ctaMain")}
+                    </Link>
+                    <div className="lp-hero-login">
+                      {t("lp.hero.haveAccount")} <Link href="/login">{t("common.login")}</Link>
+                    </div>
+                  </>
+                ))}
+            </div>
+            <ul className="lp-chips">
+              {["1", "2", "3", "4"].map((n) => (
+                <li className="lp-chip" key={n}>
+                  <span className="icon">
+                    <IconCheck />
+                  </span>
+                  {t(`lp.hero.chip${n}`)}
+                </li>
+              ))}
+            </ul>
+            <p className="lp-consent">{t("lp.hero.consent")}</p>
+          </div>
+          <div className="lp-hero-art" aria-hidden>
+            {/* ChatGPT生成のイメージビジュアル（PCのみ表示・装飾のためalt空） */}
+            <img src="/hero-visual.webp" alt="" width={1254} height={1254} />
+          </div>
         </div>
       </section>
 
-      <div className="stats">
-        <div className="stat">
-          <b>{t("landing.stats.feeVal")}</b>
-          <span>{t("landing.stats.fee")}</span>
+      {/* 2. 不安への共感 */}
+      <section className="lp-sec lp-worry">
+        <div className="lp-wrap">
+          <h2 className="lp-h reveal">{t("lp.worry.title")}</h2>
+          <div className="lp-worry-grid">
+            {worries.map((w, i) => (
+              <div className="lp-worry-card reveal" key={w.k} style={{ transitionDelay: `${i * 70}ms` }}>
+                <span className="lp-worry-emoji" aria-hidden>
+                  {w.emoji}
+                </span>
+                <h3>{t(`${w.k}.title`)}</h3>
+                <p>{t(`${w.k}.desc`)}</p>
+              </div>
+            ))}
+          </div>
+          <p className="lp-bridge reveal">{t("lp.worry.bridge")}</p>
         </div>
-        <div className="stat">
-          <b>{t("landing.stats.ssw2Val")}</b>
-          <span>{t("landing.stats.ssw2")}</span>
+      </section>
+
+      {/* 3. 4つの支援（中核） */}
+      <section className="lp-sec lp-pillars">
+        <div className="lp-wrap">
+          <h2 className="lp-h reveal">{t("lp.pillar.title")}</h2>
+          <p className="lp-h-sub reveal">{t("lp.pillar.sub")}</p>
+          <div className="lp-pillar-grid">
+            {pillars.map(({ num, Icon, k }, i) => (
+              <div className="lp-pillar-card reveal" key={k} style={{ transitionDelay: `${i * 70}ms` }}>
+                <span className="lp-pillar-num" aria-hidden>
+                  {num}
+                </span>
+                <span className="lp-pillar-ic">
+                  <Icon width={26} height={26} />
+                </span>
+                <h3>{t(`${k}.title`)}</h3>
+                <p>{t(`${k}.desc`)}</p>
+                {k === "lp.pillar.p4" && <p className="lp-pillar-note">{t("lp.pillar.p4.note")}</p>}
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="stat">
-          <b>{t("landing.stats.supportVal")}</b>
-          <span>{t("landing.stats.support")}</span>
+      </section>
+
+      {/* 4. 利用の流れ（5ステップ） */}
+      <section className="lp-sec lp-flow">
+        <div className="lp-wrap">
+          <h2 className="lp-h reveal">{t("lp.flow.title")}</h2>
+          <ol className="lp-flow-list">
+            {flowSteps.map((s, i) => (
+              <li className="lp-flow-step reveal" key={s} style={{ transitionDelay: `${i * 60}ms` }}>
+                <span className="lp-flow-num">{i + 1}</span>
+                <div className="lp-flow-body">
+                  <h3>{t(`lp.flow.${s}.title`)}</h3>
+                  <p>{t(`lp.flow.${s}.desc`)}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
+      </section>
+
+      {/* 5. 費用（なぜ0円か） */}
+      <section className="lp-sec lp-fee">
+        <div className="lp-wrap">
+          <div className="lp-h-ic reveal" aria-hidden>
+            <IconYen width={26} height={26} />
+          </div>
+          <h2 className="lp-h reveal">{t("lp.fee.title")}</h2>
+          <p className="lp-h-sub reveal">{t("lp.fee.lead")}</p>
+          <div className="lp-fee-diagram reveal">
+            <div className="lp-fc-node">
+              <b>{t("lp.fee.d1")}</b>
+            </div>
+            <div className="lp-fc-arrow" aria-hidden>
+              <IconArrowRight />
+              <i>{t("lp.fee.dPay")}</i>
+            </div>
+            <div className="lp-fc-node lp-fc-mid">
+              <span className="lp-fc-brand" aria-hidden>
+                🌸
+              </span>
+              <b>{t("lp.fee.d2")}</b>
+            </div>
+            <div className="lp-fc-arrow" aria-hidden>
+              <IconArrowRight />
+              <i className="lp-fc-zero">{t("lp.fee.dFree")}</i>
+            </div>
+            <div className="lp-fc-node">
+              <b>{t("lp.fee.d3")}</b>
+            </div>
+          </div>
+          <p className="lp-honest reveal">{t("lp.fee.honest")}</p>
+        </div>
+      </section>
+
+      {/* 6. 2社体制（信頼） */}
+      <section className="lp-sec lp-orgs">
+        <div className="lp-wrap">
+          <h2 className="lp-h reveal">{t("lp.orgs.title")}</h2>
+          <p className="lp-h-sub reveal">{t("lp.orgs.sub")}</p>
+          <div className="lp-orgs-grid">
+            <div className="lp-org-card reveal">
+              <span className="lp-org-tag">{t("lp.orgs.c1.tag")}</span>
+              <h3>{t("lp.orgs.c1.name")}</h3>
+              <p>{t("lp.orgs.c1.desc")}</p>
+            </div>
+            <div className="lp-org-card reveal" style={{ transitionDelay: "80ms" }}>
+              <span className="lp-org-tag">{t("lp.orgs.c2.tag")}</span>
+              <h3>{t("lp.orgs.c2.name")}</h3>
+              <p>{t("lp.orgs.c2.desc")}</p>
+            </div>
+          </div>
+          <div className="lp-ssw2 reveal">
+            <b>{t("lp.orgs.ssw2Val")}</b>
+            <span>{t("lp.orgs.ssw2")}</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. よくある質問 */}
+      <section className="lp-sec lp-faq">
+        <div className="lp-wrap">
+          <h2 className="lp-h reveal">{t("lp.faq.title")}</h2>
+          <div className="lp-faq-list">
+            {faqs.map((n, i) => (
+              <details className="lp-faq-item reveal" key={n} style={{ transitionDelay: `${i * 60}ms` }}>
+                <summary>
+                  <span className="lp-faq-q">{t(`lp.faq.q${n}`)}</span>
+                  <span className="lp-faq-chev" aria-hidden>
+                    <IconChevronDown />
+                  </span>
+                </summary>
+                <p>{t(`lp.faq.a${n}`)}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 8. 最終CTA */}
+      <section className="lp-sec lp-final">
+        <div className="lp-wrap">
+          <div className="lp-final-card reveal">
+            <h2>{t("lp.final.title")}</h2>
+            <p>{t("lp.final.sub")}</p>
+            {!loading && (
+              <Link className="btn btn-white lp-btn-final" href={primaryHref}>
+                {primaryLabel}
+              </Link>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 9. 運営情報・法定リンク（既存のまま） */}
+      <div className="lp-wrap">
+        <div className="op-info">
+          <div className="op-title">{t("op.title")}</div>
+          <div className="op-name">{t("op.name")}</div>
+          <div className="op-line">{t("op.license")}</div>
+          <div className="op-line">{t("op.support")}</div>
+        </div>
+        {/*
+          法務文書への常時リンク（D-1）。会員登録の同意チェックからも開けるが、
+          登録しない利用者にも常に読める場所が必要なため、フッターにも置く。
+          明示事項（D-4）は職業安定法第32条の13の「常時掲示」にあたるので、
+          ログインしていない状態でも必ずここから開けるようにしておく。
+        */}
+        <nav className="footer-links">
+          <Link href="/terms">{t("footer.terms")}</Link>
+          <Link href="/privacy">{t("footer.privacy")}</Link>
+          <Link href="/disclosure">{t("footer.disclosure")}</Link>
+        </nav>
+        <footer className="footer">{t("footer.copy")}</footer>
       </div>
 
-      <h2 className="sec-h">{t("trust.title")}</h2>
-      <div className="trust-card">
-        <div className="trust-row">{t("trust.i1")}</div>
-        <div className="trust-row">{t("trust.i2")}</div>
-        <div className="trust-row">{t("trust.i3")}</div>
-        <p className="trust-note">{t("trust.note")}</p>
-      </div>
-
-      <h2 className="sec-h">{t("features.title")}</h2>
-      <div className="features">
-        {[
-          { e: "💬", ti: "features.f1.title", d: "features.f1.desc" },
-          { e: "🛂", ti: "features.f2.title", d: "features.f2.desc" },
-          { e: "🏠", ti: "features.f3.title", d: "features.f3.desc" },
-          { e: "🔒", ti: "features.f4.title", d: "features.f4.desc" },
-        ].map((f) => (
-          <div className="feature" key={f.ti}>
-            <div className="f-emoji">{f.e}</div>
-            <h3>{t(f.ti)}</h3>
-            <p>{t(f.d)}</p>
+      {!loading &&
+        (user ? (
+          <TabBar />
+        ) : (
+          <div className="cta-bar">
+            <Link className="btn btn-primary btn-block" href="/register">
+              {t("lp.hero.ctaMain")}
+            </Link>
           </div>
         ))}
-      </div>
-
-      <h2 className="sec-h">{t("support.title")}</h2>
-      <p className="support-desc">{t("support.desc")}</p>
-      <div className="how">
-        <div className="how-step">
-          <div className="how-num">🤝</div>
-          <div className="how-body">
-            <h3>{t("support.s1.title")}</h3>
-            <div>
-              <span className="org-tag">{t("support.s1.org")}</span>
-            </div>
-            <p>{t("support.s1.desc")}</p>
-          </div>
-        </div>
-        <div className="how-step">
-          <div className="how-num">🏠</div>
-          <div className="how-body">
-            <h3>{t("support.s2.title")}</h3>
-            <div>
-              <span className="org-tag">{t("support.s2.org")}</span>
-            </div>
-            <p>{t("support.s2.desc")}</p>
-          </div>
-        </div>
-      </div>
-      <div className="support-stat">
-        <b>{t("support.statVal")}</b>
-        <span>{t("support.stat")}</span>
-      </div>
-
-      <h2 className="sec-h">{t("how.title")}</h2>
-      <div className="how">
-        {["1", "2", "3"].map((n) => (
-          <div className="how-step" key={n}>
-            <div className="how-num">{n}</div>
-            <div className="how-body">
-              <h3>{t(`how.s${n}.title`)}</h3>
-              <p>{t(`how.s${n}.desc`)}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="note-box">{t("landing.note")}</div>
-      <div className="op-info">
-        <div className="op-title">{t("op.title")}</div>
-        <div className="op-name">{t("op.name")}</div>
-        <div className="op-line">{t("op.license")}</div>
-        <div className="op-line">{t("op.support")}</div>
-      </div>
-      {/*
-        法務文書への常時リンク（D-1）。会員登録の同意チェックからも開けるが、
-        登録しない利用者にも常に読める場所が必要なため、フッターにも置く。
-        明示事項（D-4）は職業安定法第32条の13の「常時掲示」にあたるので、
-        ログインしていない状態でも必ずここから開けるようにしておく。
-      */}
-      <nav className="footer-links">
-        <Link href="/terms">{t("footer.terms")}</Link>
-        <Link href="/privacy">{t("footer.privacy")}</Link>
-        <Link href="/disclosure">{t("footer.disclosure")}</Link>
-      </nav>
-      <footer className="footer">{t("footer.copy")}</footer>
-
-      {user ? (
-        <TabBar />
-      ) : (
-        <div className="cta-bar">
-          <Link className="btn btn-primary btn-block" href="/register">
-            ✨ {t("common.register")}
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
+
