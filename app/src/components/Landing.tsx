@@ -219,7 +219,6 @@ export function Landing() {
               <b>{t("lp.fee.d3")}</b>
             </div>
           </div>
-          <p className="lp-law-note reveal">{t("lp.fee.law")}</p>
           <p className="lp-honest reveal">{t("lp.fee.honest")}</p>
         </div>
       </section>

@@ -1194,12 +1194,7 @@ ul.disclosure-fields {
 .lp-fc-arrow svg { transform: rotate(90deg); width: 17px; height: 17px; }
 .lp-fc-arrow i { font-style: normal; font-size: 11px; font-weight: 800; }
 .lp-fc-zero { color: var(--primary); }
-.lp-law-note {
-  margin-top: 14px; padding: 12px 14px;
-  background: var(--primary-softer); border-radius: var(--r-sm);
-  font-size: 11.5px; line-height: 1.75; color: var(--text-sub);
-}
-.lp-honest { margin-top: 9px; font-size: 10.5px; line-height: 1.7; color: var(--text-faint); }
+.lp-honest { margin-top: 14px; font-size: 10.5px; line-height: 1.7; color: var(--text-faint); }
 
 /* --- 2社体制（信頼） --- */
 .lp-orgs-grid { margin-top: 18px; display: grid; gap: 12px; }
@@ -1322,8 +1317,7 @@ ul.disclosure-fields {
   .lp-fc-arrow { flex-direction: column; gap: 4px; }
   .lp-fc-arrow svg { transform: none; }
   .lp-fc-arrow i { max-width: 130px; text-align: center; }
-  .lp-law-note { max-width: 720px; margin: 22px auto 0; }
-  .lp-honest { max-width: 720px; margin: 10px auto 0; text-align: center; }
+  .lp-honest { max-width: 720px; margin: 22px auto 0; text-align: center; }
 
   .lp-orgs-grid { grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
   .lp-org-card { padding: 24px 22px; }
