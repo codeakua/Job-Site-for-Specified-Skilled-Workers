@@ -230,7 +230,7 @@ no valid AAAA records found for yingpin.jp
 
 - [x] **HSTS の第1段を導入** — 下記のとおり段階導入の1段目まで実施
 - [x] **手順書の URL を新ドメインに差し替え** — スタッフ登録手順書（`/register`・`/admin`）、パスワードポリシー手順書、レート制限手順書
-- [x] **法務文書への URL 記載** — レビュー依頼書に **`https://yingpin.jp`** と、ログイン不要で見られる `/terms`・`/privacy`・`/disclosure` を明記し、Word/PDF を再生成
+- [x] **法務文書への URL 記載** — 状況説明書〔当時は「レビュー依頼書」〕に **`https://yingpin.jp`** と、ログイン不要で見られる `/terms`・`/privacy`・`/disclosure` を明記し、Word/PDF を再生成
 - [x] **旧 `.vercel.app` アドレスの扱い** — **そのまま残す**（下記の理由）
 
 ### HSTS の段階導入（重要・引き上げ予定あり）

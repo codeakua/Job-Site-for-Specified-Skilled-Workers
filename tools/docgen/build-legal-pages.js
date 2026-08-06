@@ -21,6 +21,10 @@
  *   - タイトルの「（案）」を外す（稼働後は掲示物であり「案」ではない）
  *   - 冒頭のレビュー用の注記（blockquote）を落とす
  *   - 中国語要約（<!-- zh-summary --> で囲んだ節）を切り出して別に持つ
+ *   - **確認箇所の注記（<!-- review --> で囲んだ範囲）を落とす**
+ *     ＝「【確認論点 A-1】…」という弁護士向けの目印が、会員の読む規約に
+ *     混ざらないようにする。原本を読んだ直後に取り除くので、条文の切り出し
+ *     （明示事項ページ）にも混入しない。
  *
  * 使い方:
  *   node tools/docgen/build-legal-pages.js          生成する
@@ -67,6 +71,13 @@ const ZH_DISC_BODY_END = "<!-- zh-disclosure-body:end -->";
 const FEE_TABLE_START = "<!-- fee-table:start -->";
 const FEE_TABLE_END = "<!-- fee-table:end -->";
 
+/**
+ * 弁護士へ提出する資料にだけ載せる「確認箇所の注記」。
+ * 条文のどこを見てほしいのかを示す目印なので、会員が読むサイトには出さない。
+ */
+const REVIEW_START = "<!-- review:start -->";
+const REVIEW_END = "<!-- review:end -->";
+
 /** 冒頭の「# タイトル」を取り出し、末尾の「（案）」を外す。 */
 function extractTitle(md) {
   const m = md.match(/^#\s+(.+)$/m);
@@ -106,6 +117,38 @@ function stripBlock(md, start, end) {
   const e = md.indexOf(end);
   if (s === -1 || e === -1) return md;
   return md.slice(0, s) + md.slice(e + end.length);
+}
+
+/**
+ * マーカーで囲んだ範囲を、出てくるだけすべて取り除く。
+ *
+ * 確認箇所の注記は条文のあちこちに何度も現れるため、1件だけ消す stripBlock では足りない。
+ * 閉じ忘れ・順序の逆転は「注記がそのままサイトに出る」という気づきにくい事故になるので、
+ * 見つけたら例外にして止める。
+ */
+function stripAllBlocks(md, start, end) {
+  let out = "";
+  let rest = md;
+  for (;;) {
+    const s = rest.indexOf(start);
+    if (s === -1) break;
+    const e = rest.indexOf(end, s);
+    if (e === -1) throw new Error(`${start} に対応する ${end} がありません（閉じ忘れ）`);
+    out += rest.slice(0, s);
+    rest = rest.slice(e + end.length);
+  }
+  out += rest;
+  if (out.includes(end)) throw new Error(`${end} が ${start} より先に現れています（マーカーの順序が逆）`);
+  return out;
+}
+
+/**
+ * 原本を読み、サイトには出さない範囲（確認箇所の注記）を取り除いて返す。
+ * 条文の切り出し（明示事項ページ）にも注記が混ざらないよう、読み込みの時点で落とす。
+ */
+function readSource(file) {
+  const md = fs.readFileSync(path.join(SRC, file), "utf8");
+  return stripAllBlocks(md, REVIEW_START, REVIEW_END).replace(/\n{3,}/g, "\n\n");
 }
 
 /** <!-- zh-summary --> で囲んだ節を切り出す（見出し行は落とす）。 */
@@ -149,7 +192,7 @@ function buildBody(md) {
 
 function generate() {
   const docs = DOCS.map((d) => {
-    const md = fs.readFileSync(path.join(SRC, d.src), "utf8");
+    const md = readSource(d.src);
     return {
       key: d.key,
       slug: d.slug,
@@ -292,7 +335,7 @@ function assertSameFields(fromTerms, other, where) {
 }
 
 function generateDisclosure() {
-  const md = fs.readFileSync(path.join(SRC, "terms-draft.md"), "utf8");
+  const md = readSource("terms-draft.md");
 
   const zhOuter = extractBlock(md, ZH_DISC_START, ZH_DISC_END, { label: "明示事項ページの中国語要約" });
   const zhSummary = extractBlock(zhOuter, ZH_DISC_BODY_START, ZH_DISC_BODY_END, {

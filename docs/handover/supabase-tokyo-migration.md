@@ -42,7 +42,7 @@ Supabase（会員データの保管先）をオーストラリアから東京へ
 
 1. **法務文書の保管国をオーストラリア→日本（東京）に変更**して、Word/PDFを作り直す
    - `docs/legal/privacy-draft.md` の第6条・第7条（移転先の国名・当該国の制度の説明。オーストラリアの説明は不要になります）
-   - `docs/legal/cover-letter.md` の「4. 技術構成と個人情報の流れ」
+   - `docs/legal/overview.md` の「4. 個人情報の流れと技術構成」（2026-08-06 に `cover-letter.md` から改称・作り直し）
    - `docs/legal/lawyer-checklist.md` の論点 A-1 の表
    - ⚠️ **アメリカ（Vercel・Resend）の記述は残します。** また、Supabase, Inc. が米国法人であることに由来する第28条の整理も残します
    - 再生成: `node tools/docgen/build-legal.js`
